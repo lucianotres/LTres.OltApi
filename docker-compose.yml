@@ -1,0 +1,25 @@
+version: '3.4'
+
+services:
+  mongodb:
+    container_name: mongodb
+    image: mongo:4.0
+    restart: always
+    volumes:
+      - ltres_oltapi_data:/data/db
+    ports:
+      - 27017:27017
+  
+  webapi:
+    depends_on:
+      - mongodb
+    build: 
+      context: ./LTres.OltApi.WebApi
+      dockerfile: ./Dockerfile
+    ports:
+      - 5000:5000
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+
+volumes:
+  ltres_oltapi_data:

@@ -2,15 +2,15 @@
 LTres OLT API it's a monitoring tool to provide access of OLT informations over REST API.
 
 # Getting Started
-TODO: Guide users through getting your code up and running on their own system. In this section you can talk about:
-1.	Installation process
-2.	Software dependencies
-3.	Latest releases
-4.	API references
+All modules run at docker containers, so you just need a docker instance to build and run.
 
-# Build and Test
-TODO: Describe and show how to build your code and run the tests. 
+## Run the stack
 
-# Contribute
-TODO: Explain how other users and developers can contribute to make your code better. 
+At root you'll find a docker-compose file, you can just run **`docker-compose up -d`**
 
+## Module by module
+
+1. WebApi - Module to give the REST API access
+    - to build use **`docker build -t ltres.oltapi.webapi LTres.OltApi.WebApi/.`**
+    - run it for test purpose use **`docker run -d -p 5000:5000 -e ASPNETCORE_ENVIRONMENT=Development ltres.oltapi.webapi`**
+    - open local url **http://localhost:5000/swagger**
