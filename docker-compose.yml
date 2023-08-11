@@ -14,8 +14,8 @@ services:
     depends_on:
       - mongodb
     build: 
-      context: ./LTres.OltApi.WebApi
-      dockerfile: ./Dockerfile
+      context: .
+      dockerfile: ./LTres.OltApi.WebApi/Dockerfile
     ports:
       - 5000:5000
     environment:
