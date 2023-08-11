@@ -12,4 +12,10 @@
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.4.0" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\LTres.OltApi.Common\LTres.OltApi.Common.csproj" />
+    <ProjectReference Include="..\LTres.OltApi.Mongo\LTres.OltApi.Mongo.csproj" />
+    <ProjectReference Include="..\LTres.OltApi.Core\LTres.OltApi.Core.csproj" />
+  </ItemGroup>
+
 </Project>

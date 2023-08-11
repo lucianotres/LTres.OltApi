@@ -1,6 +1,16 @@
+using LTres.OltApi.Common.DbServices;
+using LTres.OltApi.Core.Services;
+using LTres.OltApi.Mongo;
+
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+//configure connection settings for database
+builder.Services.Configure<MongoConfig>(o => builder.Configuration.Bind("MongoConfig", o));
+
+MongoModelsConfiguration.RegisterClassMap();
+
+builder.Services.AddScoped<IDbOLTHost, MongoDbOLTHost>();
+builder.Services.AddScoped<OLTHostService>();
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
