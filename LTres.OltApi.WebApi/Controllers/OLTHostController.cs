@@ -28,7 +28,18 @@ public class OLTHostController : ControllerBase
     [ProducesResponseType<Guid>(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<Guid> Add(OLT_Host model) => await _service.AddOLTHost(model);
+    public async Task<Guid> Add(OLT_Host model) => await _service.RegisterOLTHost(model);
+
+    /// <summary>
+    /// Change an OLT Host on the database
+    /// </summary>
+    [HttpPut]
+    [Consumes("application/json")]
+    [Produces("application/json")]
+    [ProducesResponseType<Guid>(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<Guid> Change(OLT_Host model) => await _service.RegisterOLTHost(model, true);
 
     /// <summary>
     /// Search or list the registered OLT Hosts

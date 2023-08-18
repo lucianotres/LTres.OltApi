@@ -32,4 +32,13 @@ public interface IDbOLTHost
         string? filterName = null,
         string? filterHost = null,
         string[]? filterTag = null);
+
+
+    /// <summary>
+    /// Change an entire register of OLT Host.
+    /// Id it's the key to find the existing one.
+    /// </summary>
+    /// <param name="olt">New OLT Host info with the original ID</param>
+    /// <returns>0 to nothing changed and positive for number of affected</returns>
+    Task<int> ChangeOLTHost(OLT_Host olt);
 }

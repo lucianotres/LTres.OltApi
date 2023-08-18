@@ -16,15 +16,7 @@ public class MongoDbOLTHost : IDbOLTHost
     public MongoDbOLTHost(IOptions<MongoConfig> options)
     {
         var config = options.Value;
-        var client = new MongoClient(new MongoClientSettings()
-        {
-            Server = new MongoServerAddress("localhost"),
-            ClusterConfigurator = cb =>
-            {
-                cb.Subscribe<CommandStartedEvent>(e => Console.WriteLine($"{e.CommandName} - {e.Command.ToJson()}"));
-            }
-        });
-
+        var client = new MongoClient(config.ConnectionString);
         var database = client.GetDatabase(config.DatabaseName);
 
         OLT_Hosts = database.GetCollection<OLT_Host>("olt_hosts");
@@ -36,6 +28,14 @@ public class MongoDbOLTHost : IDbOLTHost
     {
         await OLT_Hosts.InsertOneAsync(olt);
         return olt.Id;
+    }
+
+    public async Task<int> ChangeOLTHost(OLT_Host olt)
+    {
+        var filter = Builders<OLT_Host>.Filter.Eq(o => o.Id, olt.Id);
+        var result = await OLT_Hosts.ReplaceOneAsync(filter, olt);
+        
+        return result.IsAcknowledged && result.IsModifiedCountAvailable ? (int)result.ModifiedCount : 0;
     }
 
     public async Task<IEnumerable<OLT_Host>> ListOLTHosts(int take = 1000, int skip = 0,

@@ -23,18 +23,31 @@ public class OLTHostService
     /// Validate and include an OLT Host to the database.
     /// Throw exceptions with invalid data
     /// </summary>
-    public async Task<Guid> AddOLTHost(OLT_Host olt_host)
+    public async Task<Guid> RegisterOLTHost(OLT_Host olt_host, bool toChange = false)
     {
         if (olt_host == null)
             throw new ArgumentNullException("olt_host");
+        if (toChange && (olt_host.Id == Guid.Empty))
+            throw new ArgumentOutOfRangeException("Id", "Id should not be empty when changing!");
+        if (!toChange && olt_host.Id != Guid.Empty)
+            throw new ArgumentOutOfRangeException("Id", "Id should be empty when adding!");
+
         if (string.IsNullOrWhiteSpace(olt_host.Name))
             throw new ArgumentException("OLT Host should have a name!");
         if (string.IsNullOrWhiteSpace(olt_host.Host))
             throw new ArithmeticException("OLT Host should have a host informed!");
 
-        var ret = await _db.AddOLTHost(olt_host);
-        _log.LogInformation($"New OLT_Host included: {ret}");
-        return ret;
+        if (toChange)
+        {
+            var changedCount = await _db.ChangeOLTHost(olt_host);
+            return changedCount > 0 ? olt_host.Id : Guid.Empty;
+        }
+        else
+        {
+            var registeredGuid = await _db.AddOLTHost(olt_host);
+            _log.LogInformation($"New OLT_Host included: {registeredGuid}");
+            return registeredGuid;
+        }
     }
 
 
