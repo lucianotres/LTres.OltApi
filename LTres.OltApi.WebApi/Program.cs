@@ -1,3 +1,4 @@
+using System.Reflection;
 using LTres.OltApi.Common.DbServices;
 using LTres.OltApi.Core.Services;
 using LTres.OltApi.Mongo;
@@ -15,7 +16,17 @@ builder.Services.AddScoped<OLTHostService>();
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(options =>
+{
+    // Set the comments path for the XmlComments file.
+    try
+    {
+        string xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+        string xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+        options.IncludeXmlComments(xmlPath);
+    }
+    catch { }
+});
 
 var app = builder.Build();
 
