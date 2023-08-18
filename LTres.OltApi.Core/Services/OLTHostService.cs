@@ -23,8 +23,6 @@ public class OLTHostService
     /// Validate and include an OLT Host to the database.
     /// Throw exceptions with invalid data
     /// </summary>
-    /// <param name="olt_host"></param>
-    /// <returns></returns>
     public async Task<Guid> AddOLTHost(OLT_Host olt_host)
     {
         if (olt_host == null)
@@ -38,4 +36,23 @@ public class OLTHostService
         _log.LogInformation($"New OLT_Host included: {ret}");
         return ret;
     }
+
+
+    /// <summary>
+    /// Validate and do a query for OLT's hosts
+    /// </summary>
+    public async Task<IEnumerable<OLT_Host>> ListOLTHosts(int take = 1000, int skip = 0,
+        Guid? filterId = null, 
+        string? filterName = null, 
+        string? filterHost = null, 
+        string[]? filterTag = null)
+    {
+        if (take < 0 || take > 999999)
+            throw new ArgumentOutOfRangeException("take");
+        if (skip < 0)
+            throw new ArgumentOutOfRangeException("skip");
+        
+        return await _db.ListOLTHosts(take, skip, filterId, filterName, filterHost, filterTag);
+    }
+
 }
