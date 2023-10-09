@@ -6,6 +6,8 @@ public class WorkProbeResponse
 
     public DateTime ProbedAt { get; set; }
 
+    public bool Success { get; set; }
+
     public int? ValueInt { get; set; }
 
     public string? ValueStr { get; set; }

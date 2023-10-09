@@ -64,7 +64,10 @@ public class RabbitMQWorkExecution : IWorker, IDisposable
         else
         {
             _log.LogDebug("Message read, starting action execution..");
-            var workProbeResponse = _workerAction.Execute(workProbeInfo);
+            var workerActionThread = _workerAction.Execute(workProbeInfo);
+            
+            workerActionThread.Wait();
+            var workProbeResponse = workerActionThread.Result;
 
             _log.LogDebug("Action executed, sending response..");
             MQResponse(workProbeResponse);

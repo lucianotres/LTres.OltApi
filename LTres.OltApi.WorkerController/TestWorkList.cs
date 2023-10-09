@@ -13,8 +13,9 @@ public class TestWorkList : IWorkListController
         {
             new WorkProbeInfo() 
             {
-                Id = new Guid(),
-                Host = new IPEndPoint(IPAddress.Loopback, 1234),
+                Id = Guid.NewGuid(),
+                Action = "ping",
+                Host = new IPEndPoint(IPAddress.Parse("201.150.15.134"), 1234),
                 LastProbed = DateTime.Now,
                 WaitingResponse = false 
             }

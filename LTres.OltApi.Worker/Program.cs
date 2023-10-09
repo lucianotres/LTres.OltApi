@@ -16,6 +16,7 @@ var serviceController = new ServiceCollection()
     .AddLogging(p => p.AddConfiguration(configuration.GetSection("Logging")).AddConsole())
     .AddSingleton<IWorkerAction, WorkAction>()
     .AddSingleton<IWorker, RabbitMQWorkExecution>()
+    .AddSingleton<IWorkerActionPing, WorkPingAction>()
     .AddOptions()
     .Configure<RabbitMQConfiguration>(o => o.FillFromEnvironmentVars());
 

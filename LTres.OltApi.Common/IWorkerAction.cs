@@ -4,5 +4,8 @@ namespace LTres.OltApi.Common;
 
 public interface IWorkerAction
 {
-    WorkProbeResponse Execute(WorkProbeInfo probeInfo);
+    Task<WorkProbeResponse> Execute(WorkProbeInfo probeInfo, WorkProbeResponse? initialResponse = null);
 }
+
+
+public interface IWorkerActionPing : IWorkerAction { };
