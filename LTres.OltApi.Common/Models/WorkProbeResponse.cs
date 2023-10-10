@@ -11,4 +11,6 @@ public class WorkProbeResponse
     public int? ValueInt { get; set; }
 
     public string? ValueStr { get; set; }
+
+    public override string ToString() => $"Id: {Id}, {(Success ? "succeed" : "not succeed")} at {ProbedAt}";
 }

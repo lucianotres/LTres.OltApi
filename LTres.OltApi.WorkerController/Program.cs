@@ -15,8 +15,9 @@ var configuration = new ConfigurationBuilder()
 
 var serviceController = new ServiceCollection()
     .AddLogging(p => p.AddConfiguration(configuration.GetSection("Logging")).AddConsole())
-    .AddSingleton<IWorkListController, TestWorkList>()
-    .AddSingleton<IWorkerDispatcher, RabbitMQWorkExecutionDispatcher>()
+    .AddTransient<IWorkListController, TestWorkList>()
+    .AddTransient<IWorkerDispatcher, RabbitMQWorkExecutionDispatcher>()
+    .AddTransient<IWorkerResponseReceiver, RabbitMQWorkResponseReceiver>()
     .AddSingleton<WorkController>()
     .AddOptions()
     .Configure<RabbitMQConfiguration>(o => o.FillFromEnvironmentVars());

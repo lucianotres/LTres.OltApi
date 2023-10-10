@@ -12,16 +12,20 @@ public class WorkController
     private readonly ILogger _log;
     private readonly IWorkListController _workListController;
     private readonly IWorkerDispatcher _workExecutionDispatcher;
+    private readonly IWorkerResponseReceiver _workResponseReceiver;
     private CancellationTokenSource? _cancellationTokenSource;
     private Task? _loopTask = Task.CompletedTask;
 
     public WorkController(ILogger<WorkController> logger,
         IWorkListController workListController, 
-        IWorkerDispatcher workExecutionDispatcher)
+        IWorkerDispatcher workExecutionDispatcher,
+        IWorkerResponseReceiver workerResponseReceiver)
     {
         _log = logger;
         _workListController = workListController;
         _workExecutionDispatcher = workExecutionDispatcher;
+        _workResponseReceiver = workerResponseReceiver;
+        _workResponseReceiver.OnResponseReceived += doOnResponseReceived;
     }
 
     public void Start(bool autoRestart = true)
@@ -59,7 +63,12 @@ public class WorkController
             foreach(var work in workToBeDone)
                 _workExecutionDispatcher.Dispatch(work);
 
-            await Task.Delay(1000);
+            await Task.Delay(30000);
         }
+    }
+
+    private void doOnResponseReceived(object? sender, WorkerResponseReceivedEventArgs e)
+    {
+        _log.LogInformation(e.ProbeResponse.ToString() + $" ping {e.ProbeResponse.ValueInt}ms");
     }
 }

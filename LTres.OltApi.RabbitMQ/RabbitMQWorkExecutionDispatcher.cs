@@ -25,7 +25,6 @@ public class RabbitMQWorkExecutionDispatcher : IWorkerDispatcher, IDisposable
         _connection = connFactory.CreateConnection();
         _channel = _connection.CreateModel();
         _channel.QueueDeclare(_configuration.QueueName_do, true, false, false, null);
-        _channel.QueueDeclare(_configuration.QueueName_done, true, false, false, null);
     }
 
     public void Dispatch(WorkProbeInfo workInfo)
