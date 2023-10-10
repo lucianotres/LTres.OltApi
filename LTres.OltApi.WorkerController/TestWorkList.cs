@@ -5,7 +5,7 @@ using LTres.OltApi.Common.Models;
 
 namespace LTres.OltApi.WorkController;
 
-public class TestWorkList : IWorkListController
+public class TestWorkList : IWorkListController, IWorkResponseController
 {
     public IEnumerable<WorkProbeInfo> ToBeDone()
     {
@@ -20,5 +20,11 @@ public class TestWorkList : IWorkListController
                 WaitingResponse = false 
             }
         };
+    }
+
+    public async Task ResponseReceived(WorkProbeResponse workProbeResponse)
+    {
+        Console.WriteLine($"RESPONSE: {workProbeResponse} -> {workProbeResponse.ValueInt}ms");
+        await Task.Delay(1);
     }
 }

@@ -13,18 +13,22 @@ public class WorkController
     private readonly IWorkListController _workListController;
     private readonly IWorkerDispatcher _workExecutionDispatcher;
     private readonly IWorkerResponseReceiver _workResponseReceiver;
+    private readonly IWorkResponseController _workResponseController;
     private CancellationTokenSource? _cancellationTokenSource;
     private Task? _loopTask = Task.CompletedTask;
 
     public WorkController(ILogger<WorkController> logger,
         IWorkListController workListController, 
         IWorkerDispatcher workExecutionDispatcher,
-        IWorkerResponseReceiver workerResponseReceiver)
+        IWorkerResponseReceiver workerResponseReceiver,
+        IWorkResponseController workResponseController)
     {
         _log = logger;
         _workListController = workListController;
         _workExecutionDispatcher = workExecutionDispatcher;
         _workResponseReceiver = workerResponseReceiver;
+        _workResponseController = workResponseController;
+
         _workResponseReceiver.OnResponseReceived += doOnResponseReceived;
     }
 
@@ -69,6 +73,6 @@ public class WorkController
 
     private void doOnResponseReceived(object? sender, WorkerResponseReceivedEventArgs e)
     {
-        _log.LogInformation(e.ProbeResponse.ToString() + $" ping {e.ProbeResponse.ValueInt}ms");
+        _ = _workResponseController.ResponseReceived(e.ProbeResponse);
     }
 }
