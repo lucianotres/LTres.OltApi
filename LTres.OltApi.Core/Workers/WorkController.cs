@@ -40,6 +40,14 @@ public class WorkController
 
         _cancellationTokenSource = new CancellationTokenSource();
         _loopTask = Task.Run(ExecuteLoop, _cancellationTokenSource.Token);
+        _loopTask.ContinueWith(k => 
+        {
+            if (k.IsFaulted)
+                throw k.Exception;
+
+            Stop();
+        });
+
         _log.LogDebug("Work controller started.");
     }
 
@@ -61,7 +69,7 @@ public class WorkController
     {
         while (_cancellationTokenSource != null && !_cancellationTokenSource.IsCancellationRequested)
         {
-            var workToBeDone = _workListController.ToBeDone();
+            var workToBeDone = await _workListController.ToBeDone();
             _log.LogDebug($"Working to be done: {workToBeDone.Count()}");
 
             foreach(var work in workToBeDone)
@@ -74,5 +82,6 @@ public class WorkController
     private void doOnResponseReceived(object? sender, WorkerResponseReceivedEventArgs e)
     {
         _ = _workResponseController.ResponseReceived(e.ProbeResponse);
+        _log.LogInformation($"RESPONSE: {e.ProbeResponse} -> {e.ProbeResponse.ValueInt}ms");
     }
 }

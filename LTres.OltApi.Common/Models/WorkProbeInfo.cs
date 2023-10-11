@@ -16,4 +16,6 @@ public class WorkProbeInfo
     public bool WaitingResponse { get; set; } = false;
 
     public string Action { get; set; } = string.Empty;
+
+    public string? ItemKey { get; set; }
 }

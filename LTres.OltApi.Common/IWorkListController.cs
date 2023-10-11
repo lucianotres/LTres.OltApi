@@ -7,5 +7,5 @@ public interface IWorkListController
     /// <summary>
     /// Return a list of work to be done
     /// </summary>
-    IEnumerable<WorkProbeInfo> ToBeDone();
+    Task<IEnumerable<WorkProbeInfo>> ToBeDone();
 }

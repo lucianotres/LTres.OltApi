@@ -11,6 +11,7 @@
     <ProjectReference Include="..\LTres.OltApi.Common\LTres.OltApi.Common.csproj" />
     <ProjectReference Include="..\LTres.OltApi.Core\LTres.OltApi.Core.csproj" />
     <ProjectReference Include="..\LTres.OltApi.RabbitMQ\LTres.OltApi.RabbitMQ.csproj" />
+    <ProjectReference Include="..\LTres.OltApi.Mongo\LTres.OltApi.Mongo.csproj" />
   </ItemGroup>
   
   <ItemGroup>

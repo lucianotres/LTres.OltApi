@@ -1,12 +1,15 @@
 ﻿using LTres.OltApi.Common;
 using LTres.OltApi.Core.Workers;
-using LTres.OltApi.WorkController;
 using LTres.OltApi.RabbitMQ;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Configuration;
+using LTres.OltApi.Mongo;
+using LTres.OltApi.Common.DbServices;
 
 Console.WriteLine("Starting the worker controller..");
+
+MongoModelsConfiguration.RegisterClassMap();
 
 var configuration = new ConfigurationBuilder()
     .SetBasePath(AppContext.BaseDirectory)
@@ -15,13 +18,16 @@ var configuration = new ConfigurationBuilder()
 
 var serviceController = new ServiceCollection()
     .AddLogging(p => p.AddConfiguration(configuration.GetSection("Logging")).AddConsole())
-    .AddTransient<IWorkListController, TestWorkList>()
-    .AddTransient<IWorkResponseController, TestWorkList>()
-    .AddTransient<IWorkerDispatcher, RabbitMQWorkExecutionDispatcher>()
-    .AddTransient<IWorkerResponseReceiver, RabbitMQWorkResponseReceiver>()
+    .AddSingleton<IWorkProbeCache, WorkProbeCache>()
+    .AddScoped<IDbWorkProbeInfo, MongoDbWorkProbeInfo>()
+    .AddScoped<IWorkListController, WorkListManager>()
+    .AddScoped<IWorkResponseController, WorkDoneManager>()
+    .AddScoped<IWorkerDispatcher, RabbitMQWorkExecutionDispatcher>()
+    .AddScoped<IWorkerResponseReceiver, RabbitMQWorkResponseReceiver>()
     .AddSingleton<WorkController>()
     .AddOptions()
-    .Configure<RabbitMQConfiguration>(o => o.FillFromEnvironmentVars());
+    .Configure<RabbitMQConfiguration>(o => o.FillFromEnvironmentVars())
+    .Configure<MongoConfig>(o => configuration.Bind("MongoConfig", o));
 
 var serviceProvider = serviceController.BuildServiceProvider();
 
