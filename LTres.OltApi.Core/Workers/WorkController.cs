@@ -75,7 +75,7 @@ public class WorkController
             foreach(var work in workToBeDone)
                 _workExecutionDispatcher.Dispatch(work);
 
-            await Task.Delay(30000);
+            await Task.Delay(1000);
         }
     }
 

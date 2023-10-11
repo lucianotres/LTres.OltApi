@@ -1,10 +1,7 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using LTres.OltApi.Common.Models;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization;
+using MongoDB.Bson.Serialization.Conventions;
 using MongoDB.Bson.Serialization.Serializers;
 
 namespace LTres.OltApi.Mongo;
@@ -19,6 +16,8 @@ public static class MongoModelsConfiguration
         BsonDefaults.GuidRepresentation = GuidRepresentation.Standard;
         BsonDefaults.GuidRepresentationMode = GuidRepresentationMode.V3;
         #pragma warning restore CS0618
+
+        ConventionRegistry.Register("IgnoreNulls", new ConventionPack { new IgnoreIfNullConvention(true) }, f => true);
 
         //define the class Map for our models
         BsonClassMap.RegisterClassMap<OLT_Host>(cm => 

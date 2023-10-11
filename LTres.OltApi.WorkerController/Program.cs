@@ -9,17 +9,22 @@ using LTres.OltApi.Common.DbServices;
 
 Console.WriteLine("Starting the worker controller..");
 
-MongoModelsConfiguration.RegisterClassMap();
-
 var configuration = new ConfigurationBuilder()
     .SetBasePath(AppContext.BaseDirectory)
     .AddJsonFile("appsettings.json")
     .Build();
 
+var mongoConfig = new MongoConfig();
+configuration.Bind("MongoConfig", mongoConfig);
+
+MongoModelsConfiguration.RegisterClassMap();
+await MongoDbOltApiMigrations.Do(mongoConfig);
+
 var serviceController = new ServiceCollection()
     .AddLogging(p => p.AddConfiguration(configuration.GetSection("Logging")).AddConsole())
     .AddSingleton<IWorkProbeCache, WorkProbeCache>()
     .AddScoped<IDbWorkProbeInfo, MongoDbWorkProbeInfo>()
+    .AddScoped<IDbWorkProbeResponse, MongoDbWorkProbeResponse>()
     .AddScoped<IWorkListController, WorkListManager>()
     .AddScoped<IWorkResponseController, WorkDoneManager>()
     .AddScoped<IWorkerDispatcher, RabbitMQWorkExecutionDispatcher>()

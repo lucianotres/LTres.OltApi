@@ -24,7 +24,7 @@ public class MongoDbWorkProbeInfo : IDbWorkProbeInfo
         var database = client.GetDatabase(config.DatabaseName);
 
         OLT_Host_Items = database.GetCollection<OLT_Host_Item>("olt_host_items");
-
+        
         //create a pipeline to get only new work to be done
         pipelineDefinitionWorkProbeInfo = PipelineDefinition<OLT_Host_Item, WorkProbeInfo>.Create(
             new BsonDocument("$project", new BsonDocument
@@ -37,7 +37,7 @@ public class MongoDbWorkProbeInfo : IDbWorkProbeInfo
                 { "DoProbe",
                     new BsonDocument("$gte", new BsonArray
                     {
-                        DateTime.Now,
+                        "$$NOW",
                         new BsonDocument("$add", new BsonArray
                             {
                                 "$LastProbed",
