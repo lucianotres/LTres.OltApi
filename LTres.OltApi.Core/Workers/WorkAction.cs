@@ -30,6 +30,11 @@ public class WorkAction : IWorkerAction
             var pingWorker = _serviceProvider.GetRequiredService<IWorkerActionPing>();
             workProbeResponse = await pingWorker.Execute(probeInfo, workProbeResponse);
         }
+        else if (probeInfo.Action == "snmpget")
+        {
+            var pingWorker = _serviceProvider.GetRequiredService<IWorkerActionSnmpGet>();
+            workProbeResponse = await pingWorker.Execute(probeInfo, workProbeResponse);
+        }
         else
             _log.LogWarning("Action not found to perform.");
 
