@@ -40,8 +40,11 @@ public class OLT_Host_Item
 
 
     public bool ProbedSuccess { get; set; }
+    public string? ProbeFailedMessage { get; set; }
 
     public int? ProbedValueInt { get; set; }
+
+    public uint? ProbedValueUInt { get; set; }
 
     public string? ProbedValueStr { get; set; }
 

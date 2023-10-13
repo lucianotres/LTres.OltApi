@@ -29,15 +29,20 @@ public class MongoDbWorkProbeResponse : IDbWorkProbeResponse
 
     public async Task SaveWorkProbeResponse(WorkProbeResponse workProbeResponse)
     {
-        var filter = Builders<OLT_Host_Item>.Filter.Eq(f => f.Id, workProbeResponse.Id);
-        var update = Builders<OLT_Host_Item>.Update
-            .Set(p => p.LastProbed, workProbeResponse.ProbedAt)
-            .Set(p => p.ProbedSuccess, workProbeResponse.Success)
-            .Set(p => p.ProbedValueInt, workProbeResponse.ValueInt)
-            .Set(p => p.ProbedValueStr, workProbeResponse.ValueStr);
+        if (workProbeResponse.Type == WorkProbeResponseType.Value)
+        {
+            var filter = Builders<OLT_Host_Item>.Filter.Eq(f => f.Id, workProbeResponse.Id);
+            var update = Builders<OLT_Host_Item>.Update
+                .Set(p => p.LastProbed, workProbeResponse.ProbedAt)
+                .Set(p => p.ProbedSuccess, workProbeResponse.Success)
+                .Set(p => p.ProbeFailedMessage, workProbeResponse.FailMessage)
+                .Set(p => p.ProbedValueInt, workProbeResponse.ValueInt)
+                .Set(p => p.ProbedValueUInt, workProbeResponse.ValueUInt)
+                .Set(p => p.ProbedValueStr, workProbeResponse.ValueStr);
 
-        await OLT_Host_Items_History.InsertOneAsync(OLT_Host_Item_History.From(workProbeResponse));
-        await OLT_Host_Items.UpdateOneAsync(filter, update);
+            await OLT_Host_Items_History.InsertOneAsync(OLT_Host_Item_History.From(workProbeResponse));
+            await OLT_Host_Items.UpdateOneAsync(filter, update);
+        }
     }
 
 

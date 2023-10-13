@@ -13,6 +13,8 @@ public class WorkProbeInfo
     [JsonConverter(typeof(IPEndPointConverter))]
     public required IPEndPoint Host { get; set; }
 
+    public string? SnmpCommunity { get; set; }
+
     public bool WaitingResponse { get; set; } = false;
 
     public string Action { get; set; } = string.Empty;
