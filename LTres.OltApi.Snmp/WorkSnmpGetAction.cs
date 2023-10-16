@@ -15,27 +15,37 @@ public class WorkSnmpGetAction : IWorkerActionSnmpGet
         try
         {
             var requestMessage = new GetRequestMessage(
-                Messenger.NextRequestId, VersionCode.V1,
+                Messenger.NextRequestId, 
+                probeInfo.SnmpVersion == 3 ? VersionCode.V3 : probeInfo.SnmpVersion == 2 ? VersionCode.V2 : VersionCode.V1,
                 new OctetString(probeInfo.SnmpCommunity ?? ""),
-                new List<Variable> { new Variable(new ObjectIdentifier(probeInfo.ItemKey ?? "")) });
+                new List<Variable> { new(new ObjectIdentifier(probeInfo.ItemKey ?? "")) });
 
             var replyMessage = await requestMessage.GetResponseAsync(probeInfo.Host);
             var pdu = replyMessage.Pdu();
+            var errorStatus = pdu.ErrorStatus.ToErrorCode();
 
-            if (pdu.ErrorStatus.ToInt32() == 0)
+            if (errorStatus == ErrorCode.NoError)
             {
                 var variableReply = pdu.Variables.First();
-                if (variableReply.Data is Integer32)
-                    finalResponse.ValueInt = ((Integer32)variableReply.Data).ToInt32();
-                else if (variableReply.Data is Gauge32)
-                    finalResponse.ValueUInt = ((Gauge32)variableReply.Data).ToUInt32();
-                else if (variableReply.Data is Counter32)
-                    finalResponse.ValueUInt = ((Counter32)variableReply.Data).ToUInt32();
-                //else if (variableReply.Data is Sequence)
-                //    finalResponse.ValueUInt = ((Sequence) variableReply.Data).ToBytes();
-            }
+                if (variableReply.Data is Integer32 integer)
+                    finalResponse.ValueInt = integer.ToInt32();
+                else if (variableReply.Data is Gauge32 gauge)
+                    finalResponse.ValueUInt = gauge.ToUInt32();
+                else if (variableReply.Data is Counter32 counter)
+                    finalResponse.ValueUInt = counter.ToUInt32();
+                else if (variableReply.Data is TimeTicks ticks)
+                    finalResponse.ValueUInt = ticks.ToUInt32();
+                else if (variableReply.Data is OctetString str)
+                    finalResponse.ValueStr = str.ToString();
+                else if (variableReply.Data is Sequence binary)
+                    finalResponse.ValueBin = Convert.ToBase64String(binary.ToBytes());
 
-            finalResponse.Success = true;
+                finalResponse.Success = true;
+            }
+            else if (errorStatus == ErrorCode.NoSuchName)
+                finalResponse.FailMessage = $"Snmp object not founded, {errorStatus}";
+            else
+                finalResponse.FailMessage = $"Snmp get failed, {errorStatus}";
         }
         catch (Exception error)
         { finalResponse.FailMessage = error.Message; }

@@ -24,7 +24,7 @@ public class WorkAction : IWorkerAction
     {
         _log.LogInformation($"Work probe received: {probeInfo.Id} -> {probeInfo.Action}");
         var workProbeResponse = new WorkProbeResponse() { Id = probeInfo.Id };
-        
+
         if (probeInfo.Action == "ping")
         {
             var pingWorker = _serviceProvider.GetRequiredService<IWorkerActionPing>();
@@ -33,6 +33,11 @@ public class WorkAction : IWorkerAction
         else if (probeInfo.Action == "snmpget")
         {
             var pingWorker = _serviceProvider.GetRequiredService<IWorkerActionSnmpGet>();
+            workProbeResponse = await pingWorker.Execute(probeInfo, workProbeResponse);
+        }
+        else if (probeInfo.Action == "snmpwalk")
+        {
+            var pingWorker = _serviceProvider.GetRequiredService<IWorkerActionSnmpWalk>();
             workProbeResponse = await pingWorker.Execute(probeInfo, workProbeResponse);
         }
         else

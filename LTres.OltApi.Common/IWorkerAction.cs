@@ -10,3 +10,4 @@ public interface IWorkerAction
 
 public interface IWorkerActionPing : IWorkerAction { };
 public interface IWorkerActionSnmpGet : IWorkerAction { };
+public interface IWorkerActionSnmpWalk : IWorkerAction { };
