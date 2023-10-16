@@ -8,12 +8,16 @@ public class WorkProbeInfo
 {
     public required Guid Id { get; set; }
 
-    public required DateTime LastProbed { get; set; }
+    public DateTime LastProbed { get; set; }
 
     [JsonConverter(typeof(IPEndPointConverter))]
     public required IPEndPoint Host { get; set; }
 
     public string? SnmpCommunity { get; set; }
+
+    public int? SnmpVersion { get; set; }
+
+    public bool SnmpBulk { get; set; } = true;
 
     public bool WaitingResponse { get; set; } = false;
 
