@@ -48,8 +48,19 @@ public static class MongoDbOltApiMigrations
         var indexesOltHostItems = (await collectionOltHostItems.Indexes.ListAsync()).ToList();
         if (!indexesOltHostItems.Any(i => i.FirstOrDefault(f => f.Name == "name").Value.AsString == "idx_IdOltHost"))
         {
-            var keys = Builders<OLT_Host_Item>.IndexKeys.Ascending(p => p.IdOltHost);
+            var keys = Builders<OLT_Host_Item>.IndexKeys
+                .Ascending(p => p.IdOltHost)
+                .Ascending(p => p.ItemKey);
             var createIndexModel = new CreateIndexModel<OLT_Host_Item>(keys, new CreateIndexOptions() {  Name = "idx_IdOltHost"});
+
+            await collectionOltHostItems.Indexes.CreateOneAsync(createIndexModel);
+        }
+        if (!indexesOltHostItems.Any(i => i.FirstOrDefault(f => f.Name == "name").Value.AsString == "idx_IdRelated"))
+        {
+            var keys = Builders<OLT_Host_Item>.IndexKeys
+                .Ascending(p => p.IdRelated)
+                .Ascending(p => p.ItemKey);
+            var createIndexModel = new CreateIndexModel<OLT_Host_Item>(keys, new CreateIndexOptions() {  Name = "idx_IdRelated"});
 
             await collectionOltHostItems.Indexes.CreateOneAsync(createIndexModel);
         }

@@ -19,6 +19,8 @@ public class OLT_Host_Item_History
 
     public int? ValueInt { get; set; }
 
+    public uint? ValueUInt { get; set; }
+
     public string? ValueStr { get; set; }
 
 
@@ -28,6 +30,7 @@ public class OLT_Host_Item_History
             IdItem = workProbeResponse.Id,
             At = workProbeResponse.ProbedAt,
             ValueInt = workProbeResponse.ValueInt,
+            ValueUInt = workProbeResponse.ValueUInt,
             ValueStr = workProbeResponse.ValueStr
         };
 }

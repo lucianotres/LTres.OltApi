@@ -14,7 +14,7 @@ public class WorkController
     private Task? _loopTask = Task.CompletedTask;
 
     public WorkController(ILogger<WorkController> logger,
-        IWorkListController workListController, 
+        IWorkListController workListController,
         IWorkerDispatcher workExecutionDispatcher,
         IWorkerResponseReceiver workerResponseReceiver,
         IWorkResponseController workResponseController)
@@ -25,7 +25,7 @@ public class WorkController
         _workResponseReceiver = workerResponseReceiver;
         _workResponseController = workResponseController;
 
-        _workResponseReceiver.OnResponseReceived += doOnResponseReceived;
+        _workResponseReceiver.OnResponseReceived += DoOnResponseReceived;
     }
 
     public void Start(bool autoRestart = true)
@@ -36,7 +36,7 @@ public class WorkController
 
         _cancellationTokenSource = new CancellationTokenSource();
         _loopTask = Task.Run(ExecuteLoop, _cancellationTokenSource.Token);
-        _loopTask.ContinueWith(k => 
+        _loopTask.ContinueWith(k =>
         {
             if (k.IsFaulted)
                 throw k.Exception;
@@ -68,16 +68,21 @@ public class WorkController
             var workToBeDone = await _workListController.ToBeDone();
             _log.LogDebug($"Working to be done: {workToBeDone.Count()}");
 
-            foreach(var work in workToBeDone)
+            foreach (var work in workToBeDone)
                 _workExecutionDispatcher.Dispatch(work);
 
             await Task.Delay(1000);
         }
     }
 
-    private void doOnResponseReceived(object? sender, WorkerResponseReceivedEventArgs e)
+    private void DoOnResponseReceived(object? sender, WorkerResponseReceivedEventArgs e)
     {
-        _ = _workResponseController.ResponseReceived(e.ProbeResponse);
-        _log.LogInformation($"RESPONSE: {e.ProbeResponse}");
+        Task.Run(async () =>
+        {
+            var startedTime = DateTime.Now;
+            await _workResponseController.ResponseReceived(e.ProbeResponse);
+
+            _log.LogInformation($"RESPONSE: {e.ProbeResponse}, saved in {DateTime.Now.Subtract(startedTime)}");
+        });
     }
 }

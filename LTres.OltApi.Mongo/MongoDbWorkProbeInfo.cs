@@ -1,14 +1,8 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Amazon.Runtime.SharedInterfaces;
 using LTres.OltApi.Common.DbServices;
 using LTres.OltApi.Common.Models;
 using Microsoft.Extensions.Options;
 using MongoDB.Bson;
 using MongoDB.Driver;
-using MongoDB.Driver.Core.Events;
 
 namespace LTres.OltApi.Mongo;
 
@@ -31,6 +25,7 @@ public class MongoDbWorkProbeInfo : IDbWorkProbeInfo
             {
                 { "_id", 1 },
                 { "IdOltHost", 1 },
+                { "Active", 1 },
                 { "Action", 1 },
                 { "ItemKey", 1},
                 { "LastProbed", 1 },
@@ -48,7 +43,10 @@ public class MongoDbWorkProbeInfo : IDbWorkProbeInfo
             }),
             new BsonDocument("$match", new BsonDocument
             {
-                { "DoProbe", true }
+                { "Active", true },
+                { "DoProbe", true },
+                { "IdOltHost", new BsonDocument("$ne", BsonNull.Value) },
+                { "Action", new BsonDocument("$ne", BsonNull.Value) }
             }),
             new BsonDocument("$limit", 100),
             new BsonDocument("$lookup", new BsonDocument
@@ -65,7 +63,9 @@ public class MongoDbWorkProbeInfo : IDbWorkProbeInfo
                 { "ItemKey", 1},
                 { "LastProbed", 1 },
                 { "Host", new BsonDocument("$arrayElemAt", new BsonArray { "$olt.Host", 0 }) },
-                { "SnmpCommunity", new BsonDocument("$arrayElemAt", new BsonArray { "$olt.SnmpCommunity", 0 }) }
+                { "SnmpCommunity", new BsonDocument("$arrayElemAt", new BsonArray { "$olt.SnmpCommunity", 0 }) },
+                { "SnmpVersion", new BsonDocument("$arrayElemAt", new BsonArray { "$olt.SnmpVersion", 0 }) },
+                { "SnmpBulk", new BsonDocument("$arrayElemAt", new BsonArray { "$olt.SnmpBulk", 0 }) }
             }));
     }
 
