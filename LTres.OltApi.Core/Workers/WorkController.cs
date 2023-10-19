@@ -1,8 +1,4 @@
 using LTres.OltApi.Common;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 
 namespace LTres.OltApi.Core.Workers;
@@ -82,6 +78,6 @@ public class WorkController
     private void doOnResponseReceived(object? sender, WorkerResponseReceivedEventArgs e)
     {
         _ = _workResponseController.ResponseReceived(e.ProbeResponse);
-        _log.LogInformation($"RESPONSE: {e.ProbeResponse} -> {e.ProbeResponse.ValueInt}ms");
+        _log.LogInformation($"RESPONSE: {e.ProbeResponse}");
     }
 }

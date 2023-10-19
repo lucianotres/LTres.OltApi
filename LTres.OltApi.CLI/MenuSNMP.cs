@@ -64,7 +64,7 @@ public class MenuSNMP : Menu
             ItemKey = "1.3.6.1.2.1.1.5.0"
         };
 
-        var workResult = await workSnmpGetAction.Execute(probeInfo);
+        var workResult = await workSnmpGetAction.Execute(probeInfo, CancellationToken.None);
 
         Console.WriteLine($"sysName | {(workResult.Success ? "ok" : workResult.FailMessage)} -> {workResult.ValueStr}");
         return false;
@@ -84,7 +84,7 @@ public class MenuSNMP : Menu
             ItemKey = "1.3.6.1.2.1.1.3.0"
         };
 
-        var workResult = await workSnmpGetAction.Execute(probeInfo);
+        var workResult = await workSnmpGetAction.Execute(probeInfo, CancellationToken.None);
 
         Console.WriteLine($"sysUpTime | {(workResult.Success ? "ok" : workResult.FailMessage)} -> {TimeSpan.FromMilliseconds((double)workResult.ValueUInt * 10)}");
         return false;
@@ -107,7 +107,7 @@ public class MenuSNMP : Menu
 
         var datetimeStarted = DateTime.Now;
 
-        var workResult = await workSnmpGetAction.Execute(probeInfo);
+        var workResult = await workSnmpGetAction.Execute(probeInfo, CancellationToken.None);
         if (workResult.Success)
         {
             var timespanGotResponse = DateTime.Now.Subtract(datetimeStarted);
@@ -141,7 +141,7 @@ public class MenuSNMP : Menu
 
         var datetimeStarted = DateTime.Now;
 
-        var workResult = await workSnmpGetAction.Execute(probeInfo);
+        var workResult = await workSnmpGetAction.Execute(probeInfo, CancellationToken.None);
         if (workResult.Success)
         {
             var timespanGotResponse = DateTime.Now.Subtract(datetimeStarted);

@@ -14,11 +14,11 @@ public class WorkProbeResponse
     public int? ValueInt { get; set; }
     public uint? ValueUInt { get; set; }
     public string? ValueStr { get; set; }
-    public string? ValueBin { get; set; }
 
     public IEnumerable<WorkProbeResponseVar>? Values { get; set; }
 
-    public override string ToString() => $"Id: {Id}, {(Success ? "succeed" : "not succeed")} at {ProbedAt}";
+    public override string ToString() => 
+        $"Id: {Id}, {(Success ? "succeed" : "not succeed")} at {ProbedAt}: {(Values != null ? Values.Count().ToString() : ValueInt.HasValue ? ValueInt.ToString() : ValueUInt.HasValue ? ValueUInt.ToString() : ValueStr)}";
 }
 
 public enum WorkProbeResponseType : uint
@@ -29,9 +29,8 @@ public enum WorkProbeResponseType : uint
 
 public class WorkProbeResponseVar
 {
-    public string Key { get; set; }
+    public string Key { get; set; } = string.Empty;
     public int? ValueInt { get; set; }
     public uint? ValueUInt { get; set; }
     public string? ValueStr { get; set; }
-    public string? ValueBin { get; set; }
 }

@@ -4,7 +4,7 @@ namespace LTres.OltApi.Common;
 
 public interface IWorkerAction
 {
-    Task<WorkProbeResponse> Execute(WorkProbeInfo probeInfo, WorkProbeResponse? initialResponse = null);
+    Task<WorkProbeResponse> Execute(WorkProbeInfo probeInfo, CancellationToken cancellationToken, WorkProbeResponse? initialResponse = null);
 }
 
 

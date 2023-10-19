@@ -1,7 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using LTres.OltApi.Common;
 using LTres.OltApi.Common.Models;
 using Microsoft.Extensions.DependencyInjection;
@@ -20,7 +16,7 @@ public class WorkAction : IWorkerAction
         _serviceProvider = serviceProvider;
     }
 
-    public async Task<WorkProbeResponse> Execute(WorkProbeInfo probeInfo, WorkProbeResponse? initialResponse = null)
+    public async Task<WorkProbeResponse> Execute(WorkProbeInfo probeInfo, CancellationToken cancellationToken, WorkProbeResponse? initialResponse = null)
     {
         _log.LogInformation($"Work probe received: {probeInfo.Id} -> {probeInfo.Action}");
         var workProbeResponse = new WorkProbeResponse() { Id = probeInfo.Id };
@@ -28,17 +24,17 @@ public class WorkAction : IWorkerAction
         if (probeInfo.Action == "ping")
         {
             var pingWorker = _serviceProvider.GetRequiredService<IWorkerActionPing>();
-            workProbeResponse = await pingWorker.Execute(probeInfo, workProbeResponse);
+            workProbeResponse = await pingWorker.Execute(probeInfo, cancellationToken, workProbeResponse);
         }
         else if (probeInfo.Action == "snmpget")
         {
-            var pingWorker = _serviceProvider.GetRequiredService<IWorkerActionSnmpGet>();
-            workProbeResponse = await pingWorker.Execute(probeInfo, workProbeResponse);
+            var snmpGetWorker = _serviceProvider.GetRequiredService<IWorkerActionSnmpGet>();
+            workProbeResponse = await snmpGetWorker.Execute(probeInfo, cancellationToken, workProbeResponse);
         }
         else if (probeInfo.Action == "snmpwalk")
         {
-            var pingWorker = _serviceProvider.GetRequiredService<IWorkerActionSnmpWalk>();
-            workProbeResponse = await pingWorker.Execute(probeInfo, workProbeResponse);
+            var snmpWalkWorker = _serviceProvider.GetRequiredService<IWorkerActionSnmpWalk>();
+            workProbeResponse = await snmpWalkWorker.Execute(probeInfo, cancellationToken, workProbeResponse);
         }
         else
             _log.LogWarning("Action not found to perform.");

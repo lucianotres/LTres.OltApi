@@ -10,12 +10,17 @@ public class OLT_Host_Item
     /// <summary>
     /// Identification of OLT Host related
     /// </summary>
-    public Guid IdOltHost { get; set; }
+    public Guid? IdOltHost { get; set; }
+
+    /// <summary>
+    /// If it was created by another item
+    /// </summary>
+    public Guid? IdRelated { get; set; }
 
     /// <summary>
     /// Item action of probing
     /// </summary>
-    public string Action { get; set; } = string.Empty;
+    public string? Action { get; set; }
 
     /// <summary>
     /// Item key to perform an action
@@ -31,7 +36,7 @@ public class OLT_Host_Item
     /// <summary>
     /// Probe interval (seconds)
     /// </summary>
-    public int Interval { get; set; }
+    public int? Interval { get; set; }
 
     /// <summary>
     /// Mantain values history for (minutes)
