@@ -7,7 +7,7 @@ namespace LTres.OltApi.Snmp;
 
 public class WorkSnmpGetAction : IWorkerActionSnmpGet
 {
-    public async Task<WorkProbeResponse> Execute(WorkProbeInfo probeInfo, WorkProbeResponse? initialResponse = null)
+    public async Task<WorkProbeResponse> Execute(WorkProbeInfo probeInfo, CancellationToken cancellationToken, WorkProbeResponse? initialResponse = null)
     {
         var finalResponse = initialResponse ?? new WorkProbeResponse() { Id = probeInfo.Id };
         finalResponse.Success = false;
@@ -20,9 +20,12 @@ public class WorkSnmpGetAction : IWorkerActionSnmpGet
                 new OctetString(probeInfo.SnmpCommunity ?? ""),
                 new List<Variable> { new(new ObjectIdentifier(probeInfo.ItemKey ?? "")) });
 
-            var replyMessage = await requestMessage.GetResponseAsync(probeInfo.Host);
+            var replyMessage = await requestMessage.GetResponseAsync(probeInfo.Host, cancellationToken);
             var pdu = replyMessage.Pdu();
             var errorStatus = pdu.ErrorStatus.ToErrorCode();
+
+            if (cancellationToken.IsCancellationRequested)
+                return finalResponse;
 
             if (errorStatus == ErrorCode.NoError)
             {
@@ -38,7 +41,7 @@ public class WorkSnmpGetAction : IWorkerActionSnmpGet
                 else if (variableReply.Data is OctetString str)
                     finalResponse.ValueStr = str.ToString();
                 else if (variableReply.Data is Sequence binary)
-                    finalResponse.ValueBin = Convert.ToBase64String(binary.ToBytes());
+                    finalResponse.ValueStr = Convert.ToBase64String(binary.ToBytes());
 
                 finalResponse.Success = true;
             }

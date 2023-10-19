@@ -19,6 +19,7 @@ var serviceController = new ServiceCollection()
     .AddSingleton<IWorker, RabbitMQWorkExecution>()
     .AddSingleton<IWorkerActionPing, WorkPingAction>()
     .AddSingleton<IWorkerActionSnmpGet, WorkSnmpGetAction>()
+    .AddSingleton<IWorkerActionSnmpWalk, WorkSnmpWalkAction>()
     .AddOptions()
     .Configure<RabbitMQConfiguration>(o => o.FillFromEnvironmentVars());
 

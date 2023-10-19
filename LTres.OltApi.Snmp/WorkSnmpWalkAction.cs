@@ -7,7 +7,7 @@ namespace LTres.OltApi.Snmp;
 
 public class WorkSnmpWalkAction : IWorkerActionSnmpWalk
 {
-    public async Task<WorkProbeResponse> Execute(WorkProbeInfo probeInfo, WorkProbeResponse? initialResponse = null)
+    public async Task<WorkProbeResponse> Execute(WorkProbeInfo probeInfo, CancellationToken cancellationToken, WorkProbeResponse? initialResponse = null)
     {
         var finalResponse = initialResponse ?? new WorkProbeResponse() { Id = probeInfo.Id };
         finalResponse.Success = false;
@@ -18,6 +18,7 @@ public class WorkSnmpWalkAction : IWorkerActionSnmpWalk
             var community = new OctetString(probeInfo.SnmpCommunity ?? "");
             var originalOID = probeInfo.ItemKey ?? "";
             var latestOID = new ObjectIdentifier(originalOID);
+            originalOID = latestOID.ToString() + "."; //correctly formated
             var bulkMessage = probeInfo.SnmpVersion > 1 && probeInfo.SnmpBulk;
 
             bool errorFound = false;
@@ -30,15 +31,15 @@ public class WorkSnmpWalkAction : IWorkerActionSnmpWalk
                     var message = new GetBulkRequestMessage(Messenger.NextRequestId,
                         probeInfo.SnmpVersion == 3 ? VersionCode.V3 : VersionCode.V2,
                         community,
-                        0, 300, 
+                        0, 300,
                         variables);
-                    
-                    var response = await message.GetResponseAsync(probeInfo.Host);
+
+                    var response = await message.GetResponseAsync(probeInfo.Host, cancellationToken);
                     var pdu = response.Pdu();
                     errorFound = pdu.ErrorStatus.ToErrorCode() != 0;
                     if (!errorFound)
                     {
-                        var toAdd = pdu.Variables.Where(w => 
+                        var toAdd = pdu.Variables.Where(w =>
                             w.Id.ToString().StartsWith(originalOID, StringComparison.Ordinal)
                             && !returnListOfVariables.Any(z => z.Id == w.Id))
                             .ToList();
@@ -60,7 +61,7 @@ public class WorkSnmpWalkAction : IWorkerActionSnmpWalk
                         community,
                         variables);
 
-                    var response = await message.GetResponseAsync(probeInfo.Host);
+                    var response = await message.GetResponseAsync(probeInfo.Host, cancellationToken);
                     var pdu = response.Pdu();
                     errorFound = pdu.ErrorStatus.ToErrorCode() != 0;
                     if (!errorFound)
@@ -75,32 +76,39 @@ public class WorkSnmpWalkAction : IWorkerActionSnmpWalk
                     }
                 }
             }
-            while (!errorFound);
+            while (!errorFound && !cancellationToken.IsCancellationRequested);
 
-            finalResponse.Values = returnListOfVariables.Select(variableReply =>
+            if (!cancellationToken.IsCancellationRequested)
             {
-                var returnVar = new WorkProbeResponseVar()
+                var reduceKeyAt = originalOID.Length;
+
+                finalResponse.Type = WorkProbeResponseType.Walk;
+                finalResponse.ValueUInt = (uint)returnListOfVariables.Count;
+                finalResponse.Values = returnListOfVariables.Select(variableReply =>
                 {
-                    Key = variableReply.Id.ToString()
-                };
+                    var returnVar = new WorkProbeResponseVar()
+                    {
+                        Key = variableReply.Id.ToString().Substring(reduceKeyAt)
+                    };
 
-                if (variableReply.Data is Integer32 integer)
-                    returnVar.ValueInt = integer.ToInt32();
-                else if (variableReply.Data is Gauge32 gauge)
-                    returnVar.ValueUInt = gauge.ToUInt32();
-                else if (variableReply.Data is Counter32 counter)
-                    returnVar.ValueUInt = counter.ToUInt32();
-                else if (variableReply.Data is TimeTicks ticks)
-                    returnVar.ValueUInt = ticks.ToUInt32();
-                else if (variableReply.Data is OctetString str)
-                    returnVar.ValueStr = str.ToString();
-                else if (variableReply.Data is Sequence binary)
-                    returnVar.ValueBin = Convert.ToBase64String(binary.ToBytes());
+                    if (variableReply.Data is Integer32 integer)
+                        returnVar.ValueInt = integer.ToInt32();
+                    else if (variableReply.Data is Gauge32 gauge)
+                        returnVar.ValueUInt = gauge.ToUInt32();
+                    else if (variableReply.Data is Counter32 counter)
+                        returnVar.ValueUInt = counter.ToUInt32();
+                    else if (variableReply.Data is TimeTicks ticks)
+                        returnVar.ValueUInt = ticks.ToUInt32();
+                    else if (variableReply.Data is OctetString str)
+                        returnVar.ValueStr = str.ToString();
+                    else if (variableReply.Data is Sequence binary)
+                        returnVar.ValueStr = Convert.ToBase64String(binary.ToBytes());
 
-                return returnVar;
-            }).ToList();
+                    return returnVar;
+                }).ToList();
 
-            finalResponse.Success = true;
+                finalResponse.Success = true;
+            }
         }
         catch (Exception error)
         { finalResponse.FailMessage = error.Message; }
