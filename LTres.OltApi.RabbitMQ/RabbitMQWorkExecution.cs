@@ -51,7 +51,7 @@ public class RabbitMQWorkExecution : IWorker, IDisposable
         _log.LogDebug("RabbitMQ work execution stopped.");
     }
 
-    private void MQReceived(object? sender, BasicDeliverEventArgs e)
+    private async void MQReceived(object? sender, BasicDeliverEventArgs e)
     {
         _log.LogDebug("Message received, reading..");
         byte[] body = e.Body.ToArray();
@@ -63,15 +63,38 @@ public class RabbitMQWorkExecution : IWorker, IDisposable
             _log.LogDebug("No message read to execute.");
         else
         {
-            _log.LogDebug("Message read, starting action execution..");
-            var workerActionThread = _workerAction.Execute(workProbeInfo);
-            
-            workerActionThread.Wait();
-            var workProbeResponse = workerActionThread.Result;
+            try
+            {
+                _log.LogDebug("Message read, starting action execution..");
+                var cancellationToken = new CancellationTokenSource();
+                var workTask = _workerAction.Execute(workProbeInfo, cancellationToken.Token);
 
-            _log.LogDebug("Action executed, sending response..");
-            MQResponse(workProbeResponse);
-            _log.LogDebug("Response sent.");
+                if (await Task.WhenAny(workTask, Task.Delay(30000)) == workTask)
+                {
+                    var workProbeResponse = workTask.Result;
+
+                    _log.LogDebug("Action executed, sending response..");
+                    MQResponse(workProbeResponse);
+                    _log.LogDebug("Response sent.");
+                }
+                else
+                {
+                    cancellationToken.Cancel();
+
+                    MQResponse(new WorkProbeResponse()
+                    {
+                        Id = workProbeInfo.Id,
+                        ProbedAt = DateTime.Now,
+                        Success = false,
+                        FailMessage = "Probing timeouted"
+                    });
+                    _log.LogDebug("Timeout response sent.");
+                }
+            }
+            catch (Exception err)
+            {
+                _log.LogError(err.ToString());
+            }
         }
     }
 
