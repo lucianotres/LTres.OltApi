@@ -52,7 +52,9 @@ public class MongoDbWorkProbeResponse : IDbWorkProbeResponse
 
         if (workProbeResponse.Type == WorkProbeResponseType.Value)
         {
-            await OLT_Host_Items_History.InsertOneAsync(OLT_Host_Item_History.From(workProbeResponse));
+            if (workProbeResponse.DoHistory)
+                await OLT_Host_Items_History.InsertOneAsync(OLT_Host_Item_History.From(workProbeResponse));
+
             await OLT_Host_Items.UpdateOneAsync(filter, update);
         }
         else if (workProbeResponse.Type == WorkProbeResponseType.Walk)
@@ -112,24 +114,27 @@ public class MongoDbWorkProbeResponse : IDbWorkProbeResponse
             });
         }
 
-        var pipelineFindHostItemId = PipelineDefinition<OLT_Host_Item, Guid>
-            .Create(new IPipelineStageDefinition[] {
+        if (workProbeResponse.DoHistory)
+        {
+            var pipelineFindHostItemId = PipelineDefinition<OLT_Host_Item, Guid>
+                .Create(new IPipelineStageDefinition[] {
                 PipelineStageDefinitionBuilder.Match(vfilter),
                 PipelineStageDefinitionBuilder.Project<OLT_Host_Item, Guid>(p => p.Id)
-            });
+                });
 
-        var resultFindHostItemId = (await OLT_Host_Items.AggregateAsync(pipelineFindHostItemId)).FirstOrDefault();
-        if (resultFindHostItemId != Guid.Empty)
-        {
-            var oltHostItemHistory = new OLT_Host_Item_History()
+            var resultFindHostItemId = (await OLT_Host_Items.AggregateAsync(pipelineFindHostItemId)).FirstOrDefault();
+            if (resultFindHostItemId != Guid.Empty)
             {
-                IdItem = resultFindHostItemId,
-                At = workProbeResponse.ProbedAt,
-                ValueInt = workProbeResponseVar.ValueInt,
-                ValueUInt = workProbeResponseVar.ValueUInt,
-                ValueStr = workProbeResponseVar.ValueStr,
-            };
-            await OLT_Host_Items_History.InsertOneAsync(oltHostItemHistory);
+                var oltHostItemHistory = new OLT_Host_Item_History()
+                {
+                    IdItem = resultFindHostItemId,
+                    At = workProbeResponse.ProbedAt,
+                    ValueInt = workProbeResponseVar.ValueInt,
+                    ValueUInt = workProbeResponseVar.ValueUInt,
+                    ValueStr = workProbeResponseVar.ValueStr,
+                };
+                await OLT_Host_Items_History.InsertOneAsync(oltHostItemHistory);
+            }
         }
     }
 }

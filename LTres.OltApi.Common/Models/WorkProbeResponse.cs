@@ -5,6 +5,7 @@ public class WorkProbeResponse
     public required Guid Id { get; set; }
 
     public WorkProbeResponseType Type { get; set; } = WorkProbeResponseType.Value;
+    public bool DoHistory { get; set; } = false;
 
     public DateTime ProbedAt { get; set; }
 

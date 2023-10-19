@@ -39,9 +39,9 @@ public class OLT_Host_Item
     public int? Interval { get; set; }
 
     /// <summary>
-    /// Mantain values history for (minutes)
+    /// Maintain values history for (minutes)
     /// </summary>
-    public int? MantainFor { get; set; }
+    public int? MaintainFor { get; set; }
 
 
     public bool ProbedSuccess { get; set; }

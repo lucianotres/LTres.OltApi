@@ -55,6 +55,7 @@ public class WorkAction : IWorkerAction
         }
 
         workProbeResponse.ProbedAt = DateTime.Now;
+        workProbeResponse.DoHistory = probeInfo.DoHistory;
         return workProbeResponse;
     }
 }

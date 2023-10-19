@@ -18,9 +18,15 @@ public class MongoDbWorkProbeInfo : IDbWorkProbeInfo
         var database = client.GetDatabase(config.DatabaseName);
 
         OLT_Host_Items = database.GetCollection<OLT_Host_Item>("olt_host_items");
-        
+
         //create a pipeline to get only new work to be done
         pipelineDefinitionWorkProbeInfo = PipelineDefinition<OLT_Host_Item, WorkProbeInfo>.Create(
+            new BsonDocument("$match", new BsonDocument
+            {
+                { "Active", true },
+                { "IdOltHost", new BsonDocument("$ne", BsonNull.Value) },
+                { "Action", new BsonDocument("$ne", BsonNull.Value) }
+            }),
             new BsonDocument("$project", new BsonDocument
             {
                 { "_id", 1 },
@@ -40,14 +46,12 @@ public class MongoDbWorkProbeInfo : IDbWorkProbeInfo
                                 new BsonDocument("$multiply", new BsonArray { "$Interval", 1000 })
                             })
                     })
-                }
+                },
+                { "DoHistory", new BsonDocument("$gt", new BsonArray { "$MaintainFor", 0 }) }
             }),
             new BsonDocument("$match", new BsonDocument
             {
-                { "Active", true },
-                { "DoProbe", true },
-                { "IdOltHost", new BsonDocument("$ne", BsonNull.Value) },
-                { "Action", new BsonDocument("$ne", BsonNull.Value) }
+                { "DoProbe", true }
             }),
             new BsonDocument("$limit", 100),
             new BsonDocument("$lookup", new BsonDocument
@@ -64,6 +68,7 @@ public class MongoDbWorkProbeInfo : IDbWorkProbeInfo
                 { "ItemKey", 1},
                 { "LastProbed", 1 },
                 { "Calc", 1 },
+                { "DoHistory", 1 },
                 { "Host", new BsonDocument("$arrayElemAt", new BsonArray { "$olt.Host", 0 }) },
                 { "SnmpCommunity", new BsonDocument("$arrayElemAt", new BsonArray { "$olt.SnmpCommunity", 0 }) },
                 { "SnmpVersion", new BsonDocument("$arrayElemAt", new BsonArray { "$olt.SnmpVersion", 0 }) },
