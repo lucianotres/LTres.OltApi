@@ -29,6 +29,7 @@ public class MongoDbWorkProbeInfo : IDbWorkProbeInfo
                 { "Action", 1 },
                 { "ItemKey", 1},
                 { "LastProbed", 1 },
+                { "Calc", 1 },
                 { "DoProbe",
                     new BsonDocument("$gte", new BsonArray
                     {
@@ -62,6 +63,7 @@ public class MongoDbWorkProbeInfo : IDbWorkProbeInfo
                 { "Action", 1 },
                 { "ItemKey", 1},
                 { "LastProbed", 1 },
+                { "Calc", 1 },
                 { "Host", new BsonDocument("$arrayElemAt", new BsonArray { "$olt.Host", 0 }) },
                 { "SnmpCommunity", new BsonDocument("$arrayElemAt", new BsonArray { "$olt.SnmpCommunity", 0 }) },
                 { "SnmpVersion", new BsonDocument("$arrayElemAt", new BsonArray { "$olt.SnmpVersion", 0 }) },

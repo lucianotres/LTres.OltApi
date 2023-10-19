@@ -69,7 +69,7 @@ public class RabbitMQWorkExecution : IWorker, IDisposable
                 var cancellationToken = new CancellationTokenSource();
                 var workTask = _workerAction.Execute(workProbeInfo, cancellationToken.Token);
 
-                if (await Task.WhenAny(workTask, Task.Delay(30000)) == workTask)
+                if (await Task.WhenAny(workTask, Task.Delay(90000)) == workTask)
                 {
                     var workProbeResponse = workTask.Result;
 

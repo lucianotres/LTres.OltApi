@@ -1,3 +1,4 @@
+using System.Net.Http.Headers;
 using LTres.OltApi.Common;
 using LTres.OltApi.Common.Models;
 using Microsoft.Extensions.DependencyInjection;
@@ -21,23 +22,37 @@ public class WorkAction : IWorkerAction
         _log.LogInformation($"Work probe received: {probeInfo.Id} -> {probeInfo.Action}");
         var workProbeResponse = new WorkProbeResponse() { Id = probeInfo.Id };
 
-        if (probeInfo.Action == "ping")
+        try
         {
-            var pingWorker = _serviceProvider.GetRequiredService<IWorkerActionPing>();
-            workProbeResponse = await pingWorker.Execute(probeInfo, cancellationToken, workProbeResponse);
+            if (probeInfo.Action == "ping")
+            {
+                var pingWorker = _serviceProvider.GetRequiredService<IWorkerActionPing>();
+                workProbeResponse = await pingWorker.Execute(probeInfo, cancellationToken, workProbeResponse);
+            }
+            else if (probeInfo.Action == "snmpget")
+            {
+                var snmpGetWorker = _serviceProvider.GetRequiredService<IWorkerActionSnmpGet>();
+                workProbeResponse = await snmpGetWorker.Execute(probeInfo, cancellationToken, workProbeResponse);
+            }
+            else if (probeInfo.Action == "snmpwalk")
+            {
+                var snmpWalkWorker = _serviceProvider.GetRequiredService<IWorkerActionSnmpWalk>();
+                workProbeResponse = await snmpWalkWorker.Execute(probeInfo, cancellationToken, workProbeResponse);
+            }
+            else
+                _log.LogWarning("Action not found to perform.");
+
+            if (probeInfo.Calc != null)
+            {
+                var calc = _serviceProvider.GetRequiredService<IWorkProbeCalc>();
+                await calc.UpdateProbedValuesWithCalculated(probeInfo, workProbeResponse);
+            }
         }
-        else if (probeInfo.Action == "snmpget")
+        catch (Exception error)
         {
-            var snmpGetWorker = _serviceProvider.GetRequiredService<IWorkerActionSnmpGet>();
-            workProbeResponse = await snmpGetWorker.Execute(probeInfo, cancellationToken, workProbeResponse);
+            workProbeResponse.Success = false;
+            workProbeResponse.FailMessage = error.Message;
         }
-        else if (probeInfo.Action == "snmpwalk")
-        {
-            var snmpWalkWorker = _serviceProvider.GetRequiredService<IWorkerActionSnmpWalk>();
-            workProbeResponse = await snmpWalkWorker.Execute(probeInfo, cancellationToken, workProbeResponse);
-        }
-        else
-            _log.LogWarning("Action not found to perform.");
 
         workProbeResponse.ProbedAt = DateTime.Now;
         return workProbeResponse;

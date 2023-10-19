@@ -5,6 +5,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Configuration;
 using LTres.OltApi.Snmp;
+using LTres.OltApi.Core;
 
 Console.WriteLine("Starting the worker..");
 
@@ -20,6 +21,7 @@ var serviceController = new ServiceCollection()
     .AddSingleton<IWorkerActionPing, WorkPingAction>()
     .AddSingleton<IWorkerActionSnmpGet, WorkSnmpGetAction>()
     .AddSingleton<IWorkerActionSnmpWalk, WorkSnmpWalkAction>()
+    .AddSingleton<IWorkProbeCalc, WorkProbeCalcValues>()
     .AddOptions()
     .Configure<RabbitMQConfiguration>(o => o.FillFromEnvironmentVars());
 

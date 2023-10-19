@@ -24,4 +24,6 @@ public class WorkProbeInfo
     public string Action { get; set; } = string.Empty;
 
     public string? ItemKey { get; set; }
+
+    public string? Calc { get; set; }
 }
