@@ -5,25 +5,31 @@ namespace LTres.OltApi.Core.Workers;
 
 public class WorkController
 {
+    private const int cleanUpInterval = 60;
+
     private readonly ILogger _log;
     private readonly IWorkListController _workListController;
     private readonly IWorkerDispatcher _workExecutionDispatcher;
     private readonly IWorkerResponseReceiver _workResponseReceiver;
     private readonly IWorkResponseController _workResponseController;
+    private readonly IDbWorkCleanUp _workCleanUp;
     private CancellationTokenSource? _cancellationTokenSource;
     private Task? _loopTask = Task.CompletedTask;
+    private Task lastCleanUpTask = Task.CompletedTask;
 
     public WorkController(ILogger<WorkController> logger,
         IWorkListController workListController,
         IWorkerDispatcher workExecutionDispatcher,
         IWorkerResponseReceiver workerResponseReceiver,
-        IWorkResponseController workResponseController)
+        IWorkResponseController workResponseController,
+        IDbWorkCleanUp workCleanUp)
     {
         _log = logger;
         _workListController = workListController;
         _workExecutionDispatcher = workExecutionDispatcher;
         _workResponseReceiver = workerResponseReceiver;
         _workResponseController = workResponseController;
+        _workCleanUp = workCleanUp;
 
         _workResponseReceiver.OnResponseReceived += DoOnResponseReceived;
     }
@@ -63,6 +69,8 @@ public class WorkController
 
     private async Task ExecuteLoop()
     {
+        var toCleanUpCountdown = cleanUpInterval;
+
         while (_cancellationTokenSource != null && !_cancellationTokenSource.IsCancellationRequested)
         {
             var workToBeDone = await _workListController.ToBeDone();
@@ -72,6 +80,21 @@ public class WorkController
                 _workExecutionDispatcher.Dispatch(work);
 
             await Task.Delay(1000);
+
+            if (--toCleanUpCountdown <= 0)
+            {
+                toCleanUpCountdown = cleanUpInterval;
+
+                if (lastCleanUpTask.IsCompleted || lastCleanUpTask.IsCanceled)
+                {
+                    lastCleanUpTask = Task.Run(async () =>
+                    {
+                        var removedCount = await _workCleanUp.CleanUpExecute();
+                        if (removedCount > 0)
+                            _log.LogInformation($"Removed {removedCount} history items");
+                    });
+                }
+            }
         }
     }
 

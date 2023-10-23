@@ -47,7 +47,7 @@ public class MongoDbWorkProbeInfo : IDbWorkProbeInfo
                             })
                     })
                 },
-                { "DoHistory", new BsonDocument("$gt", new BsonArray { "$MaintainFor", 0 }) }
+                { "DoHistory", new BsonDocument("$gt", new BsonArray { "$HistoryFor", 0 }) }
             }),
             new BsonDocument("$match", new BsonDocument
             {

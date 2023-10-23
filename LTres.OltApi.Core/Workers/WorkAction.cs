@@ -21,6 +21,7 @@ public class WorkAction : IWorkerAction
     {
         _log.LogInformation($"Work probe received: {probeInfo.Id} -> {probeInfo.Action}");
         var workProbeResponse = new WorkProbeResponse() { Id = probeInfo.Id };
+        var startedTime = DateTime.Now;
 
         try
         {
@@ -56,6 +57,8 @@ public class WorkAction : IWorkerAction
 
         workProbeResponse.ProbedAt = DateTime.Now;
         workProbeResponse.DoHistory = probeInfo.DoHistory;
+
+        _log.LogInformation($"Work {probeInfo.Id} done in {workProbeResponse.ProbedAt.Subtract(startedTime)}");
         return workProbeResponse;
     }
 }
