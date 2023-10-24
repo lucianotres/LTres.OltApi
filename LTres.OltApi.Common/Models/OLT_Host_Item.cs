@@ -48,6 +48,11 @@ public class OLT_Host_Item
     /// </summary>
     public int? HistoryFor { get; set; }
 
+    /// <summary>
+    /// This item is active
+    /// </summary>
+    public bool Active { get; set; } = true;
+
 
     public bool ProbedSuccess { get; set; }
     public string? ProbeFailedMessage { get; set; }
@@ -57,5 +62,18 @@ public class OLT_Host_Item
     public uint? ProbedValueUInt { get; set; }
 
     public string? ProbedValueStr { get; set; }
+
+
+    /// <summary>
+    /// This item is a template
+    /// </summary>
+    public bool? Template { get; set; }
+
+    /// <summary>
+    /// If it's "template", this indicates from who (parent)
+    /// </summary>
+    public Guid? From { get; set; }
+
+    public string? Calc { get; set; }
 
 }

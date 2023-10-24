@@ -99,7 +99,7 @@ public class MongoDbWorkProbeResponse : IDbWorkProbeResponse
             vupdate = vupdate.Set(p => p.ProbeFailedMessage, workProbeResponse.FailMessage);
 
         var updateResult = await OLT_Host_Items.UpdateOneAsync(vfilter, vupdate);
-        if (updateResult.IsAcknowledged && (updateResult.ModifiedCount <= 0))
+        if (updateResult.IsAcknowledged && (updateResult.MatchedCount <= 0))
         {
             await OLT_Host_Items.InsertOneAsync(new OLT_Host_Item()
             {
@@ -137,4 +137,47 @@ public class MongoDbWorkProbeResponse : IDbWorkProbeResponse
             }
         }
     }
+
+    public async Task<IEnumerable<OLT_Host_Item>> GetItemTemplates(Guid from)
+    {
+        var filter = Builders<OLT_Host_Item>.Filter.Eq(p => p.From, from);
+        filter &= Builders<OLT_Host_Item>.Filter.Eq(p => p.Template, true);
+
+        var templateItems = await OLT_Host_Items.FindAsync(filter);
+        return await templateItems.ToListAsync();
+    }
+
+    public async Task CreateItemsFromTemplate(OLT_Host_Item itemTemplate, WorkProbeResponse workProbeResponse)
+    {
+        if (workProbeResponse.Values == null)
+            return;
+
+        foreach (var workProbeResponseVar in workProbeResponse.Values)
+        {
+            var newItemKey = (itemTemplate.ItemKey ?? "").Replace("{index}", workProbeResponseVar.Key);
+
+            var vfilter = Builders<OLT_Host_Item>.Filter.Eq(f => f.IdRelated, itemTemplate.Id);
+            vfilter &= Builders<OLT_Host_Item>.Filter.Eq(f => f.ItemKey, newItemKey);
+
+            var vupdate = Builders<OLT_Host_Item>.Update
+                .Set(p => p.Action, itemTemplate.Action)
+                .Set(p => p.Interval, itemTemplate.Interval)
+                .Set(p => p.Active, itemTemplate.Active);
+
+            var updateResult = await OLT_Host_Items.UpdateOneAsync(vfilter, vupdate);
+            if (updateResult.IsAcknowledged && (updateResult.MatchedCount <= 0))
+            {
+                await OLT_Host_Items.InsertOneAsync(new OLT_Host_Item()
+                {
+                    IdOltHost = itemTemplate.IdOltHost,
+                    IdRelated = itemTemplate.Id,
+                    Action = itemTemplate.Action,
+                    ItemKey = newItemKey,
+                    Interval = itemTemplate.Interval,
+                    Active = itemTemplate.Active
+                });
+            }
+        }
+    }
+
 }

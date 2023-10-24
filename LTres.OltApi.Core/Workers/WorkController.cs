@@ -102,10 +102,15 @@ public class WorkController
     {
         Task.Run(async () =>
         {
-            var startedTime = DateTime.Now;
-            await _workResponseController.ResponseReceived(e.ProbeResponse);
+            try
+            {
+                var startedTime = DateTime.Now;
+                await _workResponseController.ResponseReceived(e.ProbeResponse);
 
-            _log.LogInformation($"RESPONSE: {e.ProbeResponse}, saved in {DateTime.Now.Subtract(startedTime)}");
+                _log.LogInformation($"RESPONSE: {e.ProbeResponse}, saved in {DateTime.Now.Subtract(startedTime)}");
+            }
+            catch (Exception error)
+            { _log.LogError(error.ToString()); }
         });
     }
 }

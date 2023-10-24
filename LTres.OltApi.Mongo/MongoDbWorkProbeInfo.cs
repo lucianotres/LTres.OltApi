@@ -25,17 +25,19 @@ public class MongoDbWorkProbeInfo : IDbWorkProbeInfo
             {
                 { "Active", true },
                 { "IdOltHost", new BsonDocument("$ne", BsonNull.Value) },
-                { "Action", new BsonDocument("$ne", BsonNull.Value) }
+                { "Action", new BsonDocument("$ne", BsonNull.Value) },
+                { "Template", new BsonDocument("$ne", true) }
             }),
             new BsonDocument("$project", new BsonDocument
             {
                 { "_id", 1 },
                 { "IdOltHost", 1 },
-                { "Active", 1 },
+                { "IdRelated", 1 },
                 { "Action", 1 },
                 { "ItemKey", 1},
                 { "LastProbed", 1 },
                 { "Calc", 1 },
+                { "HistoryFor", 1 },
                 { "DoProbe",
                     new BsonDocument("$gte", new BsonArray
                     {
@@ -46,14 +48,13 @@ public class MongoDbWorkProbeInfo : IDbWorkProbeInfo
                                 new BsonDocument("$multiply", new BsonArray { "$Interval", 1000 })
                             })
                     })
-                },
-                { "DoHistory", new BsonDocument("$gt", new BsonArray { "$HistoryFor", 0 }) }
+                }
             }),
             new BsonDocument("$match", new BsonDocument
             {
                 { "DoProbe", true }
             }),
-            new BsonDocument("$limit", 100),
+            new BsonDocument("$limit", 1000),
             new BsonDocument("$lookup", new BsonDocument
             {
                 { "from", "olt_hosts" },
@@ -61,14 +62,27 @@ public class MongoDbWorkProbeInfo : IDbWorkProbeInfo
                 { "foreignField", "_id" },
                 { "as", "olt" }
             }),
+            new BsonDocument("$lookup", new BsonDocument
+            {
+                { "from", "olt_host_items" },
+                { "localField", "IdRelated" },
+                { "foreignField", "_id" },
+                { "as", "Related" }
+            }),
             new BsonDocument("$project", new BsonDocument
             {
                 { "_id", 1 },
                 { "Action", 1 },
                 { "ItemKey", 1},
                 { "LastProbed", 1 },
-                { "Calc", 1 },
-                { "DoHistory", 1 },
+                { "Calc", new BsonDocument("$max", new BsonArray { 
+                    "$Calc", 
+                    new BsonDocument("$arrayElemAt", new BsonArray { "$Related.Calc", 0 }) })
+                },
+                { "DoHistory", new BsonDocument("$gt", new BsonArray {
+                    new BsonDocument("$max", new BsonArray { "$HistoryFor", new BsonDocument("$arrayElemAt", new BsonArray { "$Related.HistoryFor", 0 }) })
+                    , 0 })
+                },
                 { "Host", new BsonDocument("$arrayElemAt", new BsonArray { "$olt.Host", 0 }) },
                 { "SnmpCommunity", new BsonDocument("$arrayElemAt", new BsonArray { "$olt.SnmpCommunity", 0 }) },
                 { "SnmpVersion", new BsonDocument("$arrayElemAt", new BsonArray { "$olt.SnmpVersion", 0 }) },

@@ -20,5 +20,14 @@ public class WorkDoneManager : IWorkResponseController
         await _workProbeCache.TryToRemoveFromCache(workProbeResponse.Id);
 
         await _dbWorkProbeResponse.SaveWorkProbeResponse(workProbeResponse);
+
+        if (workProbeResponse.Success && workProbeResponse.Type == WorkProbeResponseType.Walk)
+        {
+            var templates = await _dbWorkProbeResponse.GetItemTemplates(workProbeResponse.Id);
+            
+            if (templates.Any())
+                foreach (var template in templates)
+                    await _dbWorkProbeResponse.CreateItemsFromTemplate(template, workProbeResponse);
+        }
     }
 }
