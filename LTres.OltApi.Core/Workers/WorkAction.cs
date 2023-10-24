@@ -10,18 +10,21 @@ public class WorkAction : IWorkerAction
 {
     private readonly ILogger _log;
     private readonly IServiceProvider _serviceProvider;
+    private readonly ILogCounter _logCounter;
 
-    public WorkAction(ILogger<WorkAction> logger, IServiceProvider serviceProvider)
+    public WorkAction(ILogger<WorkAction> logger, IServiceProvider serviceProvider, ILogCounter counter)
     {
         _log = logger;
         _serviceProvider = serviceProvider;
+        _logCounter = counter;
     }
 
     public async Task<WorkProbeResponse> Execute(WorkProbeInfo probeInfo, CancellationToken cancellationToken, WorkProbeResponse? initialResponse = null)
     {
-        _log.LogInformation($"Work probe received: {probeInfo.Id} -> {probeInfo.Action}");
+        _log.LogDebug($"Work probe received: {probeInfo.Id} -> {probeInfo.Action}");
         var workProbeResponse = new WorkProbeResponse() { Id = probeInfo.Id };
         var startedTime = DateTime.Now;
+        var doneIn = TimeSpan.Zero;
 
         try
         {
@@ -48,17 +51,24 @@ public class WorkAction : IWorkerAction
                 var calc = _serviceProvider.GetRequiredService<IWorkProbeCalc>();
                 await calc.UpdateProbedValuesWithCalculated(probeInfo, workProbeResponse);
             }
+
+            doneIn = DateTime.Now.Subtract(startedTime);
+            _logCounter.AddSuccess(probeInfo.Id, probeInfo.Action, doneIn);
         }
         catch (Exception error)
         {
+            doneIn = DateTime.Now.Subtract(startedTime);
+
             workProbeResponse.Success = false;
             workProbeResponse.FailMessage = error.Message;
+
+            _logCounter.AddError(probeInfo.Id, probeInfo.Action, doneIn, error);
         }
 
         workProbeResponse.ProbedAt = DateTime.Now;
         workProbeResponse.DoHistory = probeInfo.DoHistory;
 
-        _log.LogInformation($"Work {probeInfo.Id} done in {workProbeResponse.ProbedAt.Subtract(startedTime)}");
+        _log.LogDebug($"Work {probeInfo.Id} done in {doneIn}");
         return workProbeResponse;
     }
 }

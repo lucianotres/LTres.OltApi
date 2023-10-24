@@ -11,11 +11,14 @@ Console.WriteLine("Starting the worker..");
 
 var configuration = new ConfigurationBuilder()
     .SetBasePath(AppContext.BaseDirectory)
-    .AddJsonFile("appsettings.json")   
+    .AddJsonFile("appsettings.json")
     .Build();
+
+var logCounter = new LogCounter();
 
 var serviceController = new ServiceCollection()
     .AddLogging(p => p.AddConfiguration(configuration.GetSection("Logging")).AddConsole())
+    .AddSingleton<ILogCounter>(logCounter)
     .AddSingleton<IWorkerAction, WorkAction>()
     .AddSingleton<IWorker, RabbitMQWorkExecution>()
     .AddSingleton<IWorkerActionPing, WorkPingAction>()
@@ -29,8 +32,12 @@ var serviceProvider = serviceController.BuildServiceProvider();
 var worker = serviceProvider.GetService<IWorker>();
 worker?.Start();
 
+var loggerCounterCancellationToken = new CancellationTokenSource();
+_ = logCounter.RunPeriodicNotification(loggerCounterCancellationToken.Token, 60, s => Console.Write(s));
+
 Console.WriteLine("\r\nStarted successfully, press any key to stop.");
 Console.Read();
 
 worker?.Stop();
+loggerCounterCancellationToken.Cancel();
 Console.WriteLine("Stopped");

@@ -8,6 +8,7 @@ public class WorkController
     private const int cleanUpInterval = 60;
 
     private readonly ILogger _log;
+    private readonly ILogCounter _logCounter;
     private readonly IWorkListController _workListController;
     private readonly IWorkerDispatcher _workExecutionDispatcher;
     private readonly IWorkerResponseReceiver _workResponseReceiver;
@@ -18,6 +19,7 @@ public class WorkController
     private Task lastCleanUpTask = Task.CompletedTask;
 
     public WorkController(ILogger<WorkController> logger,
+        ILogCounter logCounter,
         IWorkListController workListController,
         IWorkerDispatcher workExecutionDispatcher,
         IWorkerResponseReceiver workerResponseReceiver,
@@ -25,6 +27,7 @@ public class WorkController
         IDbWorkCleanUp workCleanUp)
     {
         _log = logger;
+        _logCounter = logCounter;
         _workListController = workListController;
         _workExecutionDispatcher = workExecutionDispatcher;
         _workResponseReceiver = workerResponseReceiver;
@@ -74,7 +77,13 @@ public class WorkController
         while (_cancellationTokenSource != null && !_cancellationTokenSource.IsCancellationRequested)
         {
             var workToBeDone = await _workListController.ToBeDone();
-            _log.LogDebug($"Working to be done: {workToBeDone.Count()}");
+            if (workToBeDone.Any())
+            {
+                var quantity = workToBeDone.Count();
+
+                _log.LogDebug($"Working to be done: {quantity}");
+                _logCounter.AddCount("work sent", quantity);
+            }
 
             foreach (var work in workToBeDone)
                 _workExecutionDispatcher.Dispatch(work);
@@ -89,9 +98,15 @@ public class WorkController
                 {
                     lastCleanUpTask = Task.Run(async () =>
                     {
+                        var removeStartedAt = DateTime.Now;
                         var removedCount = await _workCleanUp.CleanUpExecute();
+                        var removedTimespan = DateTime.Now.Subtract(removeStartedAt);
+
                         if (removedCount > 0)
-                            _log.LogInformation($"Removed {removedCount} history items");
+                        {
+                            _log.LogDebug($"Removed {removedCount} history items");
+                            _logCounter.AddCount("CleanUp Rem", removedCount > int.MaxValue ? int.MaxValue : (int)removedCount, removedTimespan);
+                        }
                     });
                 }
             }
@@ -102,15 +117,20 @@ public class WorkController
     {
         Task.Run(async () =>
         {
+            var startedTime = DateTime.Now;
             try
             {
-                var startedTime = DateTime.Now;
                 await _workResponseController.ResponseReceived(e.ProbeResponse);
 
-                _log.LogInformation($"RESPONSE: {e.ProbeResponse}, saved in {DateTime.Now.Subtract(startedTime)}");
+                var elapsedTime = DateTime.Now.Subtract(startedTime);
+                _log.LogDebug($"RESPONSE: {e.ProbeResponse}, saved in {elapsedTime}");
+                _logCounter.AddSuccess(e.ProbeResponse.Id, "response", elapsedTime);
             }
             catch (Exception error)
-            { _log.LogError(error.ToString()); }
+            { 
+                _logCounter.AddSuccess(e.ProbeResponse.Id, "response", DateTime.Now.Subtract(startedTime));
+                _log.LogError(error.ToString()); 
+            }
         });
     }
 }
