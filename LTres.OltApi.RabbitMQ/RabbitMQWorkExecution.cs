@@ -6,10 +6,11 @@ using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Microsoft.Extensions.Hosting;
 
 namespace LTres.OltApi.RabbitMQ;
 
-public class RabbitMQWorkExecution : IWorker, IDisposable
+public class RabbitMQWorkExecution : IHostedService, IDisposable
 {
     private readonly IConnection _connection;
     private readonly IModel _channel;
@@ -36,7 +37,7 @@ public class RabbitMQWorkExecution : IWorker, IDisposable
         _channel.BasicQos(prefetchSize: 0, prefetchCount: 1, global: false);
     }
 
-    public void Start()
+    public Task StartAsync(CancellationToken cancellationToken) 
     {
         _log.LogDebug("Starting RabbitMQ work execution..");
         var consumer = new EventingBasicConsumer(_channel);
@@ -44,11 +45,13 @@ public class RabbitMQWorkExecution : IWorker, IDisposable
 
         _channel.BasicConsume(queue: _configuration.QueueName_do, autoAck: false, consumer: consumer);
         _log.LogDebug("RabbitMQ work execution started.");
+        return Task.CompletedTask;
     }
 
-    public void Stop()
+    public Task StopAsync(CancellationToken cancellationToken)
     {
         _log.LogDebug("RabbitMQ work execution stopped.");
+        return Task.CompletedTask;
     }
 
     private async void MQReceived(object? sender, BasicDeliverEventArgs e)

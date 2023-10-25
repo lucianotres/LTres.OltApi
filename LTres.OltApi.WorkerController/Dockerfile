@@ -4,14 +4,16 @@ WORKDIR /App
 COPY ./LTres.OltApi.Common ./LTres.OltApi.Common
 COPY ./LTres.OltApi.Core ./LTres.OltApi.Core
 COPY ./LTres.OltApi.Mongo ./LTres.OltApi.Mongo
-COPY ./LTres.OltApi.WebApi ./LTres.OltApi.WebApi
+COPY ./LTres.OltApi.RabbitMQ ./LTres.OltApi.RabbitMQ
+COPY ./LTres.OltApi.WorkerController ./LTres.OltApi.WorkerController
 
 RUN dotnet restore LTres.OltApi.Common
 RUN dotnet restore LTres.OltApi.Core
 RUN dotnet restore LTres.OltApi.Mongo
-RUN dotnet restore LTres.OltApi.WebApi
+RUN dotnet restore LTres.OltApi.RabbitMQ
+RUN dotnet restore LTres.OltApi.WorkerController
 
-RUN dotnet publish -c Release -o out LTres.OltApi.WebApi
+RUN dotnet publish -c Release -o out LTres.OltApi.WorkerController
 
 #-------------- runtime
 
@@ -19,7 +21,6 @@ FROM mcr.microsoft.com/dotnet/aspnet:8.0
 WORKDIR /App
 COPY --from=build-env /App/out .
 
-ENV ASPNETCORE_URLS=http://+:5000
+ENV RABBITMQ_HOST=rabbit
 
-EXPOSE 5000
-ENTRYPOINT ["dotnet", "LTres.OltApi.WebApi.dll"]
+ENTRYPOINT ["dotnet", "LTres.OltApi.WorkerController.dll"]

@@ -10,6 +10,13 @@ services:
     ports:
       - 27017:27017
   
+  rabbit:
+    container_name: rabbit
+    image: rabbitmq:3
+    restart: always
+    ports:
+      - 5672:5672
+
   webapi:
     depends_on:
       - mongodb
@@ -20,6 +27,50 @@ services:
       - 5000:5000
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
+  
+  workercontroller1:
+    depends_on:
+      - mongodb
+      - rabbit
+    build: 
+      context: .
+      dockerfile: ./LTres.OltApi.WorkerController/Dockerfile
+
+  workercontroller2:
+    depends_on:
+      - mongodb
+      - rabbit
+    build: 
+      context: .
+      dockerfile: ./LTres.OltApi.WorkerController/Dockerfile
+
+  worker1:
+    depends_on:
+      - rabbit
+    build: 
+      context: .
+      dockerfile: ./LTres.OltApi.Worker/Dockerfile
+  
+  worker2:
+    depends_on:
+      - rabbit
+    build: 
+      context: .
+      dockerfile: ./LTres.OltApi.Worker/Dockerfile
+
+  worker3:
+    depends_on:
+      - rabbit
+    build: 
+      context: .
+      dockerfile: ./LTres.OltApi.Worker/Dockerfile
+
+  worker4:
+    depends_on:
+      - rabbit
+    build: 
+      context: .
+      dockerfile: ./LTres.OltApi.Worker/Dockerfile
 
 volumes:
   ltres_oltapi_data:

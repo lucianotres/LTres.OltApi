@@ -2,42 +2,31 @@
 using LTres.OltApi.Core.Workers;
 using LTres.OltApi.RabbitMQ;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Hosting;
 using LTres.OltApi.Snmp;
 using LTres.OltApi.Core;
 
 Console.WriteLine("Starting the worker..");
 
-var configuration = new ConfigurationBuilder()
-    .SetBasePath(AppContext.BaseDirectory)
-    .AddJsonFile("appsettings.json")
-    .Build();
+var builder = Host.CreateApplicationBuilder(args);
 
-var logCounter = new LogCounter();
+builder.Services
+    .Configure<RabbitMQConfiguration>(o => o.FillFromEnvironmentVars());
 
-var serviceController = new ServiceCollection()
-    .AddLogging(p => p.AddConfiguration(configuration.GetSection("Logging")).AddConsole())
-    .AddSingleton<ILogCounter>(logCounter)
+builder.Services
+    .AddSingleton<ILogCounter, LogCounter>()
     .AddSingleton<IWorkerAction, WorkAction>()
-    .AddSingleton<IWorker, RabbitMQWorkExecution>()
     .AddSingleton<IWorkerActionPing, WorkPingAction>()
     .AddSingleton<IWorkerActionSnmpGet, WorkSnmpGetAction>()
     .AddSingleton<IWorkerActionSnmpWalk, WorkSnmpWalkAction>()
     .AddSingleton<IWorkProbeCalc, WorkProbeCalcValues>()
-    .AddOptions()
-    .Configure<RabbitMQConfiguration>(o => o.FillFromEnvironmentVars());
+    .AddHostedService<LogCounterPrinter>()
+    .AddHostedService<RabbitMQWorkExecution>();
 
-var serviceProvider = serviceController.BuildServiceProvider();
-var worker = serviceProvider.GetService<IWorker>();
-worker?.Start();
+var app = builder.Build();
 
-var loggerCounterCancellationToken = new CancellationTokenSource();
-_ = logCounter.RunPeriodicNotification(loggerCounterCancellationToken.Token, 60, s => Console.Write(s));
+await app.StartAsync();
+Console.WriteLine("Started successfully");
 
-Console.WriteLine("\r\nStarted successfully, press any key to stop.");
-Console.Read();
-
-worker?.Stop();
-loggerCounterCancellationToken.Cancel();
+await app.WaitForShutdownAsync();
 Console.WriteLine("Stopped");

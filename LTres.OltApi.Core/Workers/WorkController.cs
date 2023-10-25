@@ -1,9 +1,10 @@
 using LTres.OltApi.Common;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
 namespace LTres.OltApi.Core.Workers;
 
-public class WorkController
+public class WorkController: IHostedService
 {
     private const int cleanUpInterval = 60;
 
@@ -37,7 +38,11 @@ public class WorkController
         _workResponseReceiver.OnResponseReceived += DoOnResponseReceived;
     }
 
-    public void Start(bool autoRestart = true)
+    public async Task StartAsync(CancellationToken cancellationToken) => await Task.Run(() => Start());
+
+    public async Task StopAsync(CancellationToken cancellationToken) => await Task.Run(() => Stop());
+
+    private void Start(bool autoRestart = true)
     {
         _log.LogDebug("Starting work controller..");
         if (autoRestart && _cancellationTokenSource != null && !_cancellationTokenSource.IsCancellationRequested)
@@ -56,11 +61,12 @@ public class WorkController
         _log.LogDebug("Work controller started.");
     }
 
-    public void Stop()
+    private void Stop()
     {
-        _log.LogDebug("Stopping work controller..");
         if (_cancellationTokenSource == null)
             return;
+
+        _log.LogDebug("Stopping work controller..");
 
         _cancellationTokenSource.Cancel();
         if (_loopTask != null)

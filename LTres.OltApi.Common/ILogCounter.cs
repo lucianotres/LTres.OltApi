@@ -9,4 +9,6 @@ public interface ILogCounter
     void AddError(Guid id, string category, TimeSpan? timeDone = null, Exception? error = null);
 
     string? PrintOutAndReset();
+
+    void RegisterHookOnPrintResetAction<T>(Action<ILogCounter> hookAction) where T : class;
 }

@@ -20,7 +20,7 @@ public class WorkListManager : IWorkListController
         var finalList = new List<WorkProbeInfo>();
         var listToDoFromDB = await _dbWorkProbeInfo.ToDoList();
         
-        //filter work wish is not in cache
+        //filter work which is not in cache
         foreach (var a in listToDoFromDB)
         {
             if (await _workProbeCache.TryToPutIntoCache(a.Id))
