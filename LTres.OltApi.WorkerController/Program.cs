@@ -21,12 +21,12 @@ builder.Services
     .AddTransient<IDbWorkProbeInfo, MongoDbWorkProbeInfo>()
     .AddTransient<IDbWorkProbeResponse, MongoDbWorkProbeResponse>()
     .AddTransient<IDbWorkCleanUp, MongoDbWorkCleanUp>()
-    .AddTransient<IWorkProbeCache, WorkProbeCache>()
     .AddTransient<IWorkListController, WorkListManager>()
     .AddTransient<IWorkResponseController, WorkDoneManager>()
     .AddTransient<IWorkerDispatcher, RabbitMQWorkExecutionDispatcher>()
     .AddTransient<IWorkerResponseReceiver, RabbitMQWorkResponseReceiver>()
     .AddSingleton<ILogCounter, LogCounter>()
+    .AddSingleton<IWorkProbeCache, WorkProbeCache>()
     .AddHostedService<LogCounterPrinter>()
     .AddHostedService<WorkController>();
 

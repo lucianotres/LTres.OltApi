@@ -1,6 +1,7 @@
 using System.Net;
 using LTres.OltApi.Common.Models;
 using LTres.OltApi.Snmp;
+using Microsoft.Extensions.Logging;
 
 namespace LTres.OltApi.CLI;
 
@@ -9,11 +10,14 @@ public class MenuSNMP : Menu
     private bool askedHostInfo;
     private IPEndPoint ipEndPoint;
     private string snmpCommunity = "public";
+    private ILoggerFactory logger;
 
     public MenuSNMP()
     {
         askedHostInfo = false;
         ipEndPoint = new IPEndPoint(IPAddress.Loopback, 161);
+
+        logger = new LoggerFactory();
 
         Description = "-- SNMP worker tests ---";
         Options.Add(new MenuOption('1', "Try to get sysName", SnmpGetSysName));
@@ -94,7 +98,7 @@ public class MenuSNMP : Menu
     {
         AskHostInfo();
 
-        var workSnmpGetAction = new WorkSnmpWalkAction();
+        var workSnmpGetAction = new WorkSnmpWalkAction(logger.CreateLogger<WorkSnmpWalkAction>());
         var probeInfo = new WorkProbeInfo()
         {
             Id = Guid.NewGuid(),
@@ -128,7 +132,7 @@ public class MenuSNMP : Menu
     {
         AskHostInfo();
 
-        var workSnmpGetAction = new WorkSnmpWalkAction();
+        var workSnmpGetAction = new WorkSnmpWalkAction(logger.CreateLogger<WorkSnmpWalkAction>());
         var probeInfo = new WorkProbeInfo()
         {
             Id = Guid.NewGuid(),

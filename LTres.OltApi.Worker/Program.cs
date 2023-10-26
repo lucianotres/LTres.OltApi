@@ -14,12 +14,12 @@ builder.Services
     .Configure<RabbitMQConfiguration>(o => o.FillFromEnvironmentVars());
 
 builder.Services
+    .AddTransient<IWorkerAction, WorkAction>()
+    .AddTransient<IWorkerActionPing, WorkPingAction>()
+    .AddTransient<IWorkerActionSnmpGet, WorkSnmpGetAction>()
+    .AddTransient<IWorkerActionSnmpWalk, WorkSnmpWalkAction>()
+    .AddTransient<IWorkProbeCalc, WorkProbeCalcValues>()
     .AddSingleton<ILogCounter, LogCounter>()
-    .AddSingleton<IWorkerAction, WorkAction>()
-    .AddSingleton<IWorkerActionPing, WorkPingAction>()
-    .AddSingleton<IWorkerActionSnmpGet, WorkSnmpGetAction>()
-    .AddSingleton<IWorkerActionSnmpWalk, WorkSnmpWalkAction>()
-    .AddSingleton<IWorkProbeCalc, WorkProbeCalcValues>()
     .AddHostedService<LogCounterPrinter>()
     .AddHostedService<RabbitMQWorkExecution>();
 
