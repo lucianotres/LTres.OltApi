@@ -6,18 +6,38 @@ using Microsoft.Extensions.Hosting;
 using LTres.OltApi.Snmp;
 using LTres.OltApi.Core;
 
-Console.WriteLine("Starting the worker..");
+var implementationInt = 2;
+{
+    var implementationStr = Environment.GetEnvironmentVariable("LTRES_SNMP_IMPLEMENTATION");
+
+    if (!string.IsNullOrWhiteSpace(implementationStr) && int.TryParse(implementationStr, out int i) && i > 0 && i <=2)
+        implementationInt = i;
+}
+
+Console.WriteLine($"Starting the worker i{implementationInt}..");
 
 var builder = Host.CreateApplicationBuilder(args);
 
 builder.Services
     .Configure<RabbitMQConfiguration>(o => o.FillFromEnvironmentVars());
 
+builder.Services.AddTransient<IWorkerAction, WorkAction>();
+
+if (implementationInt == 2)
+{
+    builder.Services
+        .AddTransient<IWorkerActionSnmpGet, WorkSnmpGetAction2>()
+        .AddTransient<IWorkerActionSnmpWalk, WorkSnmpWalkAction2>();
+}
+else
+{
+    builder.Services
+        .AddTransient<IWorkerActionSnmpGet, WorkSnmpGetAction>()
+        .AddTransient<IWorkerActionSnmpWalk, WorkSnmpWalkAction>();
+}
+
 builder.Services
-    .AddTransient<IWorkerAction, WorkAction>()
     .AddTransient<IWorkerActionPing, WorkPingAction>()
-    .AddTransient<IWorkerActionSnmpGet, WorkSnmpGetAction>()
-    .AddTransient<IWorkerActionSnmpWalk, WorkSnmpWalkAction>()
     .AddTransient<IWorkProbeCalc, WorkProbeCalcValues>()
     .AddSingleton<ILogCounter, LogCounter>()
     .AddHostedService<LogCounterPrinter>()
