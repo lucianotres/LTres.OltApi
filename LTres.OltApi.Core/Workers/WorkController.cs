@@ -1,10 +1,12 @@
+using System.Collections.Concurrent;
 using LTres.OltApi.Common;
+using LTres.OltApi.Common.Models;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
 namespace LTres.OltApi.Core.Workers;
 
-public class WorkController: IHostedService
+public class WorkController : IHostedService
 {
     private const int cleanUpInterval = 60;
 
@@ -18,6 +20,8 @@ public class WorkController: IHostedService
     private CancellationTokenSource? _cancellationTokenSource;
     private Task? _loopTask = Task.CompletedTask;
     private Task lastCleanUpTask = Task.CompletedTask;
+    private readonly ConcurrentQueue<WorkProbeResponse> _queueResponses;
+    private Task? _queueResponseSavingProccessorTask;
 
     public WorkController(ILogger<WorkController> logger,
         ILogCounter logCounter,
@@ -35,7 +39,17 @@ public class WorkController: IHostedService
         _workResponseController = workResponseController;
         _workCleanUp = workCleanUp;
 
+        _queueResponses = new ConcurrentQueue<WorkProbeResponse>();
+        logCounter.RegisterHookOnPrintResetAction<WorkController>(HookOnPrintResetAction);
+
         _workResponseReceiver.OnResponseReceived += DoOnResponseReceived;
+    }
+
+    private void HookOnPrintResetAction(ILogCounter counter)
+    {
+        var queueCount = _queueResponses.Count;
+        if (queueCount > 0)
+            counter.AddCount("to save queue", queueCount);
     }
 
     public async Task StartAsync(CancellationToken cancellationToken) => await Task.Run(() => Start());
@@ -119,24 +133,48 @@ public class WorkController: IHostedService
         }
     }
 
+    private Task? latestResponseReceivedTask = null;
+
     private void DoOnResponseReceived(object? sender, WorkerResponseReceivedEventArgs e)
     {
-        Task.Run(async () =>
-        {
-            var startedTime = DateTime.Now;
-            try
-            {
-                await _workResponseController.ResponseReceived(e.ProbeResponse);
+        var probeResponse = e.ProbeResponse;
 
-                var elapsedTime = DateTime.Now.Subtract(startedTime);
-                _log.LogDebug($"RESPONSE: {e.ProbeResponse}, saved in {elapsedTime}");
-                _logCounter.AddSuccess(e.ProbeResponse.Id, "response", elapsedTime);
-            }
-            catch (Exception error)
-            { 
-                _logCounter.AddSuccess(e.ProbeResponse.Id, "response", DateTime.Now.Subtract(startedTime));
-                _log.LogError(error.ToString()); 
-            }
+        if (probeResponse == null)
+            _log.LogWarning("Empty response received");
+        else 
+        {
+            _queueResponses.Enqueue(probeResponse);
+            StartQueueResponseSavingProccessor();
+        }
+    }
+
+    private void StartQueueResponseSavingProccessor()
+    {
+        if (_queueResponseSavingProccessorTask != null && !_queueResponseSavingProccessorTask.IsCompleted)
+            return;
+
+        _queueResponseSavingProccessorTask = Task.Run(async() =>
+        {
+            while (_queueResponses.TryDequeue(out var workProbeResponse))
+                await SaveProbeResponse(workProbeResponse).ConfigureAwait(false);
         });
+    }
+
+    private async Task SaveProbeResponse(WorkProbeResponse workProbeResponse)
+    {
+        var startedTime = DateTime.Now;
+        try
+        {
+            await _workResponseController.ResponseReceived(workProbeResponse).ConfigureAwait(false);
+
+            var elapsedTime = DateTime.Now.Subtract(startedTime);
+            _log.LogDebug($"RESPONSE: {workProbeResponse}, saved in {elapsedTime}");
+            _logCounter.AddSuccess(workProbeResponse.Id, "response", elapsedTime);
+        }
+        catch (Exception error)
+        {
+            _logCounter.AddSuccess(workProbeResponse.Id, "response", DateTime.Now.Subtract(startedTime));
+            _log.LogError(error.ToString());
+        }
     }
 }
