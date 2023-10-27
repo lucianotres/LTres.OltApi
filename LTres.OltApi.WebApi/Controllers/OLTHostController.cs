@@ -25,7 +25,7 @@ public class OLTHostController : ControllerBase
     [HttpPost]
     [Consumes("application/json")]
     [Produces("application/json")]
-    [ProducesResponseType<Guid>(StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(Guid), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<Guid> Add(OLT_Host model) => await _service.AddOLTHost(model);
@@ -36,7 +36,7 @@ public class OLTHostController : ControllerBase
     [HttpPut]
     [Consumes("application/json")]
     [Produces("application/json")]
-    [ProducesResponseType<Guid>(StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(Guid), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<Guid> Change(OLT_Host model) => await _service.ChangeOLTHost(model);
@@ -54,7 +54,7 @@ public class OLTHostController : ControllerBase
     [HttpGet]
     [Consumes("application/json")]
     [Produces("application/json")]
-    [ProducesResponseType<Guid>(StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(Guid), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<IEnumerable<OLT_Host>> List(int take = 1000, int skip = 0,
@@ -71,7 +71,7 @@ public class OLTHostController : ControllerBase
     [HttpGet("{id}")]
     [Consumes("application/json")]
     [Produces("application/json")]
-    [ProducesResponseType<Guid>(StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(Guid), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<OLT_Host?> Get(Guid id) => (await _service.ListOLTHosts(1, 0, id)).FirstOrDefault();
