@@ -15,12 +15,19 @@ public class WorkSnmpGetAction : IWorkerActionSnmpGet
         try
         {
             var requestMessage = new GetRequestMessage(
-                Messenger.NextRequestId, 
+                Messenger.NextRequestId,
                 probeInfo.SnmpVersion == 3 ? VersionCode.V3 : probeInfo.SnmpVersion == 2 ? VersionCode.V2 : VersionCode.V1,
                 new OctetString(probeInfo.SnmpCommunity ?? ""),
                 new List<Variable> { new(new ObjectIdentifier(probeInfo.ItemKey ?? "")) });
 
-            var replyMessage = await requestMessage.GetResponseAsync(probeInfo.Host, cancellationToken);
+            if (cancellationToken.IsCancellationRequested)
+                return finalResponse;
+
+            var replyMessage = await Task.Run(() =>
+                requestMessage.GetResponse(5000, probeInfo.Host),
+                cancellationToken)
+                .ConfigureAwait(false);
+
             var pdu = replyMessage.Pdu();
             var errorStatus = pdu.ErrorStatus.ToErrorCode();
 

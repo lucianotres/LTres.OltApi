@@ -45,7 +45,14 @@ public class WorkSnmpWalkAction : IWorkerActionSnmpWalk
                         0, 300,
                         variables);
 
-                    var response = await message.GetResponseAsync(probeInfo.Host, cancellationToken);
+                    if (cancellationToken.IsCancellationRequested)
+                        return finalResponse;
+
+                    var response = await Task.Run(() =>
+                        message.GetResponse(30000, probeInfo.Host),
+                        cancellationToken)
+                        .ConfigureAwait(false);
+                   
                     var pdu = response.Pdu();
                     errorFound = pdu.ErrorStatus.ToErrorCode() != 0;
                     if (!errorFound)
@@ -72,7 +79,14 @@ public class WorkSnmpWalkAction : IWorkerActionSnmpWalk
                         community,
                         variables);
 
-                    var response = await message.GetResponseAsync(probeInfo.Host, cancellationToken);
+                    if (cancellationToken.IsCancellationRequested)
+                        return finalResponse;
+
+                    var response = await Task.Run(() =>
+                        message.GetResponse(5000, probeInfo.Host),
+                        cancellationToken)
+                        .ConfigureAwait(false);
+
                     var pdu = response.Pdu();
                     errorFound = pdu.ErrorStatus.ToErrorCode() != 0;
                     if (!errorFound)

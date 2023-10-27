@@ -7,10 +7,11 @@
   <ItemGroup>
     <PackageReference Include="Lextm.SharpSnmpLib" Version="12.5.2+6" />
     <PackageReference Include="Microsoft.Extensions.Logging" Version="7.0.0" />
+    <PackageReference Include="SnmpSharpNet-core" Version="1.0.0" />
   </ItemGroup>
 
   <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
+    <TargetFramework>net7.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
   </PropertyGroup>

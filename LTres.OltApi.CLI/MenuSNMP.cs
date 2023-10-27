@@ -1,6 +1,8 @@
 using System.Net;
+using LTres.OltApi.Common;
 using LTres.OltApi.Common.Models;
 using LTres.OltApi.Snmp;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
 namespace LTres.OltApi.CLI;
@@ -20,6 +22,7 @@ public class MenuSNMP : Menu
         logger = new LoggerFactory();
 
         Description = "-- SNMP worker tests ---";
+        Options.Add(new MenuOption('0', "Change implementation", ChangeCurrentlyImplementation));
         Options.Add(new MenuOption('1', "Try to get sysName", SnmpGetSysName));
         Options.Add(new MenuOption('2', "Try to get sysUpTime", SnmpGetSysUpTime));
         Options.Add(new MenuOption('3', "Try to walk ifDescr", SnmpWalkIfDescr));
@@ -54,16 +57,47 @@ public class MenuSNMP : Menu
             snmpCommunity = strSnmpCommunity;
     }
 
+    private int implementationToUse = 2;
+
+    private Task<bool> ChangeCurrentlyImplementation()
+    {
+        Console.Write($"Currently implementation: {implementationToUse}, to change enter a positive integer value: ");
+        var strNewValue = Console.ReadLine();
+
+        if (!string.IsNullOrEmpty(strNewValue) && int.TryParse(strNewValue, out int newImplementation) && newImplementation > 0)
+        {
+            if (newImplementation <= 2)
+            {
+                Console.WriteLine($"Changed to {newImplementation}");
+                implementationToUse = newImplementation;
+            }
+            else
+                Console.WriteLine("Not valid implementation option!");
+        }
+
+        return Task.FromResult(false);
+    }
+
+    private IWorkerActionSnmpGet GetSnmpGetImplementation() =>
+        implementationToUse == 2 ? new WorkSnmpGetAction2() : new WorkSnmpGetAction();
+
+    private IWorkerActionSnmpWalk GetSnmpWalkImplementation() =>
+        implementationToUse == 2 ?
+            new WorkSnmpWalkAction2(logger.CreateLogger<WorkSnmpWalkAction>()) :
+            new WorkSnmpWalkAction(logger.CreateLogger<WorkSnmpWalkAction>());
+
+
     private async Task<bool> SnmpGetSysName()
     {
         AskHostInfo();
 
-        var workSnmpGetAction = new WorkSnmpGetAction();
+        var workSnmpGetAction = GetSnmpGetImplementation();
         var probeInfo = new WorkProbeInfo()
         {
             Id = Guid.NewGuid(),
             Host = ipEndPoint,
             SnmpCommunity = snmpCommunity,
+            SnmpVersion = 2,
             Action = "snmpget",
             ItemKey = "1.3.6.1.2.1.1.5.0"
         };
@@ -78,7 +112,7 @@ public class MenuSNMP : Menu
     {
         AskHostInfo();
 
-        var workSnmpGetAction = new WorkSnmpGetAction();
+        var workSnmpGetAction = GetSnmpGetImplementation();
         var probeInfo = new WorkProbeInfo()
         {
             Id = Guid.NewGuid(),
@@ -90,7 +124,7 @@ public class MenuSNMP : Menu
 
         var workResult = await workSnmpGetAction.Execute(probeInfo, CancellationToken.None);
 
-        Console.WriteLine($"sysUpTime | {(workResult.Success ? "ok" : workResult.FailMessage)} -> {TimeSpan.FromMilliseconds((double)workResult.ValueUInt * 10)}");
+        Console.WriteLine($"sysUpTime | {(workResult.Success ? "ok" : workResult.FailMessage)} -> {TimeSpan.FromMilliseconds((double)workResult.ValueUInt.GetValueOrDefault() * 10)}");
         return false;
     }
 
@@ -98,13 +132,14 @@ public class MenuSNMP : Menu
     {
         AskHostInfo();
 
-        var workSnmpGetAction = new WorkSnmpWalkAction(logger.CreateLogger<WorkSnmpWalkAction>());
+        var workSnmpGetAction = GetSnmpWalkImplementation();
         var probeInfo = new WorkProbeInfo()
         {
             Id = Guid.NewGuid(),
             Host = ipEndPoint,
             SnmpCommunity = snmpCommunity,
-            SnmpVersion = 2,
+            SnmpVersion = 1,
+            SnmpBulk = false,
             Action = "snmpwalk",
             ItemKey = "1.3.6.1.2.1.2.2.1.2"
         };
@@ -132,13 +167,14 @@ public class MenuSNMP : Menu
     {
         AskHostInfo();
 
-        var workSnmpGetAction = new WorkSnmpWalkAction(logger.CreateLogger<WorkSnmpWalkAction>());
+        var workSnmpGetAction = GetSnmpWalkImplementation();
         var probeInfo = new WorkProbeInfo()
         {
             Id = Guid.NewGuid(),
             Host = ipEndPoint,
             SnmpCommunity = snmpCommunity,
             SnmpVersion = 2,
+            SnmpBulk = true,
             Action = "snmpwalk",
             ItemKey = "1.3.6.1.4.1.3902.1012.3.28.1.1.2"
         };
