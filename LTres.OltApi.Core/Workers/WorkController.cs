@@ -52,7 +52,7 @@ public class WorkController: IHostedService
         _loopTask = Task.Run(ExecuteLoop, _cancellationTokenSource.Token);
         _loopTask.ContinueWith(k =>
         {
-            if (k.IsFaulted)
+            if (k.IsFaulted && (k.Exception != null))
                 throw k.Exception;
 
             Stop();

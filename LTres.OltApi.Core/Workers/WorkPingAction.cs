@@ -20,7 +20,7 @@ public class WorkPingAction : IWorkerActionPing
                 0x10, 0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17, 0x18, 0x19, 0x1a, 0x1b, 0x1c, 0x1d, 0x1e, 0x1f 
             };
 
-            var reply = await ping.SendPingAsync(probeInfo.Host.Address, TimeSpan.FromSeconds(5), buffer, pingOptions, cancellationToken);
+            var reply = await ping.SendPingAsync(probeInfo.Host.Address, 5000, buffer, pingOptions);
 
             if (!cancellationToken.IsCancellationRequested)
             {

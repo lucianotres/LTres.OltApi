@@ -29,10 +29,12 @@ public class LogCounterPrinter : IHostedService
         return Task.CompletedTask;
     }
 
-    public async Task StopAsync(CancellationToken cancellationToken)
+    public Task StopAsync(CancellationToken cancellationToken)
     {
         if (cancellationTokenRunnerPeriodic != null)
-            await cancellationTokenRunnerPeriodic.CancelAsync();
+            cancellationTokenRunnerPeriodic.Cancel();
+
+        return Task.CompletedTask;
     }
 
     private Task RunPeriodicNotification(CancellationToken cancellationToken) => Task.Run(async () =>
