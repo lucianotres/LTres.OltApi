@@ -21,6 +21,7 @@ public class RabbitMQWorkExecution : IHostedService, IDisposable
     private readonly RabbitMQConfiguration _configuration;
     private readonly ConcurrentQueue<WorkProbeInfo> _queue;
     private Task? QueueWorkActionExecutionTask;
+    private readonly TimeSpan cRequestedInMaxDelay = TimeSpan.FromMinutes(3);
 
     public RabbitMQWorkExecution(ILogger<RabbitMQWorkExecution> logger,
         ILogCounter logCounter,
@@ -79,6 +80,8 @@ public class RabbitMQWorkExecution : IHostedService, IDisposable
 
         if (workProbeInfo == null)
             _log.LogDebug("No message read to execute.");
+        else if ((workProbeInfo.RequestedIn == null) || (DateTime.Now.Subtract(workProbeInfo.RequestedIn.Value) > cRequestedInMaxDelay))
+            _log.LogDebug($"Message {workProbeInfo.Id}, requested at {workProbeInfo.RequestedIn} it's too late to execute.");
         else
         {
             _queue.Enqueue(workProbeInfo);

@@ -52,9 +52,9 @@ public class WorkController : IHostedService
             counter.AddCount("to save queue", queueCount);
     }
 
-    public async Task StartAsync(CancellationToken cancellationToken) => await Task.Run(() => Start());
+    public async Task StartAsync(CancellationToken cancellationToken) => await Task.Run(() => Start()).ConfigureAwait(false);
 
-    public async Task StopAsync(CancellationToken cancellationToken) => await Task.Run(() => Stop());
+    public async Task StopAsync(CancellationToken cancellationToken) => await Task.Run(() => Stop()).ConfigureAwait(false);
 
     private void Start(bool autoRestart = true)
     {
@@ -96,7 +96,7 @@ public class WorkController : IHostedService
 
         while (_cancellationTokenSource != null && !_cancellationTokenSource.IsCancellationRequested)
         {
-            var workToBeDone = await _workListController.ToBeDone();
+            var workToBeDone = await _workListController.ToBeDone().ConfigureAwait(false);
             if (workToBeDone.Any())
             {
                 var quantity = workToBeDone.Count();
@@ -108,7 +108,7 @@ public class WorkController : IHostedService
             foreach (var work in workToBeDone)
                 _workExecutionDispatcher.Dispatch(work);
 
-            await Task.Delay(1000);
+            await Task.Delay(1000).ConfigureAwait(false);
 
             if (--toCleanUpCountdown <= 0)
             {
@@ -119,7 +119,7 @@ public class WorkController : IHostedService
                     lastCleanUpTask = Task.Run(async () =>
                     {
                         var removeStartedAt = DateTime.Now;
-                        var removedCount = await _workCleanUp.CleanUpExecute();
+                        var removedCount = await _workCleanUp.CleanUpExecute().ConfigureAwait(false);
                         var removedTimespan = DateTime.Now.Subtract(removeStartedAt);
 
                         if (removedCount > 0)
@@ -132,8 +132,6 @@ public class WorkController : IHostedService
             }
         }
     }
-
-    private Task? latestResponseReceivedTask = null;
 
     private void DoOnResponseReceived(object? sender, WorkerResponseReceivedEventArgs e)
     {

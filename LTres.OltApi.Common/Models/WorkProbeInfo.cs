@@ -19,7 +19,7 @@ public class WorkProbeInfo
 
     public bool SnmpBulk { get; set; } = true;
 
-    public bool WaitingResponse { get; set; } = false;
+    public DateTime? RequestedIn { get; set; }
 
     public bool DoHistory { get; set; } = false;
 

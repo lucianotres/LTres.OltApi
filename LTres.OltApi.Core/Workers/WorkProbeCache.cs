@@ -5,7 +5,7 @@ namespace LTres.OltApi.Core.Workers;
 
 public class WorkProbeCache : IWorkProbeCache
 {
-    private List<Guid> _cacheLst = new List<Guid>();
+    private List<(Guid id, DateTime requestedIn)> _cacheLst = new List<(Guid id, DateTime requestedIn)>();
     private object _cacheLock = new object();
 
     public WorkProbeCache(ILogCounter logCounter)
@@ -20,19 +20,27 @@ public class WorkProbeCache : IWorkProbeCache
             logCounter.AddCount("probe cache", cacheCount);
     }
 
-    public async Task<bool> TryToPutIntoCache(Guid idWork)
+    public async Task<bool> TryToPutIntoCache(Guid idWork, DateTime requestedIn)
     {
         return await Task.Run(() =>
         {
             lock (_cacheLock)
             {
-                if (_cacheLst.Any(w => w == idWork))
+                if (_cacheLst.Any(w => w.id == idWork))
                     return false;
 
-                _cacheLst.Add(idWork);
+                RemoveOld();
+
+                _cacheLst.Add((idWork, requestedIn));
                 return true;
             }
-        });
+        }).ConfigureAwait(false);
+    }
+
+    private void RemoveOld()
+    {
+        var cutAt = DateTime.Now.Subtract(TimeSpan.FromMinutes(3));
+        _cacheLst.RemoveAll(f => f.requestedIn < cutAt);
     }
 
     public async Task<bool> TryToRemoveFromCache(Guid idWork)
@@ -40,7 +48,7 @@ public class WorkProbeCache : IWorkProbeCache
         return await Task.Run(() =>
         {
             lock (_cacheLock)
-                return _cacheLst.Remove(idWork);
-        });
+                return _cacheLst.RemoveAll(f => f.id == idWork) > 0;
+        }).ConfigureAwait(false);
     }
 }
