@@ -1,11 +1,12 @@
 FROM mcr.microsoft.com/dotnet/sdk:7.0 AS build-env
+ARG VERSION
 
 WORKDIR /App
 COPY . .
 
 RUN dotnet restore LTres.OltApi.CLI
 
-RUN dotnet publish -c Release -o out LTres.OltApi.CLI
+RUN dotnet publish -c Release -p Version=$VERSION -o out LTres.OltApi.CLI
 
 #-------------- runtime
 
