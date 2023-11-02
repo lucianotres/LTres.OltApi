@@ -28,6 +28,7 @@ public interface IDbOLTHost
     /// <param name="filterTag">Filter by existing tags</param>
     /// <returns></returns>
     Task<IEnumerable<OLT_Host>> ListOLTHosts(int take = 1000, int skip = 0,
+        bool? filterActive = null,
         Guid? filterId = null,
         string? filterName = null,
         string? filterHost = null,

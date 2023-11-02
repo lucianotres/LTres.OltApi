@@ -1,7 +1,10 @@
 using System.Reflection;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using LTres.OltApi.Common.DbServices;
 using LTres.OltApi.Core.Services;
 using LTres.OltApi.Mongo;
+using Microsoft.AspNetCore.Http.Json;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -13,7 +16,13 @@ MongoModelsConfiguration.RegisterClassMap();
 builder.Services.AddScoped<IDbOLTHost, MongoDbOLTHost>();
 builder.Services.AddScoped<OLTHostService>();
 
-builder.Services.AddControllers();
+builder.Services.AddControllers()
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
+        options.JsonSerializerOptions.WriteIndented = false;
+    });
+
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>

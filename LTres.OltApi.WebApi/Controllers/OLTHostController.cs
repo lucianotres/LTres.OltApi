@@ -1,7 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using LTres.OltApi.Common.Models;
 using LTres.OltApi.Core.Services;
@@ -46,6 +42,7 @@ public class OLTHostController : ControllerBase
     /// </summary>
     /// <param name="take">Limit a maximum results</param>
     /// <param name="skip">Skip a certain amount of registers before list</param>
+    /// <param name="filterActive">Filter by Active OLT Hosts</param>
     /// <param name="filterId">Filter by ID of OLT Host</param>
     /// <param name="filterName">Filter by OLT name (contains)</param>
     /// <param name="filterHost">Filter by OLT host (contains)</param>
@@ -58,11 +55,12 @@ public class OLTHostController : ControllerBase
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<IEnumerable<OLT_Host>> List(int take = 1000, int skip = 0,
+        bool? filterActive = null,
         Guid? filterId = null, 
         string? filterName = null, 
         string? filterHost = null, 
         string[]? filterTag = null)
-        => await _service.ListOLTHosts(take, skip, filterId, filterName, filterHost, filterTag);
+        => await _service.ListOLTHosts(take, skip, filterActive, filterId, filterName, filterHost, filterTag);
 
     /// <summary>
     /// Return info of a specific OLT Host
@@ -74,5 +72,5 @@ public class OLTHostController : ControllerBase
     [ProducesResponseType(typeof(Guid), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<OLT_Host?> Get(Guid id) => (await _service.ListOLTHosts(1, 0, id)).FirstOrDefault();
+    public async Task<OLT_Host?> Get(Guid id) => (await _service.ListOLTHosts(1, 0, null, id)).FirstOrDefault();
 }

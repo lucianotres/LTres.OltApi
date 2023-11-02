@@ -54,6 +54,7 @@ public class OLTHostService
 
 
     public async Task<IEnumerable<OLT_Host>> ListOLTHosts(int take = 1000, int skip = 0,
+        bool? filterActive = null,
         Guid? filterId = null,
         string? filterName = null,
         string? filterHost = null,
@@ -64,7 +65,7 @@ public class OLTHostService
         if (skip < 0)
             throw new ArgumentOutOfRangeException("skip");
 
-        return await _db.ListOLTHosts(take, skip, filterId, filterName, filterHost, filterTag);
+        return await _db.ListOLTHosts(take, skip, filterActive, filterId, filterName, filterHost, filterTag);
     }
 
 }

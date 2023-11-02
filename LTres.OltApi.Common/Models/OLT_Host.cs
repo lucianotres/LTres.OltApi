@@ -26,13 +26,29 @@ public class OLT_Host
     /// <summary>
     /// Snmp community to read of
     /// </summary>
-    /// <value></value>
     public string? SnmpCommunity { get; set; }
+
+    /// <summary>
+    /// Snmp should use bulk get?
+    /// </summary>
+    public bool? SnmpBulk { get; set; }
+
+    /// <summary>
+    /// Snmp version: 1, 2, 3 (not implemented yet)
+    /// </summary>
+    public int? SnmpVersion { get; set; }
 
     /// <summary>
     /// What interface should use to comunicate. See the compatibility table.
     /// </summary>
     public int Interface { get; set; }
+
+    /// <summary>
+    /// Ignore OLT Hosts when setted to false
+    /// </summary>
+    public bool? Active { get; set; }
+
+
     
     /// <summary>
     /// Tags to classsify this OLT Host
