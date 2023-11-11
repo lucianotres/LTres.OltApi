@@ -1,10 +1,10 @@
 using System.Reflection;
-using System.Text.Json;
 using System.Text.Json.Serialization;
+using LTres.OltApi.Common;
 using LTres.OltApi.Common.DbServices;
+using LTres.OltApi.Core;
 using LTres.OltApi.Core.Services;
 using LTres.OltApi.Mongo;
-using Microsoft.AspNetCore.Http.Json;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -13,9 +13,17 @@ builder.Services.Configure<MongoConfig>(o => builder.Configuration.Bind("MongoCo
 
 MongoModelsConfiguration.RegisterClassMap();
 
-builder.Services.AddScoped<IDbOLTHost, MongoDbOLTHost>();
-builder.Services.AddScoped<OLTHostService>();
+//database handlers
+builder.Services
+    .AddScoped<IDbOLTHost, MongoDbOLTHost>()
+    .AddScoped<IDbOLTHostItem, MongoDbOLTHostItem>();
 
+//service handlers
+builder.Services
+    .AddScoped<IOLTHostService, OLTHostService>()
+    .AddScoped<IOLTHostItemService, OLTHostItemService>();
+
+//webapi controllers
 builder.Services.AddControllers()
     .AddJsonOptions(options =>
     {

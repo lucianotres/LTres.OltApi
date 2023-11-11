@@ -76,4 +76,21 @@ public class OLT_Host_Item
 
     public string? Calc { get; set; }
 
+
+    public string? Description { get; set; }
+}
+
+
+public static class OLT_Host_ItemExtensions
+{
+    public static readonly string[] ValidActions = new []{ "ping", "snmpget", "snmpwalk" };
+
+    public const int MinInterval = 1;
+    public const int MaxInterval = 86400; //1 day 
+
+    public const int MinHistoryFor = 1;
+    public const int MaxHistoryFor = 2628000; //5 years
+
+    public const int MinMaintainFor = 1;
+    public const int MaxMaintainFor = 2628000; //5 years
 }
