@@ -2,13 +2,14 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using LTres.OltApi.Common;
 using LTres.OltApi.Common.DbServices;
 using LTres.OltApi.Common.Models;
 using Microsoft.Extensions.Logging;
 
 namespace LTres.OltApi.Core.Services;
 
-public class OLTHostService
+public class OLTHostService : IOLTHostService
 {
     private readonly IDbOLTHost _db;
     private readonly ILogger _log;
@@ -42,14 +43,13 @@ public class OLTHostService
         return registeredGuid;
     }
 
-    public async Task<Guid> ChangeOLTHost(OLT_Host olt_host)
+    public async Task<int> ChangeOLTHost(OLT_Host olt_host)
     {
         ValidateOltHost(olt_host);
         if (olt_host.Id == Guid.Empty)
             throw new ArgumentOutOfRangeException("Id", "Id should not be empty when changing!");
 
-        var changedCount = await _db.ChangeOLTHost(olt_host);
-        return changedCount > 0 ? olt_host.Id : Guid.Empty;
+        return await _db.ChangeOLTHost(olt_host);
     }
 
 

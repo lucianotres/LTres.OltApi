@@ -49,6 +49,8 @@ public class MongoDbOLTHost : IDbOLTHost
         var filters = new List<FilterDefinition<OLT_Host>>();
 
         //mount filters..
+        if (filterActive.HasValue)
+            filters.Add(builder.Eq(o => o.Active, filterActive.Value));
         if (filterId.HasValue)
             filters.Add(builder.Eq(o => o.Id, filterId.Value));
         if (filterName != null)

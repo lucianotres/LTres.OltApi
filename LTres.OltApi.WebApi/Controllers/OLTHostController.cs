@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using LTres.OltApi.Common.Models;
-using LTres.OltApi.Core.Services;
+using LTres.OltApi.Common;
 
 namespace LTres.OltApi.WebApi.Controllers;
 
@@ -8,9 +8,9 @@ namespace LTres.OltApi.WebApi.Controllers;
 [Route("api/[controller]")]
 public class OLTHostController : ControllerBase
 {
-    private OLTHostService _service;
+    private readonly IOLTHostService _service;
 
-    public OLTHostController(OLTHostService service)
+    public OLTHostController(IOLTHostService service)
     {
         _service = service;
     }
@@ -35,7 +35,11 @@ public class OLTHostController : ControllerBase
     [ProducesResponseType(typeof(Guid), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<Guid> Change(OLT_Host model) => await _service.ChangeOLTHost(model);
+    public async Task<Guid> Change(OLT_Host model)
+    {
+        var changedCount = await _service.ChangeOLTHost(model);
+        return changedCount > 0 ? model.Id : Guid.Empty;
+    }
 
     /// <summary>
     /// Search or list the registered OLT Hosts
@@ -56,9 +60,9 @@ public class OLTHostController : ControllerBase
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<IEnumerable<OLT_Host>> List(int take = 1000, int skip = 0,
         bool? filterActive = null,
-        Guid? filterId = null, 
-        string? filterName = null, 
-        string? filterHost = null, 
+        Guid? filterId = null,
+        string? filterName = null,
+        string? filterHost = null,
         string[]? filterTag = null)
         => await _service.ListOLTHosts(take, skip, filterActive, filterId, filterName, filterHost, filterTag);
 
