@@ -28,6 +28,7 @@ public class MenuSNMP : Menu
         Options.Add(new MenuOption('3', "Try to walk ifDescr", SnmpWalkIfDescr));
         Options.Add(new MenuOption('4', "Try to walk ZTE ONUs", SnmpWalkZteOnu));
         Options.Add(new MenuOption('5', "Try to get string value", SnmpGetStr));
+        Options.Add(new MenuOption('6', "Try to get integer value", SnmpGetInt));
         Options.Add(new MenuOption('r', "to return"));
     }
 
@@ -225,6 +226,34 @@ public class MenuSNMP : Menu
         var workResult = await workSnmpGetAction.Execute(probeInfo, CancellationToken.None);
 
         Console.WriteLine($"{oid} | {(workResult.Success ? "ok" : workResult.FailMessage)} -> {workResult.ValueStr}");
+        return false;
+    }
+
+    private async Task<bool> SnmpGetInt()
+    {
+        AskHostInfo();
+
+        
+        Console.Write("Enter OID: ");
+        string? oid = Console.ReadLine()?.Trim();
+        
+        if (string.IsNullOrEmpty(oid))
+            return false;
+
+        var workSnmpGetAction = GetSnmpGetImplementation();
+        var probeInfo = new WorkProbeInfo()
+        {
+            Id = Guid.NewGuid(),
+            Host = ipEndPoint,
+            SnmpCommunity = snmpCommunity,
+            SnmpVersion = 2,
+            Action = "snmpget",
+            ItemKey = oid,
+        };
+
+        var workResult = await workSnmpGetAction.Execute(probeInfo, CancellationToken.None);
+
+        Console.WriteLine($"{oid} | {(workResult.Success ? "ok" : workResult.FailMessage)} -> {workResult.ValueUInt}{workResult.ValueInt}");
         return false;
     }
 }
