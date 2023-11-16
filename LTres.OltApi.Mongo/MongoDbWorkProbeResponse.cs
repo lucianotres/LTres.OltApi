@@ -154,7 +154,7 @@ public class MongoDbWorkProbeResponse : IDbWorkProbeResponse
 
         foreach (var workProbeResponseVar in workProbeResponse.Values)
         {
-            var newItemKey = (itemTemplate.ItemKey ?? "").Replace("{index}", workProbeResponseVar.Key);
+            var newItemKey = workProbeResponseVar.Key;
 
             var vfilter = Builders<OLT_Host_Item>.Filter.Eq(f => f.IdRelated, itemTemplate.Id);
             vfilter &= Builders<OLT_Host_Item>.Filter.Eq(f => f.ItemKey, newItemKey);

@@ -55,7 +55,7 @@ public class MongoDbOLTHostItem : IDbOLTHostItem
         if (filterActive.HasValue)
             filters.Add(builder.Eq(o => o.Active, filterActive.Value));
         if (filterTemplate.HasValue)
-            filters.Add(builder.Eq(o => o.Active, filterTemplate.Value));
+            filters.Add(builder.Eq(o => o.Template, filterTemplate.Value));
 
         if (filterRelated == Guid.Empty)
             filters.Add(builder.Eq(o => o.IdRelated, null));
