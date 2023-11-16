@@ -45,7 +45,7 @@ public class WorkSnmpGetAction2 : IWorkerActionSnmpGet
                 else if (variable.Value is TimeTicks ticks)
                     finalResponse.ValueUInt = ticks.Value;
                 else if (variable.Value is OctetString str)
-                    finalResponse.ValueStr = str.ToString();
+                    finalResponse.ValueStr = probeInfo.AsHex.GetValueOrDefault() ? str.ToHexString().Replace(" ", "") : str.ToString();
                 else if (variable.Value is Sequence binary)
                     finalResponse.ValueStr = Convert.ToBase64String(binary.Value);
 

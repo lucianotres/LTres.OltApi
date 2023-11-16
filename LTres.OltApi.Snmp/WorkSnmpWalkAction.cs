@@ -128,7 +128,7 @@ public class WorkSnmpWalkAction : IWorkerActionSnmpWalk
                     else if (variableReply.Data is TimeTicks ticks)
                         returnVar.ValueUInt = ticks.ToUInt32();
                     else if (variableReply.Data is OctetString str)
-                        returnVar.ValueStr = str.ToString();
+                        returnVar.ValueStr = probeInfo.AsHex.GetValueOrDefault() ? str.ToHexString() : str.ToString();
                     else if (variableReply.Data is Sequence binary)
                         returnVar.ValueStr = Convert.ToBase64String(binary.ToBytes());
 

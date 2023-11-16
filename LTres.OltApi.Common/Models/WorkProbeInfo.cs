@@ -29,4 +29,5 @@ public class WorkProbeInfo
 
     public string? Calc { get; set; }
 
+    public bool? AsHex { get; set; }
 }

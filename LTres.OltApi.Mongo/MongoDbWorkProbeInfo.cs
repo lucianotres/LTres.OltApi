@@ -37,6 +37,7 @@ public class MongoDbWorkProbeInfo : IDbWorkProbeInfo
                 { "ItemKey", 1},
                 { "LastProbed", 1 },
                 { "Calc", 1 },
+                { "AsHex", 1 },
                 { "HistoryFor", 1 },
                 { "DoProbe",
                     new BsonDocument("$gte", new BsonArray
@@ -90,6 +91,10 @@ public class MongoDbWorkProbeInfo : IDbWorkProbeInfo
                 { "Calc", new BsonDocument("$max", new BsonArray {
                     "$Calc",
                     new BsonDocument("$arrayElemAt", new BsonArray { "$Related.Calc", 0 }) })
+                },
+                { "AsHex", new BsonDocument("$max", new BsonArray {
+                    "$AsHex",
+                    new BsonDocument("$arrayElemAt", new BsonArray { "$Related.AsHex", 0 }) })
                 },
                 { "DoHistory", new BsonDocument("$gt", new BsonArray {
                     new BsonDocument("$max", new BsonArray { "$HistoryFor", new BsonDocument("$arrayElemAt", new BsonArray { "$Related.HistoryFor", 0 }) })
