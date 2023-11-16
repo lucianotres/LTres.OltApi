@@ -62,12 +62,16 @@ public class MongoDbWorkProbeResponse : IDbWorkProbeResponse
             await OLT_Host_Items.UpdateOneAsync(filter, update);
 
             if (workProbeResponse.Values != null)
+            {
+                var oltItemReference = (await OLT_Host_Items.FindAsync(f => f.Id == workProbeResponse.Id)).FirstOrDefault();
+
                 foreach (var v in workProbeResponse.Values)
-                    await AddOrUpdateNestedProbedItem(workProbeResponse, v);
+                    await AddOrUpdateNestedProbedItem(workProbeResponse, v, oltItemReference?.IdOltHost);
+            }
         }
     }
 
-    private async Task AddOrUpdateNestedProbedItem(WorkProbeResponse workProbeResponse, WorkProbeResponseVar workProbeResponseVar)
+    private async Task AddOrUpdateNestedProbedItem(WorkProbeResponse workProbeResponse, WorkProbeResponseVar workProbeResponseVar, Guid? idOltHost)
     {
         var vfilter = Builders<OLT_Host_Item>.Filter.Eq(f => f.IdRelated, workProbeResponse.Id);
         vfilter &= Builders<OLT_Host_Item>.Filter.Eq(f => f.ItemKey, workProbeResponseVar.Key);
@@ -103,6 +107,7 @@ public class MongoDbWorkProbeResponse : IDbWorkProbeResponse
         {
             await OLT_Host_Items.InsertOneAsync(new OLT_Host_Item()
             {
+                IdOltHost = idOltHost,
                 IdRelated = workProbeResponse.Id,
                 ItemKey = workProbeResponseVar.Key,
                 LastProbed = workProbeResponse.ProbedAt,

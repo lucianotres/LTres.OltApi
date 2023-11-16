@@ -73,10 +73,22 @@ public class MongoDbWorkProbeInfo : IDbWorkProbeInfo
             {
                 { "_id", 1 },
                 { "Action", 1 },
-                { "ItemKey", 1},
+                { "ItemKey", new BsonDocument("$switch",
+                    new BsonDocument {
+                    { "branches", new BsonArray {
+                        new BsonDocument {
+                            { "case", new BsonDocument("$gt", new BsonArray { "$IdRelated", BsonNull.Value }) },
+                            { "then", new BsonDocument("$replaceOne", new BsonDocument {
+                                { "input", new BsonDocument("$arrayElemAt", new BsonArray { "$Related.ItemKey", 0 }) },
+                                { "find", "{index}" },
+                                { "replacement", "$ItemKey" }
+                            }) }
+                    }}},
+                    { "default", "$ItemKey" }
+                })},
                 { "LastProbed", 1 },
-                { "Calc", new BsonDocument("$max", new BsonArray { 
-                    "$Calc", 
+                { "Calc", new BsonDocument("$max", new BsonArray {
+                    "$Calc",
                     new BsonDocument("$arrayElemAt", new BsonArray { "$Related.Calc", 0 }) })
                 },
                 { "DoHistory", new BsonDocument("$gt", new BsonArray {
