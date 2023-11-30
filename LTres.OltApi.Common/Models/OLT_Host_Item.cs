@@ -76,6 +76,8 @@ public class OLT_Host_Item
 
     public string? Calc { get; set; }
 
+    public bool? AsHex { get; set; }
+
 
     public string? Description { get; set; }
 }

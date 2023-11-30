@@ -6,11 +6,11 @@ namespace LTres.OltApi.WebApi;
 
 [ApiController]
 [Route("api/[controller]")]
-public class OLTHostItem : ControllerBase
+public class OLTHostItemController : ControllerBase
 {
     private readonly IOLTHostItemService _service;
 
-    public OLTHostItem(IOLTHostItemService service)
+    public OLTHostItemController(IOLTHostItemService service)
     {
         _service = service;
     }
@@ -91,10 +91,13 @@ public class OLTHostItem : ControllerBase
 
         var itemsList = await _service.ListOLTHostItems(limit, skip, id, null, activeOnly ? true : null, null, Guid.Empty, key);
         
-        var templateItems = itemsList.Where(w => w.Template.GetValueOrDefault()).ToList();
+        var templateItems = itemsList
+            .Where(w => w.Template.GetValueOrDefault() || w.Action == "snmpwalk")
+            .ToList();
+
         if (templateItems.Any())
         {
-            itemsList = itemsList.Where(w => !w.Template.GetValueOrDefault()).ToList();
+            itemsList = itemsList.Where(w => !templateItems.Exists(k => k.Id == w.Id)).ToList();
 
             foreach(var i in templateItems)
             {

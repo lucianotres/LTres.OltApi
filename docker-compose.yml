@@ -3,7 +3,7 @@ version: '3.4'
 services:
   mongodb:
     container_name: mongodb
-    image: mongo:4.2
+    image: mongo:4.4
     restart: always
     volumes:
       - ltres_oltapi_data:/data/db
@@ -35,14 +35,16 @@ services:
     build: 
       context: .
       dockerfile: ./LTres.OltApi.WorkerController/Dockerfile
+      args:
+        - VERSION=1.0.0.4
 
-  workercontroller2:
-    depends_on:
-      - mongodb
-      - rabbit
-    build: 
-      context: .
-      dockerfile: ./LTres.OltApi.WorkerController/Dockerfile
+  # workercontroller2:
+  #   depends_on:
+  #     - mongodb
+  #     - rabbit
+  #   build: 
+  #     context: .
+  #     dockerfile: ./LTres.OltApi.WorkerController/Dockerfile
 
   worker1:
     depends_on:
@@ -50,27 +52,29 @@ services:
     build: 
       context: .
       dockerfile: ./LTres.OltApi.Worker/Dockerfile
+      args:
+        - VERSION=1.0.0.2
   
-  worker2:
-    depends_on:
-      - rabbit
-    build: 
-      context: .
-      dockerfile: ./LTres.OltApi.Worker/Dockerfile
+  # worker2:
+  #   depends_on:
+  #     - rabbit
+  #   build: 
+  #     context: .
+  #     dockerfile: ./LTres.OltApi.Worker/Dockerfile
 
-  worker3:
-    depends_on:
-      - rabbit
-    build: 
-      context: .
-      dockerfile: ./LTres.OltApi.Worker/Dockerfile
+  # worker3:
+  #   depends_on:
+  #     - rabbit
+  #   build: 
+  #     context: .
+  #     dockerfile: ./LTres.OltApi.Worker/Dockerfile
 
-  worker4:
-    depends_on:
-      - rabbit
-    build: 
-      context: .
-      dockerfile: ./LTres.OltApi.Worker/Dockerfile
+  # worker4:
+  #   depends_on:
+  #     - rabbit
+  #   build: 
+  #     context: .
+  #     dockerfile: ./LTres.OltApi.Worker/Dockerfile
 
 volumes:
   ltres_oltapi_data:
