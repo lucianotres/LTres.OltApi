@@ -38,7 +38,7 @@ else
 
 builder.Services
     .AddTransient<IWorkerActionPing, WorkPingAction>()
-    .AddTransient<IWorkProbeCalc, WorkProbeCalcValues>()
+    .AddTransient<IWorkProbeCalc, WorkProbeCalc2Values>()
     .AddSingleton<ILogCounter, LogCounter>()
     .AddHostedService<LogCounterPrinter>()
     .AddHostedService<RabbitMQWorkExecution>();

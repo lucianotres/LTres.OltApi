@@ -1,5 +1,6 @@
 ﻿
 using System.Net;
+using LTres.OltApi.Common;
 using LTres.OltApi.Common.Models;
 using LTres.OltApi.Core;
 
@@ -16,6 +17,9 @@ public class MenuCalc : Menu
 
     private async Task<bool> TestingAnExpression()
     {
+        Console.Write("What version should be used? (1,2) ");
+        var version = Console.ReadLine()?.Trim();
+        
         Console.Write("Inform the original value (int): ");
         var strOriginalValue = Console.ReadLine();
         if (!int.TryParse(strOriginalValue, out int originalValue))
@@ -24,7 +28,7 @@ public class MenuCalc : Menu
         Console.Write("Inform the expression (where 'val' is a variable): ");
         var expression = Console.ReadLine();
 
-        var workCalc = new WorkProbeCalcValues();
+        IWorkProbeCalc workCalc = version == "2" ? new WorkProbeCalc2Values() : new WorkProbeCalcValues();
         var mockProbeInfo = new WorkProbeInfo()
         {
             Id = Guid.NewGuid(),
