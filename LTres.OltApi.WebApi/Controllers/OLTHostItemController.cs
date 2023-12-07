@@ -1,4 +1,5 @@
-﻿using LTres.OltApi.Common;
+﻿using System.Data.Common;
+using LTres.OltApi.Common;
 using LTres.OltApi.Common.Models;
 using Microsoft.AspNetCore.Mvc;
 
@@ -46,9 +47,8 @@ public class OLTHostItemController : ControllerBase
     /// </summary>
     /// <param name="id">Guid ID of the OLT Host Item</param>
     [HttpGet("{id}")]
-    [Consumes("application/json")]
     [Produces("application/json")]
-    [ProducesResponseType(typeof(Guid), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(OLT_Host_Item), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<OLT_Host_Item?> Get(Guid id) => (await _service.ListOLTHostItems(1, 0, null, id)).FirstOrDefault();
@@ -61,9 +61,8 @@ public class OLTHostItemController : ControllerBase
     /// <param name="limit">Limit result range</param>
     /// <param name="skip">Amount to skip before mount the result</param>
     [HttpGet("ByOLT/{id}")]
-    [Consumes("application/json")]
     [Produces("application/json")]
-    [ProducesResponseType(typeof(Guid), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(IEnumerable<OLT_Host_Item>), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<IEnumerable<OLT_Host_Item>> GetByOLT(Guid id, int limit = 9999, int skip = 0) => 
@@ -77,9 +76,8 @@ public class OLTHostItemController : ControllerBase
     /// <param name="limit">Limit result range</param>
     /// <param name="skip">Amount to skip before mount the result</param>
     [HttpGet("ByKey/{id}")]
-    [Consumes("application/json")]
     [Produces("application/json")]
-    [ProducesResponseType(typeof(Guid), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(IEnumerable<OLT_Host_Item>), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<IEnumerable<OLT_Host_Item>> GetByKey(Guid id, string key, bool activeOnly = true, int limit = 9999, int skip = 0)
@@ -108,4 +106,19 @@ public class OLTHostItemController : ControllerBase
         
         return itemsList;
     }
+
+    [HttpGet("OnuList/{id}")]
+    [Produces("application/json")]
+    [ProducesResponseType(typeof(IEnumerable<ONU_Info>), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<IEnumerable<ONU_Info>> ListONUInfo(Guid id, bool full = true)
+    {
+        if (id == Guid.Empty)
+            throw new ArgumentNullException("id", "An OLT Host id is mandatory!");
+
+        return await _service.ListONUInfo(id, full);
+    }
+
+
 }

@@ -1,4 +1,5 @@
-﻿using System.Numerics;
+﻿using System.Data.Common;
+using System.Numerics;
 using LTres.OltApi.Common;
 using LTres.OltApi.Common.Models;
 using Microsoft.Extensions.Logging;
@@ -27,7 +28,7 @@ public class OLTHostItemService : IOLTHostItemService
             throw new ArgumentNullException("Action", "OLT item should have an action!");
         else if (!OLT_Host_ItemExtensions.ValidActions.Contains(item.Action))
             throw new ArgumentOutOfRangeException("Action", $"OLT item should have a valid action {OLT_Host_ItemExtensions.ValidActions}!");
-        
+
         var interval = item.Interval.GetValueOrDefault();
         if (interval < OLT_Host_ItemExtensions.MinInterval || interval > OLT_Host_ItemExtensions.MaxInterval)
             throw new ArgumentOutOfRangeException("Interval", $"OLT item should have an interval between {OLT_Host_ItemExtensions.MinInterval} and {OLT_Host_ItemExtensions.MaxInterval} seconds.");
@@ -38,7 +39,7 @@ public class OLTHostItemService : IOLTHostItemService
 
         if (item.MaintainFor.HasValue && !item.Template.GetValueOrDefault())
             throw new ArgumentOutOfRangeException("MaintainFor", "MaintainFor can only be used when OLT Item it's a template!");
-        
+
         interval = item.MaintainFor.GetValueOrDefault();
         if (item.MaintainFor.HasValue && (interval < OLT_Host_ItemExtensions.MinMaintainFor || interval > OLT_Host_ItemExtensions.MaxMaintainFor))
             throw new ArgumentOutOfRangeException("MaintainFor", $"Discovered item can be maintained by {OLT_Host_ItemExtensions.MinMaintainFor} up to {OLT_Host_ItemExtensions.MaxMaintainFor} minutes.");
@@ -61,7 +62,7 @@ public class OLTHostItemService : IOLTHostItemService
         var registeredGuid = await _db.AddOLTHostItem(item);
         _log.LogInformation($"New OLT_Host_Item included: {registeredGuid}");
         return registeredGuid;
-        
+
     }
 
     public async Task<int> ChangeOLTHostItem(OLT_Host_Item item)
@@ -89,4 +90,54 @@ public class OLTHostItemService : IOLTHostItemService
 
         return await _db.ListOLTHostItems(take, skip, filterByOlt, filterById, filterActive, filterTemplate, filterRelated, filterKey);
     }
+
+    public async Task<IEnumerable<ONU_Info>> ListONUInfo(Guid olt, bool full = true)
+    {
+        List<ONU_Info> finalList = new ();
+        Dictionary<string, string?> lstOnuSn = new();
+        Dictionary<string, int?> lstOnuSt = new();
+        Dictionary<string, int?> lstOnuRx;
+
+        var onuRefs = await _db.GetOLTOnuRef(olt);
+        if (onuRefs == null || onuRefs.Name == null || onuRefs.Signal == null)
+            return finalList;
+        
+        finalList = (await _db.ListOLTHostItems(999999, 0, null, null, null, null, onuRefs.Name))
+            .Where(w => w.ItemKey != null)
+            .Select(s => new ONU_Info()
+            {
+                key = s.ItemKey ?? "",
+                name = full ? s.ProbedValueStr : null
+            })
+            .ToList();
+
+        if (full && onuRefs.SN != null)
+            lstOnuSn = (await _db.ListOLTHostItems(999999, 0, null, null, null, null, onuRefs.SN))
+                .Where(w => w.ItemKey != null)
+                .ToDictionary(k => k.ItemKey ?? "", s => s.ProbedValueStr);
+
+        if (onuRefs.State != null)
+            lstOnuSt = (await _db.ListOLTHostItems(999999, 0, null, null, null, null, onuRefs.State))
+                .Where(w => w.ItemKey != null)
+                .ToDictionary(k => k.ItemKey ?? "", s => s.ProbedValueInt);
+
+        lstOnuRx = (await _db.ListOLTHostItems(999999, 0, null, null, null, null, onuRefs.Signal))
+            .Where(w => w.ItemKey != null)
+            .ToDictionary(k => k.ItemKey ?? "", s => s.ProbedValueInt);
+
+        foreach (var n in finalList)
+        {
+            if (full && lstOnuSn.TryGetValue(n.key, out string? sn))
+                n.sn = sn;
+
+            if (lstOnuSt.TryGetValue(n.key, out int? st))
+                n.state = st;
+
+            if (lstOnuRx.TryGetValue(n.key, out int? rx))
+                n.rx = rx;
+        };
+
+        return finalList;
+    }
+
 }

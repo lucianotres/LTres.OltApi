@@ -53,9 +53,8 @@ public class OLTHostController : ControllerBase
     /// <param name="filterTag">Filter by specifics tags</param>
     /// <returns></returns>
     [HttpGet]
-    [Consumes("application/json")]
     [Produces("application/json")]
-    [ProducesResponseType(typeof(Guid), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(IEnumerable<OLT_Host>), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<IEnumerable<OLT_Host>> List(int take = 1000, int skip = 0,
@@ -71,9 +70,8 @@ public class OLTHostController : ControllerBase
     /// </summary>
     /// <param name="id">Guid ID of the OLT Host</param>
     [HttpGet("{id}")]
-    [Consumes("application/json")]
     [Produces("application/json")]
-    [ProducesResponseType(typeof(Guid), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(OLT_Host), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<OLT_Host?> Get(Guid id) => (await _service.ListOLTHosts(1, 0, null, id)).FirstOrDefault();

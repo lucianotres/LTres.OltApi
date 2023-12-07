@@ -15,4 +15,6 @@ public interface IOLTHostItemService
         bool? filterTemplate = null,
         Guid? filterRelated = null,
         string? filterKey = null);
+
+    Task<IEnumerable<ONU_Info>> ListONUInfo(Guid olt, bool full = true);
 }

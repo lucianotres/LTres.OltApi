@@ -56,4 +56,10 @@ public class OLT_Host
     /// Tags to classsify this OLT Host
     /// </summary>
     public IEnumerable<string>? tags { get; set; }
+
+
+    /// <summary>
+    /// Onu info items references
+    /// </summary>
+    public OLT_Host_OnuRef? OnuRef { get; set; }
 }
