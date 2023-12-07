@@ -19,6 +19,8 @@ public class WorkProbeInfo
 
     public bool SnmpBulk { get; set; } = true;
 
+    public int? GetTimeout { get; set; }
+
     public DateTime? RequestedIn { get; set; }
 
     public bool DoHistory { get; set; } = false;

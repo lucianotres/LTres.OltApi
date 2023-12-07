@@ -1,4 +1,5 @@
-﻿using LTres.OltApi.Common;
+﻿using System.Diagnostics;
+using LTres.OltApi.Common;
 using LTres.OltApi.Common.Models;
 using Microsoft.Extensions.Logging;
 using SnmpSharpNet;
@@ -28,7 +29,7 @@ public class WorkSnmpWalkAction2 : IWorkerActionSnmpWalk
             var bulkMessage = probeInfo.SnmpVersion > 1 && probeInfo.SnmpBulk;
 
             _log.LogDebug($"SNMP walk starting, {probeInfo.Host} -v {probeInfo.SnmpVersion} {(bulkMessage ? "bulk" : "")} -c {community} {latestOID}");
-            var startedDateTime = DateTime.Now;
+            var timer = Stopwatch.StartNew();
 
             var snmpAgentParams = new AgentParameters(probeInfo.SnmpVersion == 3 ? SnmpVersion.Ver3 : probeInfo.SnmpVersion == 2 ? SnmpVersion.Ver2 : SnmpVersion.Ver1,
                 new OctetString(probeInfo.SnmpCommunity ?? ""));
@@ -70,11 +71,13 @@ public class WorkSnmpWalkAction2 : IWorkerActionSnmpWalk
             }
             while (!errorFound && !cancellationToken.IsCancellationRequested);
 
+            timer.Stop();
+
             if (cancellationToken.IsCancellationRequested)
-                _log.LogDebug($"SNMP walk cancelled with {DateTime.Now.Subtract(startedDateTime)}");
+                _log.LogDebug($"SNMP walk cancelled with {timer.Elapsed}");
             else
             {
-                _log.LogDebug($"SNMP walk completed in {DateTime.Now.Subtract(startedDateTime)}");
+                _log.LogDebug($"SNMP walk completed in {timer.Elapsed}");
                 var reduceKeyAt = originalOID.ToString().Length + 1;
 
                 finalResponse.Type = WorkProbeResponseType.Walk;

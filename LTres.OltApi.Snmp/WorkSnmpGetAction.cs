@@ -24,7 +24,7 @@ public class WorkSnmpGetAction : IWorkerActionSnmpGet
                 return finalResponse;
 
             var replyMessage = await Task.Run(() =>
-                requestMessage.GetResponse(5000, probeInfo.Host),
+                requestMessage.GetResponse(probeInfo.GetTimeout.GetValueOrDefault(5000), probeInfo.Host),
                 cancellationToken)
                 .ConfigureAwait(false);
 

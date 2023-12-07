@@ -1,4 +1,5 @@
-﻿using LTres.OltApi.Common;
+﻿using System.Diagnostics;
+using LTres.OltApi.Common;
 using LTres.OltApi.Common.Models;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -134,7 +135,7 @@ public class MongoDbWorkCleanUp : IDbWorkCleanUp
     private async Task<long> RemoveRelatedExpiredItems()
     {
         long removedCount = 0;
-        var startedTime = DateTime.Now;
+        var timer = Stopwatch.StartNew();
 
         var listItemsNestedToDelete = await OLT_Host_Items
             .Aggregate(pipelineDefinitionItemsNestedToDelete)
@@ -149,14 +150,15 @@ public class MongoDbWorkCleanUp : IDbWorkCleanUp
                 removedCount += deleteResult.DeletedCount;
         }
 
-        _log.LogDebug($"Remove related expired items executed in {DateTime.Now.Subtract(startedTime)}");
+        timer.Stop();
+        _log.LogDebug($"Remove related expired items executed in {timer.Elapsed}");
         return removedCount;
     }
 
     private async Task<long> RemoveHistoryExpiredItems()
     {
         long removedCount = 0;
-        var startedTime = DateTime.Now;
+        var timer = Stopwatch.StartNew();
 
         var listItemsHistoryToDelete = await OLT_Host_Items
             .Aggregate(pipelineDefinitionItemsHistoryToDelete)
@@ -171,9 +173,10 @@ public class MongoDbWorkCleanUp : IDbWorkCleanUp
                 removedCount += deleteResult.DeletedCount;
         }
 
-        _log.LogDebug($"Remove history expired items executed in {DateTime.Now.Subtract(startedTime)}");
-        startedTime = DateTime.Now;
+        timer.Stop();
+        _log.LogDebug($"Remove history expired items executed in {timer.Elapsed}");
 
+        timer.Start();
         var listItemsHistoryOphansToDelete = await OLT_Host_Items_History
             .Aggregate(pipelineDefinitionHistoryItemsOrphansToDelete)
             .ToListAsync();
@@ -187,7 +190,8 @@ public class MongoDbWorkCleanUp : IDbWorkCleanUp
                 removedCount += deleteResult.DeletedCount;
         }
 
-        _log.LogDebug($"Remove items history orphans executed in {DateTime.Now.Subtract(startedTime)}");
+        timer.Stop();
+        _log.LogDebug($"Remove items history orphans executed in {timer.Elapsed}");
 
         return removedCount;
     }

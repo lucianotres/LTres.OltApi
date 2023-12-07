@@ -1,4 +1,5 @@
 using System.Collections.Concurrent;
+using System.Diagnostics;
 using LTres.OltApi.Common;
 using LTres.OltApi.Common.Models;
 using Microsoft.Extensions.Hosting;
@@ -118,14 +119,14 @@ public class WorkController : IHostedService
                 {
                     lastCleanUpTask = Task.Run(async () =>
                     {
-                        var removeStartedAt = DateTime.Now;
+                        var removeTimer = Stopwatch.StartNew();
                         var removedCount = await _workCleanUp.CleanUpExecute().ConfigureAwait(false);
-                        var removedTimespan = DateTime.Now.Subtract(removeStartedAt);
+                        removeTimer.Stop();
 
                         if (removedCount > 0)
                         {
                             _log.LogDebug($"Removed {removedCount} history items");
-                            _logCounter.AddCount("CleanUp Rem", removedCount > int.MaxValue ? int.MaxValue : (int)removedCount, removedTimespan);
+                            _logCounter.AddCount("CleanUp Rem", removedCount > int.MaxValue ? int.MaxValue : (int)removedCount, removeTimer.Elapsed);
                         }
                     });
                 }
@@ -160,18 +161,22 @@ public class WorkController : IHostedService
 
     private async Task SaveProbeResponse(WorkProbeResponse workProbeResponse)
     {
-        var startedTime = DateTime.Now;
+        var workResponseTimer = Stopwatch.StartNew();
         try
         {
             await _workResponseController.ResponseReceived(workProbeResponse).ConfigureAwait(false);
+            workResponseTimer.Stop();
 
-            var elapsedTime = DateTime.Now.Subtract(startedTime);
-            _log.LogDebug($"RESPONSE: {workProbeResponse}, saved in {elapsedTime}");
-            _logCounter.AddSuccess(workProbeResponse.Id, "response", elapsedTime);
+            _log.LogDebug($"RESPONSE: {workProbeResponse}, saved in {workResponseTimer.Elapsed}");
+            _logCounter.AddSuccess(workProbeResponse.Id, "response", workResponseTimer.Elapsed);
         }
         catch (Exception error)
         {
-            _logCounter.AddSuccess(workProbeResponse.Id, "response", DateTime.Now.Subtract(startedTime));
+            try
+            { workResponseTimer.Stop(); }
+            catch
+            { }
+            _logCounter.AddSuccess(workProbeResponse.Id, "response", workResponseTimer.Elapsed);
             _log.LogError(error.ToString());
         }
     }

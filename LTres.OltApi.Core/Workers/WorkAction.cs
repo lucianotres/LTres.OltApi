@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Net.Http.Headers;
 using LTres.OltApi.Common;
 using LTres.OltApi.Common.Models;
@@ -23,8 +24,7 @@ public class WorkAction : IWorkerAction
     {
         _log.LogDebug($"Work probe received: {probeInfo.Id} -> {probeInfo.Action}");
         var workProbeResponse = new WorkProbeResponse() { Id = probeInfo.Id };
-        var startedTime = DateTime.Now;
-        var doneIn = TimeSpan.Zero;
+        var timer = Stopwatch.StartNew();
 
         try
         {
@@ -52,23 +52,23 @@ public class WorkAction : IWorkerAction
                 await calc.UpdateProbedValuesWithCalculated(probeInfo, workProbeResponse);
             }
 
-            doneIn = DateTime.Now.Subtract(startedTime);
-            _logCounter.AddSuccess(probeInfo.Id, probeInfo.Action, doneIn);
+            timer.Stop();
+            _logCounter.AddSuccess(probeInfo.Id, probeInfo.Action, timer.Elapsed);
         }
         catch (Exception error)
         {
-            doneIn = DateTime.Now.Subtract(startedTime);
+            timer.Stop();
 
             workProbeResponse.Success = false;
             workProbeResponse.FailMessage = error.Message;
 
-            _logCounter.AddError(probeInfo.Id, probeInfo.Action, doneIn, error);
+            _logCounter.AddError(probeInfo.Id, probeInfo.Action, timer.Elapsed, error);
         }
 
         workProbeResponse.ProbedAt = DateTime.Now;
         workProbeResponse.DoHistory = probeInfo.DoHistory;
 
-        _log.LogDebug($"Work {probeInfo.Id} done in {doneIn}");
+        _log.LogDebug($"Work {probeInfo.Id} done in {timer.Elapsed}");
         return workProbeResponse;
     }
 }

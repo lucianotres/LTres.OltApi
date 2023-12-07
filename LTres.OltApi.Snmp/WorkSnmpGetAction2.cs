@@ -16,7 +16,7 @@ public class WorkSnmpGetAction2 : IWorkerActionSnmpGet
             var snmpAgentParams = new AgentParameters(probeInfo.SnmpVersion == 3 ? SnmpVersion.Ver3 : probeInfo.SnmpVersion == 2 ? SnmpVersion.Ver2 : SnmpVersion.Ver1,
                 new OctetString(probeInfo.SnmpCommunity ?? ""));
 
-            using var udpTarget = new UdpTarget(probeInfo.Host.Address, probeInfo.Host.Port, 5000, 3);
+            using var udpTarget = new UdpTarget(probeInfo.Host.Address, probeInfo.Host.Port, probeInfo.GetTimeout.GetValueOrDefault(5000), 1);
 
             var oid = new Oid(probeInfo.ItemKey ?? "");
 

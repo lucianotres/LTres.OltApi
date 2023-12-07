@@ -38,6 +38,8 @@ public class OLT_Host
     /// </summary>
     public int? SnmpVersion { get; set; }
 
+    public int? GetTimeout { get; set; }
+
     /// <summary>
     /// What interface should use to comunicate. See the compatibility table.
     /// </summary>

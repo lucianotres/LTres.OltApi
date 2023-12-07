@@ -179,7 +179,8 @@ public static class MongoDbOltApiMigrations
                 { "Host", new BsonDocument("$arrayElemAt", new BsonArray { "$olt.Host", 0 }) },
                 { "SnmpCommunity", new BsonDocument("$arrayElemAt", new BsonArray { "$olt.SnmpCommunity", 0 }) },
                 { "SnmpVersion", new BsonDocument("$arrayElemAt", new BsonArray { "$olt.SnmpVersion", 0 }) },
-                { "SnmpBulk", new BsonDocument("$arrayElemAt", new BsonArray { "$olt.SnmpBulk", 0 }) }
+                { "SnmpBulk", new BsonDocument("$arrayElemAt", new BsonArray { "$olt.SnmpBulk", 0 }) },
+                { "GetTimeout", new BsonDocument("$arrayElemAt", new BsonArray { "$olt.GetTimeout", 0 }) },
                 }));
 
 
