@@ -93,15 +93,17 @@ public class OLTHostItemService : IOLTHostItemService
 
     public async Task<IEnumerable<ONU_Info>> ListONUInfo(Guid olt, bool full = true)
     {
-        List<ONU_Info> finalList = new ();
+        List<ONU_Info> finalList = new();
         Dictionary<string, string?> lstOnuSn = new();
+        Dictionary<string, string?> lstOnuDesc = new();
+        Dictionary<string, int?> lstOnuDistance = new();
         Dictionary<string, int?> lstOnuSt = new();
         Dictionary<string, int?> lstOnuRx;
 
         var onuRefs = await _db.GetOLTOnuRef(olt);
         if (onuRefs == null || onuRefs.Name == null || onuRefs.Signal == null)
             return finalList;
-        
+
         finalList = (await _db.ListOLTHostItems(999999, 0, null, null, null, null, onuRefs.Name))
             .Where(w => w.ItemKey != null)
             .Select(s => new ONU_Info()
@@ -116,6 +118,16 @@ public class OLTHostItemService : IOLTHostItemService
                 .Where(w => w.ItemKey != null)
                 .ToDictionary(k => k.ItemKey ?? "", s => s.ProbedValueStr);
 
+        if (full && onuRefs.Desc != null)
+            lstOnuDesc = (await _db.ListOLTHostItems(999999, 0, null, null, null, null, onuRefs.Desc))
+                .Where(w => w.ItemKey != null)
+                .ToDictionary(k => k.ItemKey ?? "", s => s.ProbedValueStr);
+
+        if (full && onuRefs.Distance != null)
+            lstOnuDistance = (await _db.ListOLTHostItems(999999, 0, null, null, null, null, onuRefs.Distance))
+                .Where(w => w.ItemKey != null)
+                .ToDictionary(k => k.ItemKey ?? "", s => s.ProbedValueInt);
+
         if (onuRefs.State != null)
             lstOnuSt = (await _db.ListOLTHostItems(999999, 0, null, null, null, null, onuRefs.State))
                 .Where(w => w.ItemKey != null)
@@ -129,6 +141,12 @@ public class OLTHostItemService : IOLTHostItemService
         {
             if (full && lstOnuSn.TryGetValue(n.key, out string? sn))
                 n.sn = sn;
+
+            if (full && lstOnuDesc.TryGetValue(n.key, out string? desc))
+                n.desc = desc;
+
+            if (full && lstOnuDistance.TryGetValue(n.key, out int? distance))
+                n.distance = distance;
 
             if (lstOnuSt.TryGetValue(n.key, out int? st))
                 n.state = st;
