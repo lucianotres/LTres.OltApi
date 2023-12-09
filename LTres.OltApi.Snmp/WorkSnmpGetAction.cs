@@ -37,20 +37,27 @@ public class WorkSnmpGetAction : IWorkerActionSnmpGet
             if (errorStatus == ErrorCode.NoError)
             {
                 var variableReply = pdu.Variables.First();
-                if (variableReply.Data is Integer32 integer)
-                    finalResponse.ValueInt = integer.ToInt32();
-                else if (variableReply.Data is Gauge32 gauge)
-                    finalResponse.ValueUInt = gauge.ToUInt32();
-                else if (variableReply.Data is Counter32 counter)
-                    finalResponse.ValueUInt = counter.ToUInt32();
-                else if (variableReply.Data is TimeTicks ticks)
-                    finalResponse.ValueUInt = ticks.ToUInt32();
-                else if (variableReply.Data is OctetString str)
-                    finalResponse.ValueStr = probeInfo.AsHex.GetValueOrDefault() ? str.ToHexString() : str.ToString();
-                else if (variableReply.Data is Sequence binary)
-                    finalResponse.ValueStr = Convert.ToBase64String(binary.ToBytes());
+                if (variableReply.Data is NoSuchInstance)
+                    finalResponse.FailMessage = "NoSuchInstance";
+                else if (variableReply.Data is NoSuchObject)
+                    finalResponse.FailMessage = "NoSuchObject";
+                else
+                {
+                    if (variableReply.Data is Integer32 integer)
+                        finalResponse.ValueInt = integer.ToInt32();
+                    else if (variableReply.Data is Gauge32 gauge)
+                        finalResponse.ValueUInt = gauge.ToUInt32();
+                    else if (variableReply.Data is Counter32 counter)
+                        finalResponse.ValueUInt = counter.ToUInt32();
+                    else if (variableReply.Data is TimeTicks ticks)
+                        finalResponse.ValueUInt = ticks.ToUInt32();
+                    else if (variableReply.Data is OctetString str)
+                        finalResponse.ValueStr = probeInfo.AsHex.GetValueOrDefault() ? str.ToHexString() : str.ToString();
+                    else if (variableReply.Data is Sequence binary)
+                        finalResponse.ValueStr = Convert.ToBase64String(binary.ToBytes());
 
-                finalResponse.Success = true;
+                    finalResponse.Success = true;
+                }
             }
             else if (errorStatus == ErrorCode.NoSuchName)
                 finalResponse.FailMessage = $"Snmp object not founded, {errorStatus}";
