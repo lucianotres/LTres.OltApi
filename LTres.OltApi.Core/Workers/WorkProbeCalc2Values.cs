@@ -27,7 +27,10 @@ public class WorkProbeCalc2Values : IWorkProbeCalc
                 workProbeResponse.ValueInt = expression.Eval<int>();
 
                 if (workProbeResponse.ValueInt.Value == int.MaxValue)
+                {
                     workProbeResponse.ValueInt = null;
+                    workProbeResponse.Success = false;
+                }
             }
             else if (workProbeResponse.ValueUInt.HasValue)
             {
@@ -35,7 +38,10 @@ public class WorkProbeCalc2Values : IWorkProbeCalc
                 workProbeResponse.ValueUInt = expression.Eval<uint>();
 
                 if (workProbeResponse.ValueUInt.Value == uint.MaxValue)
+                {
                     workProbeResponse.ValueUInt = null;
+                    workProbeResponse.Success = false;
+                }
             }
         }
         else if (workProbeResponse.Type == WorkProbeResponseType.Walk)

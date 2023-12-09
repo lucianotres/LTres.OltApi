@@ -102,34 +102,11 @@ public static class MongoDbOltApiMigrations
                 { "Active", true },
                 { "IdOltHost", new BsonDocument("$ne", BsonNull.Value) },
                 { "Action", new BsonDocument("$ne", BsonNull.Value) },
-                { "Template", new BsonDocument("$ne", true) }
-                }),
-                new BsonDocument("$project", new BsonDocument
-                {
-                { "_id", 1 },
-                { "IdOltHost", 1 },
-                { "IdRelated", 1 },
-                { "Action", 1 },
-                { "ItemKey", 1},
-                { "LastProbed", 1 },
-                { "Calc", 1 },
-                { "AsHex", 1 },
-                { "HistoryFor", 1 },
-                { "DoProbe",
-                    new BsonDocument("$gte", new BsonArray
-                    {
-                        "$$NOW",
-                        new BsonDocument("$add", new BsonArray
-                            {
-                                "$LastProbed",
-                                new BsonDocument("$multiply", new BsonArray { "$Interval", 1000 })
-                            })
-                    })
-                }
-                }),
-                new BsonDocument("$match", new BsonDocument
-                {
-                { "DoProbe", true }
+                { "Template", new BsonDocument("$ne", true) },
+                { "$or", new BsonArray {
+                    new BsonDocument("NextProbe", new BsonDocument("$eq", BsonNull.Value)),
+                    new BsonDocument("$expr", new BsonDocument("$lte", new BsonArray { "$NextProbe", "$$NOW" }))
+                }}
                 }),
                 new BsonDocument("$limit", 1000),
                 new BsonDocument("$lookup", new BsonDocument
@@ -164,6 +141,8 @@ public static class MongoDbOltApiMigrations
                     { "default", "$ItemKey" }
                 })},
                 { "LastProbed", 1 },
+                { "Interval", 1 },
+                { "NextProbe", 1 },
                 { "Calc", new BsonDocument("$max", new BsonArray {
                     "$Calc",
                     new BsonDocument("$arrayElemAt", new BsonArray { "$Related.Calc", 0 }) })

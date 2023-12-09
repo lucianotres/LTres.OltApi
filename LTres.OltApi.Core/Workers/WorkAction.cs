@@ -23,7 +23,7 @@ public class WorkAction : IWorkerAction
     public async Task<WorkProbeResponse> Execute(WorkProbeInfo probeInfo, CancellationToken cancellationToken, WorkProbeResponse? initialResponse = null)
     {
         _log.LogDebug($"Work probe received: {probeInfo.Id} -> {probeInfo.Action}");
-        var workProbeResponse = new WorkProbeResponse() { Id = probeInfo.Id };
+        var workProbeResponse = new WorkProbeResponse() { Id = probeInfo.Id, Request = probeInfo };
         var timer = Stopwatch.StartNew();
 
         try

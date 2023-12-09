@@ -22,14 +22,18 @@ public class MongoDbWorkProbeResponse : IDbWorkProbeResponse
 
     public async Task SaveWorkProbeResponse(WorkProbeResponse workProbeResponse)
     {
+        var interval = workProbeResponse.Request?.Interval;
+
         var filter = Builders<OLT_Host_Item>.Filter.Eq(f => f.Id, workProbeResponse.Id);
         var update = Builders<OLT_Host_Item>.Update
-            .Set(p => p.LastProbed, workProbeResponse.ProbedAt)
-            .Set(p => p.ProbedSuccess, workProbeResponse.Success);
+            .Set(p => p.ProbedSuccess, workProbeResponse.Success)
+            .Set(p => p.NextProbe, workProbeResponse.ProbedAt.AddSeconds(interval.GetValueOrDefault(60)));
 
         if (workProbeResponse.Success)
         {
-            update = update.Unset(p => p.ProbeFailedMessage);
+            update = update
+                .Unset(p => p.ProbeFailedMessage)
+                .Set(p => p.LastProbed, workProbeResponse.ProbedAt);
 
             if (workProbeResponse.ValueInt.HasValue)
                 update = update.Set(p => p.ProbedValueInt, workProbeResponse.ValueInt);

@@ -10,6 +10,10 @@ public class WorkProbeInfo
 
     public DateTime LastProbed { get; set; }
 
+    public DateTime? NextProbe { get; set; }
+
+    public int? Interval { get; set; }
+
     [JsonConverter(typeof(IPEndPointConverter))]
     public required IPEndPoint Host { get; set; }
 

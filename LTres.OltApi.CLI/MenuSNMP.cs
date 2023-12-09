@@ -29,6 +29,7 @@ public class MenuSNMP : Menu
         Options.Add(new MenuOption('4', "Try to walk ZTE ONUs", SnmpWalkZteOnu));
         Options.Add(new MenuOption('5', "Try to get string value", SnmpGetStr));
         Options.Add(new MenuOption('6', "Try to get integer value", SnmpGetInt));
+        Options.Add(new MenuOption('7', "Try to walk on ...", SnmpWalk));
         Options.Add(new MenuOption('r', "to return"));
     }
 
@@ -254,6 +255,46 @@ public class MenuSNMP : Menu
         var workResult = await workSnmpGetAction.Execute(probeInfo, CancellationToken.None);
 
         Console.WriteLine($"{oid} | {(workResult.Success ? "ok" : workResult.FailMessage)} -> {workResult.ValueUInt}{workResult.ValueInt}");
+        return false;
+    }
+
+    private async Task<bool> SnmpWalk()
+    {
+        AskHostInfo();
+
+        Console.Write("Enter OID: ");
+        string? oid = Console.ReadLine()?.Trim();
+
+        var workSnmpGetAction = GetSnmpWalkImplementation();
+        var probeInfo = new WorkProbeInfo()
+        {
+            Id = Guid.NewGuid(),
+            Host = ipEndPoint,
+            SnmpCommunity = snmpCommunity,
+            SnmpVersion = 2,
+            SnmpBulk = true,
+            Action = "snmpwalk",
+            ItemKey = oid
+        };
+
+        var datetimeStarted = DateTime.Now;
+
+        var workResult = await workSnmpGetAction.Execute(probeInfo, CancellationToken.None);
+        if (workResult.Success)
+        {
+            var timespanGotResponse = DateTime.Now.Subtract(datetimeStarted);
+
+            if (workResult.Values != null)
+            {
+                foreach (var v in workResult.Values)
+                    Console.WriteLine($"{v.Key}: {v.ValueStr}");
+            }
+
+            Console.WriteLine($"Walk with {(workResult.Values?.Count()).GetValueOrDefault()} results in {timespanGotResponse}");
+        }
+        else
+            Console.WriteLine($"Failed: {workResult.FailMessage}");
+
         return false;
     }
 }

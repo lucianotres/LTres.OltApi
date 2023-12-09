@@ -28,10 +28,15 @@ public class OLT_Host_Item
     public string? ItemKey { get; set; }
 
     /// <summary>
-    /// Latest probed datetime
+    /// Latest succeed probed datetime
     /// </summary>
     /// <value></value>
     public DateTime? LastProbed { get; set; }
+    
+    /// <summary>
+    /// Do next probe after
+    /// </summary>
+    public DateTime? NextProbe { get; set; }
 
     /// <summary>
     /// Probe interval (seconds)
@@ -74,8 +79,15 @@ public class OLT_Host_Item
     /// </summary>
     public Guid? From { get; set; }
 
+    
+    /// <summary>
+    /// Calc expression to numeric values
+    /// </summary>
     public string? Calc { get; set; }
 
+    /// <summary>
+    /// Should read as hexstring instead of string
+    /// </summary>
     public bool? AsHex { get; set; }
 
 
@@ -93,6 +105,6 @@ public static class OLT_Host_ItemExtensions
     public const int MinHistoryFor = 1;
     public const int MaxHistoryFor = 2628000; //5 years
 
-    public const int MinMaintainFor = 1;
+    public const int MinMaintainFor = 0; //0 is for not maintain at failed read 
     public const int MaxMaintainFor = 2628000; //5 years
 }
