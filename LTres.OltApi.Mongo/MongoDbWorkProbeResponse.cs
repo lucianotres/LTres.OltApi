@@ -56,7 +56,7 @@ public class MongoDbWorkProbeResponse : IDbWorkProbeResponse
 
         if (workProbeResponse.Type == WorkProbeResponseType.Value)
         {
-            if (workProbeResponse.DoHistory)
+            if (workProbeResponse.DoHistory && workProbeResponse.Success)
                 await OLT_Host_Items_History.InsertOneAsync(OLT_Host_Item_History.From(workProbeResponse));
 
             await OLT_Host_Items.UpdateOneAsync(filter, update);
@@ -81,12 +81,13 @@ public class MongoDbWorkProbeResponse : IDbWorkProbeResponse
         vfilter &= Builders<OLT_Host_Item>.Filter.Eq(f => f.ItemKey, workProbeResponseVar.Key);
 
         var vupdate = Builders<OLT_Host_Item>.Update
-            .Set(p => p.LastProbed, workProbeResponse.ProbedAt)
             .Set(p => p.ProbedSuccess, workProbeResponse.Success);
 
         if (workProbeResponse.Success)
         {
-            vupdate = vupdate.Unset(p => p.ProbeFailedMessage);
+            vupdate = vupdate
+                .Unset(p => p.ProbeFailedMessage)
+                .Set(p => p.LastProbed, workProbeResponse.ProbedAt);
 
             if (workProbeResponseVar.ValueInt.HasValue)
                 vupdate = vupdate.Set(p => p.ProbedValueInt, workProbeResponseVar.ValueInt);
@@ -114,7 +115,7 @@ public class MongoDbWorkProbeResponse : IDbWorkProbeResponse
                 IdOltHost = idOltHost,
                 IdRelated = workProbeResponse.Id,
                 ItemKey = workProbeResponseVar.Key,
-                LastProbed = workProbeResponse.ProbedAt,
+                LastProbed = workProbeResponse.Success ? workProbeResponse.ProbedAt : null,
                 ProbedSuccess = workProbeResponse.Success,
                 ProbeFailedMessage = workProbeResponse.FailMessage,
                 ProbedValueInt = workProbeResponseVar.ValueInt,
@@ -123,7 +124,7 @@ public class MongoDbWorkProbeResponse : IDbWorkProbeResponse
             });
         }
 
-        if (workProbeResponse.DoHistory)
+        if (workProbeResponse.DoHistory && workProbeResponse.Success)
         {
             var pipelineFindHostItemId = PipelineDefinition<OLT_Host_Item, Guid>
                 .Create(new IPipelineStageDefinition[] {
