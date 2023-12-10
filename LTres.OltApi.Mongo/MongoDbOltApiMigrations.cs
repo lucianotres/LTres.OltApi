@@ -165,5 +165,38 @@ public static class MongoDbOltApiMigrations
 
             await database.CreateViewAsync("to_probe", "olt_host_items", pipelineDefinitionWorkProbeInfo);
         }
+
+
+        if (!collections.Any(s => s == "to_remove_olt_items"))
+        {
+            var pipelineDefinitionWorkProbeInfo = PipelineDefinition<OLT_Host_Item, BsonDocument>.Create(
+                new BsonDocument("$match", new BsonDocument("IdRelated", new BsonDocument("$ne", BsonNull.Value))),
+                new BsonDocument("$lookup", new BsonDocument
+                {
+                    { "from", "olt_host_items" }, 
+                    { "localField", "IdRelated" }, 
+                    { "foreignField", "_id" }, 
+                    { "as", "Related" }
+                }),
+                new BsonDocument("$match", new BsonDocument("$expr", 
+                    new BsonDocument("$lt", new BsonArray
+                    {
+                        new BsonDocument("$add", new BsonArray
+                        {
+                            "$LastProbed",
+                            new BsonDocument("$multiply", new BsonArray
+                            {
+                                new BsonDocument("$max", new BsonArray { 0, "$MaintainFor" }), 60000
+                            })
+                        }),
+                        "$$NOW"
+                    }))),
+                new BsonDocument("$project", 
+                new BsonDocument("_id", 1)),
+                new BsonDocument("$limit", 1000)
+            );
+
+            await database.CreateViewAsync("to_remove_olt_items", "olt_host_items", pipelineDefinitionWorkProbeInfo);
+        }
     }
 }

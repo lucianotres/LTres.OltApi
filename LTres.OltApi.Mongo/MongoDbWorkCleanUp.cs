@@ -13,9 +13,9 @@ public class MongoDbWorkCleanUp : IDbWorkCleanUp
 {
     private ILogger _log;
     private IMongoCollection<OLT_Host_Item> OLT_Host_Items;
+    private IMongoCollection<IdModel> to_remove_olt_items;
     private IMongoCollection<OLT_Host_Item_History> OLT_Host_Items_History;
     private PipelineDefinition<OLT_Host_Item, CleanUpItemHistory> pipelineDefinitionItemsHistoryToDelete;
-    private PipelineDefinition<OLT_Host_Item, CleanUpItemHistory> pipelineDefinitionItemsNestedToDelete;
     private PipelineDefinition<OLT_Host_Item_History, CleanUpItemHistory> pipelineDefinitionHistoryItemsOrphansToDelete;
 
     public MongoDbWorkCleanUp(IOptions<MongoConfig> options, ILogger<MongoDbWorkCleanUp> logger)
@@ -28,6 +28,8 @@ public class MongoDbWorkCleanUp : IDbWorkCleanUp
 
         OLT_Host_Items = database.GetCollection<OLT_Host_Item>("olt_host_items");
         OLT_Host_Items_History = database.GetCollection<OLT_Host_Item_History>("olt_host_items_history");
+
+        to_remove_olt_items = database.GetCollection<IdModel>("to_remove_olt_items");
 
         pipelineDefinitionItemsHistoryToDelete = PipelineDefinition<OLT_Host_Item, CleanUpItemHistory>.Create(
             new BsonDocument("$lookup", new BsonDocument
@@ -72,51 +74,26 @@ public class MongoDbWorkCleanUp : IDbWorkCleanUp
             new BsonDocument("$match", new BsonDocument("History", new BsonDocument("$gt", 0))));
 
 
-
-        pipelineDefinitionItemsNestedToDelete = PipelineDefinition<OLT_Host_Item, CleanUpItemHistory>.Create(
-            new BsonDocument("$match", new BsonDocument("Action", "snmpwalk")),
-            new BsonDocument("$lookup", new BsonDocument
-            {
-                { "from", "olt_host_items" },
-                { "localField", "_id" },
-                { "foreignField", "IdRelated" },
-                { "as", "Adjacent" }
-            }),
-            new BsonDocument("$project", new BsonDocument
-            {
-                { "History", new BsonDocument("$size", "$Adjacent") },
-                { "Until", new BsonDocument("$subtract", new BsonArray {
-                    "$LastProbed",
-                    new BsonDocument("$multiply", new BsonArray
-                    {
-                        new BsonDocument("$max", new BsonArray { 1, "$MaintainFor" }),
-                        60000
-                    })
-                }) }
-            }),
-            new BsonDocument("$match", new BsonDocument("History", new BsonDocument("$gt", 0))));
-
-
         pipelineDefinitionHistoryItemsOrphansToDelete = PipelineDefinition<OLT_Host_Item_History, CleanUpItemHistory>.Create(
             new BsonDocument("$lookup", new BsonDocument
             {
-                { "from", "olt_host_items" }, 
-                { "localField", "IdItem" }, 
-                { "foreignField", "_id" }, 
+                { "from", "olt_host_items" },
+                { "localField", "IdItem" },
+                { "foreignField", "_id" },
                 { "as", "ParentItem" }
             }),
             new BsonDocument("$project", new BsonDocument
             {
-                { "_id", 1 }, 
+                { "_id", 1 },
                 { "IdItem", 1 },
-                { "Until", "$$NOW" }, 
+                { "Until", "$$NOW" },
                 { "History", new BsonDocument("$size", "$ParentItem") }
             }),
-            new BsonDocument("$match", new BsonDocument("History",  new BsonDocument("$lte", 0))),
+            new BsonDocument("$match", new BsonDocument("History", new BsonDocument("$lte", 0))),
             new BsonDocument("$group", new BsonDocument
             {
-                { "_id", "$IdItem" }, 
-                { "Until", new BsonDocument("$max", "$Until") }, 
+                { "_id", "$IdItem" },
+                { "Until", new BsonDocument("$max", "$Until") },
                 { "History", new BsonDocument("$max", 1) }
             }));
     }
@@ -127,7 +104,7 @@ public class MongoDbWorkCleanUp : IDbWorkCleanUp
 
         iTotalItemsRemoved += await RemoveRelatedExpiredItems();
 
-        iTotalItemsRemoved += await RemoveHistoryExpiredItems();        
+        iTotalItemsRemoved += await RemoveHistoryExpiredItems();
 
         return iTotalItemsRemoved;
     }
@@ -137,14 +114,12 @@ public class MongoDbWorkCleanUp : IDbWorkCleanUp
         long removedCount = 0;
         var timer = Stopwatch.StartNew();
 
-        var listItemsNestedToDelete = await OLT_Host_Items
-            .Aggregate(pipelineDefinitionItemsNestedToDelete)
-            .ToListAsync();
+        var listItemsNestedToDelete = (await to_remove_olt_items.FindAsync(_ => true)).ToList();
 
-        foreach(var toDel in listItemsNestedToDelete)
+        foreach (var toDel in listItemsNestedToDelete)
         {
             var deleteResult = await OLT_Host_Items
-                .DeleteManyAsync(f => f.IdRelated == toDel.Id && f.LastProbed <= toDel.Until);
+                .DeleteOneAsync(f => f.Id == toDel.Id);
 
             if (deleteResult.IsAcknowledged)
                 removedCount += deleteResult.DeletedCount;
@@ -196,6 +171,12 @@ public class MongoDbWorkCleanUp : IDbWorkCleanUp
         return removedCount;
     }
 
+}
+
+class IdModel
+{
+    [BsonId]
+    public Guid Id { get; set; }
 }
 
 class CleanUpItemHistory
