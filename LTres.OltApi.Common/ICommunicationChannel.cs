@@ -27,7 +27,7 @@ public interface ICommunicationChannel : IDisposable
 
     int ToReadAvailable { get; }
 
-    int LastReadBackspacesCount { get; }
+    int LastReadBackspacesCount { get; set; }
 
     int LastReadErrorCount { get; }
 

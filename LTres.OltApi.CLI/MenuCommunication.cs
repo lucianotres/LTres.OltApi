@@ -1,13 +1,17 @@
 ﻿
 using System.Net;
+using Lextm.SharpSnmpLib.Security;
 using LTres.OltApi.Common;
 using LTres.OltApi.Communication;
+using LTres.OltApi.Core.Tools;
+using Microsoft.Extensions.Logging;
 using org.matheval.Functions;
 
 namespace LTres.OltApi.CLI;
 
 public class MenuCommunication : Menu
 {
+    private ILoggerFactory logger;
     private bool askedTelnetInfo = false;
     private IPEndPoint ipEndPoint;
     private string telnetUser = "";
@@ -15,8 +19,12 @@ public class MenuCommunication : Menu
 
     public MenuCommunication()
     {
+        logger = new LoggerFactory();
+
         Description = "-- Test communication with OLT terminal ---";
         Options.Add(new MenuOption('0', "Simple telnet connection test", SimpleTelnetConnectionTest));
+        Options.Add(new MenuOption('1', "List all ONUs RX from pon", ListPonOnuRx));
+        Options.Add(new MenuOption('2', "Get RX from specific ONU", GetOnuRx));
         Options.Add(new MenuOption('r', "to return"));
     }
 
@@ -27,7 +35,7 @@ public class MenuCommunication : Menu
             return;
 
         askedTelnetInfo = true;
-        
+
         var environmentVarIP = Environment.GetEnvironmentVariable("LTRES_HOSTIP");
         if (!string.IsNullOrEmpty(environmentVarIP) && IPAddress.TryParse(environmentVarIP, out IPAddress? environmentIPAddress))
             ipEndPoint = new IPEndPoint(environmentIPAddress, 23);
@@ -60,15 +68,21 @@ public class MenuCommunication : Menu
     }
 
 
-    private async Task<ICommunicationChannel> GetCommunicationChannel()
+    private async Task<CommunicationChannel> GetCommunicationChannel()
     {
         AskTelnetInfo();
 
-        var channel = new TelnetZTEChannel();
-        var logged = await channel.Connect(ipEndPoint, telnetUser, telnetPassword);
+        var channel = new CommunicationChannel(new TelnetZTEChannel(), logger.CreateLogger<CommunicationChannel>())
+        {
+            Address = ipEndPoint,
+            Username = telnetUser,
+            Password = telnetPassword
+        };
+
+        var logged = await channel.Connect();
         if (!logged)
         {
-            var error = channel.LastReadErrors.First().error;
+            var error = channel.LastError.error;
             channel.Dispose();
             throw new Exception(error);
         }
@@ -80,11 +94,55 @@ public class MenuCommunication : Menu
     {
         using var channel = await GetCommunicationChannel();
 
-        await channel.WriteCommand("show version-running");
-        var read = await channel.ReadLinesFromChannel();
+        await channel.GoToBeginning();
+        return false;
+    }
 
-        foreach(var l in read)
-            Console.WriteLine(l);
+    private async Task<bool> ListPonOnuRx()
+    {
+        using var channel = await GetCommunicationChannel();
+
+        Console.Write($"Complete pon ID gpon-olt_1/1/x: ");
+        var strPon = Console.ReadLine();
+        if (string.IsNullOrEmpty(strPon) || !int.TryParse(strPon, out int pon))
+            return false;
+
+        var read = await channel.GetPowerOnuRx(1, 1, pon);
+
+        if (read == null)
+            Console.WriteLine(channel.LastError.error);
+        else
+        {
+            foreach (var l in read)
+                Console.WriteLine(l);
+        }
+
+        return false;
+    }
+
+    private async Task<bool> GetOnuRx()
+    {
+        using var channel = await GetCommunicationChannel();
+
+        Console.Write($"Complete gpon-onu_1/1/x: ");
+        var strPon = Console.ReadLine();
+        if (string.IsNullOrEmpty(strPon) || !int.TryParse(strPon, out int pon))
+            return false;
+
+        Console.Write($"And the onu id gpon-nu_1/1/{pon}:x: ");
+        var strID = Console.ReadLine();
+        if (string.IsNullOrEmpty(strID) || !int.TryParse(strID, out int id))
+            return false;
+
+        var read = await channel.GetPowerOnuRx(1, 1, pon, id);
+
+        if (read == null)
+            Console.WriteLine(channel.LastError.error);
+        else
+        {
+            foreach (var l in read)
+                Console.WriteLine(l);
+        }
 
         return false;
     }

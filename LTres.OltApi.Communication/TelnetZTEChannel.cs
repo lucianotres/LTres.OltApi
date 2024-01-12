@@ -11,7 +11,6 @@ public class TelnetZTEChannel : ICommunicationChannel
     private TcpClient? telnetClient;
     private Stream? telnetStream;
     private bool telnetLoggedIn = false;
-    private int lastReadBackspacesCount = 0;
     private readonly List<(int code, string error)> lastReadErrors = new();
     private readonly Regex regexErrorDetect = new(@"^%Error ([0-9]{1,11})\: (.*)$");
 
@@ -165,7 +164,7 @@ public class TelnetZTEChannel : ICommunicationChannel
         while (cancellationTokenSource == null || !cancellationTokenSource.IsCancellationRequested);
 
         //count backspaces and remove it
-        lastReadBackspacesCount = stringBuilder.ToString().Where(w => w == '\b').Count();
+        LastReadBackspacesCount = stringBuilder.ToString().Where(w => w == '\b').Count();
         stringBuilder.Replace("\b", "");
 
         //break lines to return as list
@@ -188,7 +187,7 @@ public class TelnetZTEChannel : ICommunicationChannel
 
     public async Task<IEnumerable<string>> ReadLinesFromChannel() => await ReadLinesTelnet().ConfigureAwait(false);
 
-    public int LastReadBackspacesCount { get => lastReadBackspacesCount; }
+    public int LastReadBackspacesCount { get; set; }
 
     public int LastReadErrorCount { get => lastReadErrors.Count; }
 
