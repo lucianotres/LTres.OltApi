@@ -3,6 +3,7 @@
   <ItemGroup>
     <ProjectReference Include="..\LTres.OltApi.Core\LTres.OltApi.Core.csproj" />
     <ProjectReference Include="..\LTres.OltApi.Snmp\LTres.OltApi.Snmp.csproj" />
+    <ProjectReference Include="..\LTres.OltApi.Communication\LTres.OltApi.Communication.csproj" />
   </ItemGroup>
 
   <PropertyGroup>

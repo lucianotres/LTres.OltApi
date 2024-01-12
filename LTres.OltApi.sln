@@ -21,6 +21,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LTres.OltApi.Snmp", "LTres.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LTres.OltApi.CLI", "LTres.OltApi.CLI\LTres.OltApi.CLI.csproj", "{6F2CD7AE-B549-4AF7-B6B0-4E57B56F29FA}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LTres.OltApi.Communication", "LTres.OltApi.Communication\LTres.OltApi.Communication.csproj", "{4A41B08D-E02F-416C-9BE8-55EA58916B8F}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -66,5 +68,9 @@ Global
 		{6F2CD7AE-B549-4AF7-B6B0-4E57B56F29FA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6F2CD7AE-B549-4AF7-B6B0-4E57B56F29FA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6F2CD7AE-B549-4AF7-B6B0-4E57B56F29FA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4A41B08D-E02F-416C-9BE8-55EA58916B8F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4A41B08D-E02F-416C-9BE8-55EA58916B8F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4A41B08D-E02F-416C-9BE8-55EA58916B8F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4A41B08D-E02F-416C-9BE8-55EA58916B8F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

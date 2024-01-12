@@ -44,7 +44,7 @@ public class MenuOption
 {
     public char Option { get; set; } = '\0';
     public string Description { get; set; } = string.Empty;
-    public Func<Task<bool>>? Action { get; set; } 
+    public Func<Task<bool>>? Action { get; set; }
 
     public MenuOption() { }
 
@@ -54,10 +54,31 @@ public class MenuOption
         Description = description;
     }
 
-    public MenuOption(char option, string description, Func<Task<bool>> action)
+    public MenuOption(char option, string description, Func<Task<bool>> action, bool catchError = false)
     {
         Option = option;
         Description = description;
-        Action = action;
+
+        if (catchError)
+            Action = () => CatchError(() => action());
+        else
+            Action = action;
+    }
+
+    private async Task<bool> CatchError(Func<Task<bool>> action)
+    {
+        try
+        {
+            return await action();
+        }
+        catch (Exception err)
+        {
+            var color = Console.BackgroundColor;
+            Console.BackgroundColor = ConsoleColor.DarkRed;
+            Console.Write(err.Message);
+            Console.BackgroundColor = color;
+            Console.WriteLine();
+            return false;
+        }
     }
 }
