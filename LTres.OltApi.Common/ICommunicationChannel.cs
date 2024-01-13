@@ -1,10 +1,19 @@
 ﻿using System.Net;
+using System.Text.RegularExpressions;
 using Microsoft.VisualBasic;
 
 namespace LTres.OltApi.Common;
 
 public interface ICommunicationChannel : IDisposable
 {
+    IPEndPoint HostEndPoint { get; set; }
+    string? Username { get; set; }
+    string? Password { get; set; }
+
+    int ToReadAvailable { get; }
+    int LastReadBackspacesCount { get; set; }
+    int LastReadErrorCount { get; }
+
     /// <summary>
     /// Write a single byte to channel
     /// </summary>
@@ -24,23 +33,15 @@ public interface ICommunicationChannel : IDisposable
     /// <param name="newLine">Write a new line after</param>
     Task WriteCommand(string command, bool newLine = true, bool doLogging = true);
 
-
-    int ToReadAvailable { get; }
-
-    int LastReadBackspacesCount { get; set; }
-
-    int LastReadErrorCount { get; }
-
     IEnumerable<(int code, string error)> LastReadErrors { get; }
 
     Task<int> ReadBuffer(byte[] buffer, int offset, int count);
 
     Task<int> ReadBuffer(byte[] buffer, int offset, int count, CancellationToken cancellationToken);
 
-    Task<IEnumerable<string>> ReadLinesFromChannel();
+    Task<IEnumerable<string>> ReadLinesFromChannel(Regex? regexDetectWaitLine = null, CancellationTokenSource? cancellationTokenSource = null);
 
-
-    Task<bool> Connect(IPEndPoint ipEndPoint, string? username = null, string? password = null);
+    Task<bool> Connect();
 
     Task Disconnect();
 }

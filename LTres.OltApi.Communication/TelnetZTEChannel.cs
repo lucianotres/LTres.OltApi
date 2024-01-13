@@ -14,11 +14,15 @@ public class TelnetZTEChannel : ICommunicationChannel
     private readonly List<(int code, string error)> lastReadErrors = new();
     private readonly Regex regexErrorDetect = new(@"^%Error ([0-9]{1,11})\: (.*)$");
 
+    public IPEndPoint HostEndPoint { get; set; } = new IPEndPoint(IPAddress.None, 0);
+    public string? Username { get; set; } = null;
+    public string? Password { get; set; } = null;
+
     public int DelayToStartRead { get; set; } = 300;
     public Regex ExpressionForToWaitCommand { get; set; } = new Regex(@"^[\w-]+(\(config\)#|#)", RegexOptions.Multiline);
 
 
-    public async Task<bool> Connect(IPEndPoint ipEndPoint, string? username = null, string? password = null)
+    public async Task<bool> Connect()
     {
         await Disconnect();
 
@@ -30,7 +34,7 @@ public class TelnetZTEChannel : ICommunicationChannel
                 ReceiveTimeout = 700
             };
 
-            await telnetClient.ConnectAsync(ipEndPoint);
+            await telnetClient.ConnectAsync(HostEndPoint);
 
             telnetStream = telnetClient.GetStream();
         }
@@ -49,13 +53,13 @@ public class TelnetZTEChannel : ICommunicationChannel
             //asking for username?
             if (rLines.Any(s => s.Contains("username", StringComparison.InvariantCultureIgnoreCase)))
             {
-                await WriteCommand(username ?? "", true, false);
+                await WriteCommand(Username ?? "", true, false);
                 rLines = await ReadLinesTelnet(3, false, new Regex("[Pp]assword"));
 
                 //now asking for password?
                 if (rLines.Any(s => s.Contains("password", StringComparison.InvariantCultureIgnoreCase)))
                 {
-                    await WriteCommand(password ?? "", true, false);
+                    await WriteCommand(Password ?? "", true, false);
                     await ReadLinesTelnet(3, false);
                 }
             }
@@ -185,7 +189,8 @@ public class TelnetZTEChannel : ICommunicationChannel
         return ret;
     }
 
-    public async Task<IEnumerable<string>> ReadLinesFromChannel() => await ReadLinesTelnet().ConfigureAwait(false);
+    public async Task<IEnumerable<string>> ReadLinesFromChannel(Regex? regexDetectWaitLine = null, CancellationTokenSource? cancellationTokenSource = null) => 
+        await ReadLinesTelnet(5, true, regexDetectWaitLine, cancellationTokenSource).ConfigureAwait(false);
 
     public int LastReadBackspacesCount { get; set; }
 
@@ -214,6 +219,5 @@ public class TelnetZTEChannel : ICommunicationChannel
         var vBytes = Encoding.ASCII.GetBytes(command);
         await WriteBuffer(vBytes);
     }
-
 
 }

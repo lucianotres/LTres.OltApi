@@ -1,5 +1,6 @@
 ﻿
 using System.Net;
+using System.Text.RegularExpressions;
 using Lextm.SharpSnmpLib.Security;
 using LTres.OltApi.Common;
 using LTres.OltApi.Communication;
@@ -13,7 +14,7 @@ public class MenuCommunication : Menu
 {
     private ILoggerFactory logger;
     private bool askedTelnetInfo = false;
-    private IPEndPoint ipEndPoint;
+    private IPEndPoint ipEndPoint = new IPEndPoint(IPAddress.None, 0);
     private string telnetUser = "";
     private string telnetPassword = "";
 
@@ -24,7 +25,10 @@ public class MenuCommunication : Menu
         Description = "-- Test communication with OLT terminal ---";
         Options.Add(new MenuOption('0', "Simple telnet connection test", SimpleTelnetConnectionTest));
         Options.Add(new MenuOption('1', "List all ONUs RX from pon", ListPonOnuRx));
-        Options.Add(new MenuOption('2', "Get RX from specific ONU", GetOnuRx));
+        Options.Add(new MenuOption('2', "List all ONUs info", ListPonOnuInfo));
+        Options.Add(new MenuOption('3', "List all ONUs unconfigured", ListUnconfiguredOnu));
+        Options.Add(new MenuOption('4', "Get RX from specific ONU", GetOnuRx));
+        Options.Add(new MenuOption('5', "Show ONU detail", GetOnuDetail));
         Options.Add(new MenuOption('r', "to return"));
     }
 
@@ -68,13 +72,13 @@ public class MenuCommunication : Menu
     }
 
 
-    private async Task<CommunicationChannel> GetCommunicationChannel()
+    private async Task<ClientZteCLI> GetCommunicationChannel()
     {
         AskTelnetInfo();
 
-        var channel = new CommunicationChannel(new TelnetZTEChannel(), logger.CreateLogger<CommunicationChannel>())
+        var channel = new ClientZteCLI(new TelnetZTEChannel(), logger.CreateLogger<ClientZteCLI>())
         {
-            Address = ipEndPoint,
+            HostEndPoint = ipEndPoint,
             Username = telnetUser,
             Password = telnetPassword
         };
@@ -98,17 +102,25 @@ public class MenuCommunication : Menu
         return false;
     }
 
-    private async Task<bool> ListPonOnuRx()
+    private (int olt, int slot, int port, int id) AskOnuID()
     {
-        using var channel = await GetCommunicationChannel();
+        Console.Write($"Inform the id for ONU <1/1/1:1>: ");
+        var userInput = Console.ReadLine() ?? "";
 
-        Console.Write($"Complete pon ID gpon-olt_1/1/x: ");
-        var strPon = Console.ReadLine();
-        if (string.IsNullOrEmpty(strPon) || !int.TryParse(strPon, out int pon))
-            return false;
+        var expressionId = new Regex(@"^([0-9]{1,3})\/([0-9]{1,3})\/([0-9]{1,3}):{0,1}([0-9]{0,3})");
+        var match = expressionId.Match(userInput.Trim());
 
-        var read = await channel.GetPowerOnuRx(1, 1, pon);
+        if (match.Success)
+        {
+            var id = match.Groups.Count > 4 && !string.IsNullOrWhiteSpace(match.Groups[4].Value) ? int.Parse(match.Groups[4].Value) : 0;
+            return (int.Parse(match.Groups[1].Value), int.Parse(match.Groups[2].Value), int.Parse(match.Groups[3].Value), id);
+        }
+        else
+            return (0, 0, 0, 0);
+    }
 
+    private void CommonConsoleOutputLines(IEnumerable<string>? read, ClientZteCLI channel)
+    {
         if (read == null)
             Console.WriteLine(channel.LastError.error);
         else
@@ -116,6 +128,15 @@ public class MenuCommunication : Menu
             foreach (var l in read)
                 Console.WriteLine(l);
         }
+    }
+
+    private async Task<bool> ListPonOnuRx()
+    {
+        using var channel = await GetCommunicationChannel();
+
+        var ask = AskOnuID();
+        if (ask.port > 0)
+            CommonConsoleOutputLines(await channel.ShowPowerOnuRx(ask.olt, ask.slot, ask.port), channel);
 
         return false;
     }
@@ -124,24 +145,73 @@ public class MenuCommunication : Menu
     {
         using var channel = await GetCommunicationChannel();
 
-        Console.Write($"Complete gpon-onu_1/1/x: ");
-        var strPon = Console.ReadLine();
-        if (string.IsNullOrEmpty(strPon) || !int.TryParse(strPon, out int pon))
-            return false;
+        var ask = AskOnuID();
+        if (ask.id > 0)
+        {
+            var dbmRx = await channel.GetPowerOnuRx(ask.olt, ask.slot, ask.port, ask.id);
+            Console.WriteLine($"rx -->> {dbmRx} dbm");
+        }
 
-        Console.Write($"And the onu id gpon-nu_1/1/{pon}:x: ");
-        var strID = Console.ReadLine();
-        if (string.IsNullOrEmpty(strID) || !int.TryParse(strID, out int id))
-            return false;
+        return false;
+    }
 
-        var read = await channel.GetPowerOnuRx(1, 1, pon, id);
+    private async Task<bool> GetOnuDetail()
+    {
+        using var channel = await GetCommunicationChannel();
 
+        var ask = AskOnuID();
+        if (ask.id > 0)
+        {
+            Console.WriteLine("---detail");
+            CommonConsoleOutputLines(await channel.ShowGponOnuDetail(ask.olt, ask.slot, ask.port, ask.id), channel);
+
+            Console.WriteLine("---remote pon");
+            CommonConsoleOutputLines(await channel.ShowGponOnuRemoteInterfacePon(ask.olt, ask.slot, ask.port, ask.id), channel);
+
+            Console.WriteLine("---remote eth");
+            CommonConsoleOutputLines(await channel.ShowGponOnuRemoteInterfaceEth(ask.olt, ask.slot, ask.port, ask.id), channel);
+
+            Console.WriteLine("---remote version");
+            CommonConsoleOutputLines(await channel.ShowGponOnuRemoteVersion(ask.olt, ask.slot, ask.port, ask.id), channel);
+
+            Console.WriteLine("---mac addresses");
+            CommonConsoleOutputLines(await channel.ShowMacOnuInfo(ask.olt, ask.slot, ask.port, ask.id), channel);
+        }
+
+        return false;
+    }
+
+    private async Task<bool> ListPonOnuInfo()
+    {
+        using var channel = await GetCommunicationChannel();
+
+        var ask = AskOnuID();
+        if (ask.port > 0)
+        {
+            var read = await channel.ShowGponOnuBaseInfo(ask.olt, ask.slot, ask.port);
+            if (read == null)
+                Console.WriteLine(channel.LastError.error);
+            else
+            {
+                foreach (var l in read)
+                    Console.WriteLine($"id {l.id,3} | {l.tp,10} | {l.mode,4} | {l.auth,14} | {l.state}");
+            }
+        }
+
+        return false;
+    }
+
+    private async Task<bool> ListUnconfiguredOnu()
+    {
+        using var channel = await GetCommunicationChannel();
+
+        var read = await channel.ShowGponOnuUncfg();
         if (read == null)
             Console.WriteLine(channel.LastError.error);
         else
         {
             foreach (var l in read)
-                Console.WriteLine(l);
+                Console.WriteLine($"gpon-olt_{l.olt}/{l.slot}/{l.port} | {l.id,-3} | {l.sn,14} | {l.state}");
         }
 
         return false;
