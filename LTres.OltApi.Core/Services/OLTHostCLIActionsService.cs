@@ -65,4 +65,49 @@ public class OLTHostCLIActionsService : IOLTHostCLIActionsService
         else
             return result;
     }
+
+    public async Task<IEnumerable<string>> GetONUInterfaces(Guid oltId, int olt, int slot, int port, int id)
+    {
+        using var cli = await CreateCommunicationChannel(oltId);
+
+        var finalResult = new List<string>();
+
+        var result = await cli.ShowGponOnuRemoteInterfacePon(olt, slot, port, id);
+        if (result == null)
+            finalResult.Add(cli.LastError.error);
+        else
+            finalResult.AddRange(result);
+
+        finalResult.Add("");
+
+        result = await cli.ShowGponOnuRemoteInterfaceEth(olt, slot, port, id);
+        if (result == null)
+            finalResult.Add(cli.LastError.error);
+        else
+            finalResult.AddRange(result);
+
+        return finalResult;
+    }
+
+    public async Task<IEnumerable<string>> GetONUVersion(Guid oltId, int olt, int slot, int port, int id)
+    {
+        using var cli = await CreateCommunicationChannel(oltId);
+
+        var result = await cli.ShowGponOnuRemoteVersion(olt, slot, port, id);
+        if (result == null)
+            return new string[] { cli.LastError.error };
+        else
+            return result;
+    }
+
+    public async Task<IEnumerable<string>> GetONUmac(Guid oltId, int olt, int slot, int port, int id)
+    {
+        using var cli = await CreateCommunicationChannel(oltId);
+
+        var result = await cli.ShowMacOnuInfo(olt, slot, port, id);
+        if (result == null)
+            return new string[] { cli.LastError.error };
+        else
+            return result;
+    }
 }

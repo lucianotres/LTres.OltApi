@@ -32,5 +32,27 @@ public class OLTHostActionsController : ControllerBase
     public async Task<string> GetONUInfo(Guid oltId, int olt, int slot, int port, int id) =>
         LinesToStr(await _service.GetONUInfo(oltId, olt, slot, port, id));
 
+    [HttpGet("onuinterfaces/{oltId}/{olt}/{slot}/{port}/{id}")]
+    [Produces("text/plain")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<string> GetONUInterfaces(Guid oltId, int olt, int slot, int port, int id) =>
+        LinesToStr(await _service.GetONUInterfaces(oltId, olt, slot, port, id));
 
+    [HttpGet("onuversion/{oltId}/{olt}/{slot}/{port}/{id}")]
+    [Produces("text/plain")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<string> GetONUVersion(Guid oltId, int olt, int slot, int port, int id) =>
+        LinesToStr(await _service.GetONUVersion(oltId, olt, slot, port, id));
+
+    [HttpGet("onumac/{oltId}/{olt}/{slot}/{port}/{id}")]
+    [Produces("text/plain")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<string> GetONUmac(Guid oltId, int olt, int slot, int port, int id) =>
+        LinesToStr(await _service.GetONUmac(oltId, olt, slot, port, id));
 }
