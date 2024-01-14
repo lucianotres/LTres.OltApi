@@ -62,4 +62,9 @@ public class OLT_Host
     /// Onu info items references
     /// </summary>
     public OLT_Host_OnuRef? OnuRef { get; set; }
+
+    /// <summary>
+    /// Configuration to CLI access
+    /// </summary> <summary>
+    public OLT_Host_CLIconfig? CLI { get; set; }
 }

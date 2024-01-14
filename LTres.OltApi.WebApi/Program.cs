@@ -2,8 +2,10 @@ using System.Reflection;
 using System.Text.Json.Serialization;
 using LTres.OltApi.Common;
 using LTres.OltApi.Common.DbServices;
+using LTres.OltApi.Communication;
 using LTres.OltApi.Core;
 using LTres.OltApi.Core.Services;
+using LTres.OltApi.Core.Tools;
 using LTres.OltApi.Mongo;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -21,7 +23,13 @@ builder.Services
 //service handlers
 builder.Services
     .AddScoped<IOLTHostService, OLTHostService>()
-    .AddScoped<IOLTHostItemService, OLTHostItemService>();
+    .AddScoped<IOLTHostItemService, OLTHostItemService>()
+    .AddScoped<IOLTHostCLIActionsService, OLTHostCLIActionsService>();
+
+//OLT CLI channel
+builder.Services
+    .AddScoped<ICommunicationChannel, TelnetZTEChannel>()
+    .AddScoped<ClientZteCLI>();
 
 //webapi controllers
 builder.Services.AddControllers()

@@ -13,7 +13,7 @@ public class ClientZteCLI : IDisposable
     private ICommunicationChannel channel;
     private ILogger logger;
 
-    public ClientZteCLI(ICommunicationChannel channel, ILogger logger)
+    public ClientZteCLI(ICommunicationChannel channel, ILogger<ClientZteCLI> logger)
     {
         Disposed = false;
 
@@ -46,11 +46,11 @@ public class ClientZteCLI : IDisposable
     {
         if (Disposed)
             throw new ObjectDisposedException(nameof(channel));
-               
+
         return await channel.Connect();
     }
 
-    private async Task<IEnumerable<string>?> ReadLinesFromChannelWithMore()
+    private async Task<IEnumerable<string>?> ReadLinesFromChannelWithMore(bool trimEmptyLines = false)
     {
         var finalLines = new List<string>();
         var readLines = await channel.ReadLinesFromChannel().ConfigureAwait(false);
@@ -94,6 +94,24 @@ public class ClientZteCLI : IDisposable
 
         if (finalLines.Count == 0)
             return finalLines;
+        else if (trimEmptyLines)
+        {
+            var firstNotEmpty = finalLines.FindIndex(s => !string.IsNullOrWhiteSpace(s));
+            if (firstNotEmpty < 0)
+                firstNotEmpty = 0;
+
+            var lastNotEmpty = finalLines
+                .Skip(firstNotEmpty)
+                .Select((value, index) => new { value, index })
+                .SkipLast(1)
+                .Last(w => !string.IsNullOrWhiteSpace(w.value))
+                .index;
+
+            if (lastNotEmpty > 0)
+                return finalLines.Skip(firstNotEmpty).Take(lastNotEmpty + 1).ToList();
+            else
+                return finalLines.Skip(firstNotEmpty).Take(finalLines.Count - firstNotEmpty - 1).ToList();
+        }
         else
             return finalLines.Take(finalLines.Count - 1).ToList();
     }
@@ -205,7 +223,7 @@ public class ClientZteCLI : IDisposable
         else
             await channel.WriteCommand($"show pon power onu-rx gpon-onu_{olt}/{slot}/{port}:{id}");
 
-        return await ReadLinesFromChannelWithMore();
+        return await ReadLinesFromChannelWithMore(true);
     }
 
     public async Task<double?> GetPowerOnuRx(int olt, int slot, int port, int id)
@@ -215,8 +233,8 @@ public class ClientZteCLI : IDisposable
             return null;
 
         var expressionValueDbm = new Regex(@"^\s*gpon-onu_([0-9]{1,3})\/([0-9]{1,3})\/([0-9]{1,3}):([0-9]{1,3})\s*(-{0,1}[0-9\.]{1,12})");
-        
-        foreach(var l in readLines)
+
+        foreach (var l in readLines)
         {
             var match = expressionValueDbm.Match(l);
             if (match.Success)
@@ -234,7 +252,7 @@ public class ClientZteCLI : IDisposable
 
         await channel.WriteCommand($"show gpon onu detail-info gpon-onu_{olt}/{slot}/{port}:{id}");
 
-        return await ReadLinesFromChannelWithMore();
+        return await ReadLinesFromChannelWithMore(true);
     }
 
     /// <summary>
@@ -246,7 +264,7 @@ public class ClientZteCLI : IDisposable
 
         await channel.WriteCommand($"show gpon remote-onu interface pon gpon-onu_{olt}/{slot}/{port}:{id}");
 
-        return await ReadLinesFromChannelWithMore();
+        return await ReadLinesFromChannelWithMore(true);
     }
 
     /// <summary>
@@ -258,7 +276,7 @@ public class ClientZteCLI : IDisposable
 
         await channel.WriteCommand($"show gpon remote-onu interface eth gpon-onu_{olt}/{slot}/{port}:{id}");
 
-        return await ReadLinesFromChannelWithMore();
+        return await ReadLinesFromChannelWithMore(true);
     }
 
     /// <summary>
@@ -270,7 +288,7 @@ public class ClientZteCLI : IDisposable
 
         await channel.WriteCommand($"show remote-unit information gpon-olt_{olt}/{slot}/{port} {id}");
 
-        return await ReadLinesFromChannelWithMore();
+        return await ReadLinesFromChannelWithMore(true);
     }
 
     /// <summary>
@@ -282,7 +300,7 @@ public class ClientZteCLI : IDisposable
 
         await channel.WriteCommand($"show mac gpon onu gpon-onu_{olt}/{slot}/{port}:{id}");
 
-        return await ReadLinesFromChannelWithMore();
+        return await ReadLinesFromChannelWithMore(true);
     }
 
     /// <summary>
@@ -340,7 +358,7 @@ public class ClientZteCLI : IDisposable
         var readLines = await ReadLinesFromChannelWithMore();
         if (readLines == null)
             return null;
-        
+
         //read values with regex
         var returnList = new List<(int id, string tp, string mode, string auth, string state)>();
         var expressionForOnuInfo = new Regex(@"^\s*gpon-onu_[0-9]{1,3}\/[0-9]{1,3}\/[0-9]{1,3}:([0-9]{1,3}) +([\w-]+) +([\w-]+) +SN:([\w-:]+) +([\w-]+)");
@@ -412,6 +430,6 @@ public class ClientZteCLI : IDisposable
             return (ok, $"Failed to enter in interface gpon-olt_{olt}/{slot}/{port}!");
     }
 
-    
+
 
 }
