@@ -3,6 +3,7 @@ ARG VERSION
 
 WORKDIR /App
 COPY ./LTres.OltApi.Common ./LTres.OltApi.Common
+COPY ./LTres.OltApi.Communication ./LTres.OltApi.Communication
 COPY ./LTres.OltApi.Core ./LTres.OltApi.Core
 COPY ./LTres.OltApi.Mongo ./LTres.OltApi.Mongo
 COPY ./LTres.OltApi.WebApi ./LTres.OltApi.WebApi
