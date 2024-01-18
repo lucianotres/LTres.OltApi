@@ -1,10 +1,8 @@
-﻿using System.Dynamic;
-using System.Globalization;
+﻿using System.Globalization;
 using System.Net;
 using System.Text.RegularExpressions;
 using LTres.OltApi.Common;
 using Microsoft.Extensions.Logging;
-using org.matheval.Functions;
 
 namespace LTres.OltApi.Core.Tools;
 

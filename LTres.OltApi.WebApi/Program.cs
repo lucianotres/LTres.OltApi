@@ -7,6 +7,7 @@ using LTres.OltApi.Core;
 using LTres.OltApi.Core.Services;
 using LTres.OltApi.Core.Tools;
 using LTres.OltApi.Mongo;
+using LTres.OltApi.WebApi;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -22,9 +23,11 @@ builder.Services
 
 //service handlers
 builder.Services
+    .AddMemoryCache()
     .AddScoped<IOLTHostService, OLTHostService>()
     .AddScoped<IOLTHostItemService, OLTHostItemService>()
-    .AddScoped<IOLTHostCLIActionsService, OLTHostCLIActionsService>();
+    .AddScoped<IOLTHostCLIActionsService, OLTHostCLIActionsService>()
+    .AddTransient<IOLTHostCLIScriptService, OLTHostCLIScriptService>();
 
 //OLT CLI channel
 builder.Services

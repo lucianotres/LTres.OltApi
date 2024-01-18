@@ -2,6 +2,8 @@ using Microsoft.AspNetCore.Mvc;
 using LTres.OltApi.Common.Models;
 using LTres.OltApi.Common;
 using System.Text;
+using Microsoft.Extensions.Caching.Memory;
+using LTres.OltApi.Core;
 
 namespace LTres.OltApi.WebApi.Controllers;
 
@@ -55,4 +57,25 @@ public class OLTHostActionsController : ControllerBase
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<string> GetONUmac(Guid oltId, int olt, int slot, int port, int id) =>
         LinesToStr(await _service.GetONUmac(oltId, olt, slot, port, id));
+
+
+
+    [HttpGet("teststart")]
+    public async Task<Guid> TestStart([FromServices] IMemoryCache cache, [FromServices] IOLTHostCLIScriptService scriptService)
+    {
+        var guid = Guid.NewGuid();
+        await scriptService.StartScript(Guid.Parse("6a2c3da4-a027-4807-8639-318d9116dace"), Guid.NewGuid(), null);
+        cache.Set(guid, scriptService, TimeSpan.FromMinutes(5));
+
+        return guid;
+    }
+
+    [HttpGet("testGet/{id}")]
+    public string TestGet([FromServices] IMemoryCache cache, Guid id)
+    {
+        var entry = cache.Get<OLTHostCLIScriptService>(id);
+        return entry == null ? "N/A" : entry.ScriptResult;
+    }
+
+
 }
