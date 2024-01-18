@@ -378,6 +378,34 @@ public class ClientZteCLI : IDisposable
     }
 
     /// <summary>
+    /// Get first unused index at gpon interface. Return null if an error occur, check lasterrors
+    /// </summary>
+    /// <param name="olt">Interface olt number</param>
+    /// <param name="slot">Interface slot number</param>
+    /// <param name="port">Interface port number</param>
+    public async Task<int?> GetFirstUnusedOnuIndex(int olt, int slot, int port)
+    {
+        var showGponOnuBaseInfoResult = await ShowGponOnuBaseInfo(olt, slot, port);
+        
+        if (showGponOnuBaseInfoResult != null)
+        {
+            var ordenedOnuIndexes = showGponOnuBaseInfoResult.Select(i => i.id).OrderBy(i => i).ToList();
+
+            int index = 1;
+            foreach(var i in ordenedOnuIndexes)
+            {
+                if (index < i)
+                    break;
+                index++;
+            }
+
+            return index;
+        }
+        else
+            return null;
+    }
+
+    /// <summary>
     /// Enter in an interface configuration
     /// </summary>
     /// <param name="iface">Interface name</param>
@@ -416,10 +444,7 @@ public class ClientZteCLI : IDisposable
             //register ONU by SN
             await channel.WriteCommand($"onu {id} type {onuType} sn {serialNumber}");
             var r = await channel.ReadLinesFromChannel();
-
-            await channel.WriteCommand("!");
-            await channel.ReadLinesFromChannel();
-
+            
             //Success?
             if (r.Any(w => expressionSuccess.IsMatch(w)))
                 return (true, "OK");
@@ -430,6 +455,35 @@ public class ClientZteCLI : IDisposable
             return (ok, $"Failed to enter in interface gpon-olt_{olt}/{slot}/{port}!");
     }
 
+    /// <summary>
+    /// Remove an onu from interface gpon
+    /// </summary>
+    /// <param name="olt">Interface olt number</param>
+    /// <param name="slot">Interface slot number</param>
+    /// <param name="port">Interface port number</param>
+    /// <param name="id">ID for ONU at this interface</param>
+    /// <param name="gotoConfigBefore">Enter in configuration mode before</param>
+    public async Task<(bool ok, string msg)> RemoveONU(int olt, int slot, int port, int id, bool gotoConfigBefore = false)
+    {
+        //go to interface configuration
+        var ok = await ConfigInterface($"gpon-olt_{olt}/{slot}/{port}", gotoConfigBefore);
+        if (ok)
+        {
+            var expressionSuccess = new Regex(@"\[[Ss]uccessful\]");
+
+            //remove by id
+            await channel.WriteCommand($"no onu {id}");
+            var r = await channel.ReadLinesFromChannel();
+
+            //Success?
+            if (r.Any(w => expressionSuccess.IsMatch(w)))
+                return (true, "OK");
+            else
+                return (false, channel.LastReadErrorCount == 0 ? string.Empty : channel.LastReadErrors.Last().error);
+        }
+        else
+            return (ok, $"Failed to remove onu {id} at gpon-olt_{olt}/{slot}/{port}!");
+    }
 
 
 }

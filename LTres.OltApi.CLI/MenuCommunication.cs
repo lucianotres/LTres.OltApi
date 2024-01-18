@@ -29,6 +29,8 @@ public class MenuCommunication : Menu
         Options.Add(new MenuOption('3', "List all ONUs unconfigured", ListUnconfiguredOnu));
         Options.Add(new MenuOption('4', "Get RX from specific ONU", GetOnuRx));
         Options.Add(new MenuOption('5', "Show ONU detail", GetOnuDetail));
+        Options.Add(new MenuOption('6', "Remove ONU", RemoveOnu));
+        Options.Add(new MenuOption('7', "Authorize ONU", AuthorizeOnu));
         Options.Add(new MenuOption('r', "to return"));
     }
 
@@ -216,4 +218,63 @@ public class MenuCommunication : Menu
 
         return false;
     }
+
+    private async Task<bool> RemoveOnu()
+    {
+        using var channel = await GetCommunicationChannel();
+
+        Console.WriteLine("WARNING! The command will remove the ONU's configuration and itself from OLT!!!");
+        var ask = AskOnuID();
+        if (ask.id > 0)
+        {
+            var result = await channel.RemoveONU(ask.olt, ask.slot, ask.port, ask.id, true);
+            Console.WriteLine($"{result.ok} -->> {result.msg}");
+        }
+
+        return false;
+    }
+
+    private async Task<bool> AuthorizeOnu()
+    {
+        using var channel = await GetCommunicationChannel();
+
+        var ask = AskOnuID();
+        if (ask.port > 0)
+        {
+            int tried = 0;
+            string? onuType;
+            do
+            {
+                Console.Write("Please inform a onu type to register: ");
+                onuType = Console.ReadLine()?.Trim();
+            } while (string.IsNullOrEmpty(onuType) && (tried++ <= 3));
+
+            if (string.IsNullOrEmpty(onuType))
+                return false;
+
+            tried = 0;
+            string? onuSN;
+            do
+            {
+                Console.Write("Please inform a onu SN to register: ");
+                onuSN = Console.ReadLine()?.Trim();
+            } while (string.IsNullOrEmpty(onuSN) && (tried++ <= 3));
+
+            if (string.IsNullOrEmpty(onuSN))
+                return false;
+
+            var firstUnusedIndex = await channel.GetFirstUnusedOnuIndex(ask.olt, ask.slot, ask.port);
+            if (!firstUnusedIndex.HasValue)
+            {
+                Console.WriteLine(" Failed to get an unused index!");
+                return false;
+            }
+
+            var result = await channel.AuthorizeONU(ask.olt, ask.slot, ask.port, firstUnusedIndex.Value, onuType, onuSN, true);
+            Console.WriteLine($"{result.ok} -->> {result.msg}");
+        }
+
+        return false;
+    }
+
 }
