@@ -64,7 +64,13 @@ public class OLTHostActionsController : ControllerBase
     public async Task<Guid> TestStart([FromServices] IMemoryCache cache, [FromServices] IOLTHostCLIScriptService scriptService)
     {
         var guid = Guid.NewGuid();
-        await scriptService.StartScript(Guid.Parse("6a2c3da4-a027-4807-8639-318d9116dace"), Guid.NewGuid(), null);
+        await scriptService.StartScript(Guid.Parse("6a2c3da4-a027-4807-8639-318d9116dace"), Guid.NewGuid(), 
+            new Dictionary<string,string>()
+            {
+                { "olt", "1" },
+                { "slot", "2" },
+                { "port", "12" }
+            });
         cache.Set(guid, scriptService, TimeSpan.FromMinutes(5));
 
         return guid;

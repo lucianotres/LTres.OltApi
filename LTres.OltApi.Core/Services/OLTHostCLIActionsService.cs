@@ -1,5 +1,6 @@
 ﻿using System.Linq.Expressions;
 using System.Net;
+using System.Security.Cryptography;
 using LTres.OltApi.Common;
 using LTres.OltApi.Common.DbServices;
 using LTres.OltApi.Core.Tools;
@@ -109,5 +110,12 @@ public class OLTHostCLIActionsService : IOLTHostCLIActionsService
             return new string[] { cli.LastError.error };
         else
             return result;
+    }
+
+    public async Task<int?> GetFirstUnusedOnuIndex(Guid oltId, int olt, int slot, int port)
+    {
+        using var cli = await CreateCommunicationChannel(oltId);
+
+        return await cli.GetFirstUnusedOnuIndex(olt, slot, port);
     }
 }

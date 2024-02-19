@@ -41,4 +41,12 @@ public interface IOLTHostCLIActionsService
     /// <param name="port">Port</param>
     /// <param name="id">ID of ONU</param>
     Task<IEnumerable<string>> GetONUmac(Guid oltId, int olt, int slot, int port, int id);
+
+    /// <summary>
+    /// Get the first unsued id 
+    /// </summary>
+    /// <param name="olt">OLT chassi number</param>
+    /// <param name="slot">Slot</param>
+    /// <param name="port">Port</param>
+    Task<int?> GetFirstUnusedOnuIndex(Guid oltId, int olt, int slot, int port);
 }
