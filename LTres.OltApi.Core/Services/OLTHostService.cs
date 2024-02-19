@@ -1,7 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using LTres.OltApi.Common;
 using LTres.OltApi.Common.DbServices;
 using LTres.OltApi.Common.Models;
@@ -31,7 +27,6 @@ public class OLTHostService : IOLTHostService
             throw new ArithmeticException("OLT Host should have a host informed!");
     }
 
-
     public async Task<Guid> AddOLTHost(OLT_Host olt_host)
     {
         ValidateOltHost(olt_host);
@@ -51,7 +46,6 @@ public class OLTHostService : IOLTHostService
 
         return await _db.ChangeOLTHost(olt_host);
     }
-
 
     public async Task<IEnumerable<OLT_Host>> ListOLTHosts(int take = 1000, int skip = 0,
         bool? filterActive = null,

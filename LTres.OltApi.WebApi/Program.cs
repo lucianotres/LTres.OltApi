@@ -8,6 +8,7 @@ using LTres.OltApi.Core.Services;
 using LTres.OltApi.Core.Tools;
 using LTres.OltApi.Mongo;
 using LTres.OltApi.WebApi;
+using Microsoft.Extensions.Options;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -19,6 +20,7 @@ MongoModelsConfiguration.RegisterClassMap();
 //database handlers
 builder.Services
     .AddScoped<IDbOLTHost, MongoDbOLTHost>()
+    .AddScoped<IDbOLTScript, MongoDbOLTHost>()
     .AddScoped<IDbOLTHostItem, MongoDbOLTHostItem>();
 
 //service handlers
@@ -26,6 +28,7 @@ builder.Services
     .AddMemoryCache()
     .AddScoped<IOLTHostService, OLTHostService>()
     .AddScoped<IOLTHostItemService, OLTHostItemService>()
+    .AddScoped<IOLTScriptService, OLTScriptService>()
     .AddScoped<IOLTHostCLIActionsService, OLTHostCLIActionsService>()
     .AddTransient<IOLTHostCLIScriptService, OLTHostCLIScriptService>();
 
@@ -57,6 +60,9 @@ builder.Services.AddSwaggerGen(options =>
 });
 
 var app = builder.Build();
+
+//do BD migrations before start
+await MongoDbOltApiMigrations.Do(app.Services.GetRequiredService<IOptions<MongoConfig>>().Value);
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

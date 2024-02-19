@@ -41,6 +41,8 @@ public static class MongoDbOltApiMigrations
         if (!collections.Any(s => s == "olt_host_items_history"))
             await database.CreateCollectionAsync("olt_host_items_history");
 
+        if (!collections.Any(s => s == "olt_scripts"))
+            await database.CreateCollectionAsync("olt_scripts");
     }
 
     private static async Task CheckOrCreateIndexes(IMongoDatabase database)
