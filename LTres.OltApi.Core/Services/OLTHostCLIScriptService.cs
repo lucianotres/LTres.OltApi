@@ -11,6 +11,7 @@ public class OLTHostCLIScriptService : IOLTHostCLIScriptService
     private readonly IServiceScopeFactory serviceScopeFactory;
     private IServiceScope? actualScope;
     private IOLTHostCLIActionsService? oltHostCLIActionsService;
+    private IOLTScriptService? oltScriptService;
     private Guid guidOltId = Guid.Empty;
     private Guid guidScriptId = Guid.Empty;
     private string scriptToRun = string.Empty;
@@ -32,7 +33,7 @@ public class OLTHostCLIScriptService : IOLTHostCLIScriptService
         guidOltId = oltId;
         guidScriptId = scriptId;
 
-        scriptToRun = "$onuid\r\n$onuid";
+        scriptToRun = string.Empty;
         scriptVariables = variables ?? new Dictionary<string, string>(0);
 
         actualScope = serviceScopeFactory.CreateScope();
@@ -43,6 +44,16 @@ public class OLTHostCLIScriptService : IOLTHostCLIScriptService
         }
 
         oltHostCLIActionsService = actualScope.ServiceProvider.GetRequiredService<IOLTHostCLIActionsService>();
+        oltScriptService = actualScope.ServiceProvider.GetRequiredService<IOLTScriptService>();
+
+        var oltScript = (await oltScriptService.ListOLTScripts(1, 0, guidScriptId)).FirstOrDefault();
+        if (oltScript == null)
+        {
+            ScriptResult = "Can't find script by ID";
+            return false;
+        }
+        else
+            scriptToRun = oltScript.Script;
 
         _ = RunScript().ConfigureAwait(false);
         return true;
