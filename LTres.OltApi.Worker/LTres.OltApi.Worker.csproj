@@ -24,6 +24,9 @@
 
   <ItemGroup>
     <None Update="appsettings.json" CopyToOutputDirectory="PreserveNewest" />
+    <None Update="mock_items.csv">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
 </Project>
