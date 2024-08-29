@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/dotnet/sdk:7.0 AS build-env
+FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build-env
 ARG VERSION
 
 WORKDIR /App
@@ -18,7 +18,7 @@ RUN dotnet publish -c Release -p Version=$VERSION -o out LTres.OltApi.WorkerCont
 
 #-------------- runtime
 
-FROM mcr.microsoft.com/dotnet/aspnet:7.0
+FROM mcr.microsoft.com/dotnet/aspnet:8.0
 WORKDIR /App
 COPY --from=build-env /App/out .
 
