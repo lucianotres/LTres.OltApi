@@ -65,11 +65,11 @@ var app = builder.Build();
 await MongoDbOltApiMigrations.Do(app.Services.GetRequiredService<IOptions<MongoConfig>>().Value);
 
 // Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
+//if (app.Environment.IsDevelopment())
+//{
     app.UseSwagger();
     app.UseSwaggerUI();
-}
+//}
 
 app.UseCors(builder => builder.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod());
 
