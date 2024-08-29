@@ -1,5 +1,3 @@
-version: '3.4'
-
 services:
   mongodb:
     container_name: mongodb
@@ -56,6 +54,8 @@ services:
       dockerfile: ./LTres.OltApi.Worker/Dockerfile
       args:
         - VERSION=1.0.0.6
+    environment:
+      - LTRES_MOCKING=true
   
   # worker2:
   #   depends_on:
