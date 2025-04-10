@@ -13,7 +13,6 @@ builder.Services.AddLocalization();
 builder.Services.AddOidcAuthentication(options =>
 {
     builder.Configuration.Bind("Local", options.ProviderOptions);
-    
 });
 
 await builder.Build().RunAsync();
