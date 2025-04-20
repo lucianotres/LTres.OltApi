@@ -10,6 +10,11 @@ public class MockPingAction : IWorkerActionPing
         var response = initialResponse ?? new WorkProbeResponse() { Id = probeInfo.Id };
 
         await Task.Delay(10);
+        if (cancellationToken.IsCancellationRequested)
+        {
+            response.Success = false;
+            return response;
+        }   
 
         response.ValueInt = Random.Shared.Next(10, 90);
         response.Success = true;

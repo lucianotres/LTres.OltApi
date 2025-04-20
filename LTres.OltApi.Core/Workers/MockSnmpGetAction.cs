@@ -20,7 +20,7 @@ public class MockSnmpGetAction : IWorkerActionSnmpGet
 
         if (probeInfo.ItemKey != null)
         {
-            await Task.Delay(300);
+            await Task.Delay(150);
 
             var oidItem = _mockSNMPItems[probeInfo.ItemKey];
 
