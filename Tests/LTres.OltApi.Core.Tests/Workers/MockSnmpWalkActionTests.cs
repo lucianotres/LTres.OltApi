@@ -1,13 +1,7 @@
 ﻿using LTres.OltApi.Common.Models;
 using LTres.OltApi.Core.Tools;
 using LTres.OltApi.Core.Workers;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Net;
-using System.Text;
-using System.Threading.Tasks;
-using Xunit;
 
 namespace LTres.OltApi.Core.Tests.Workers;
 

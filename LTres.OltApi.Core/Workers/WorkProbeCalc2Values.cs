@@ -35,7 +35,7 @@ public class WorkProbeCalc2Values : IWorkProbeCalc
             else if (workProbeResponse.ValueUInt.HasValue)
             {
                 expression.Bind("val", workProbeResponse.ValueUInt.Value);
-                workProbeResponse.ValueUInt = expression.Eval<uint>();
+                workProbeResponse.ValueUInt = (uint)expression.Eval<long>();
 
                 if (workProbeResponse.ValueUInt.Value == uint.MaxValue)
                 {
@@ -60,7 +60,7 @@ public class WorkProbeCalc2Values : IWorkProbeCalc
                     else if (v.ValueUInt.HasValue)
                     {
                         expression.Bind("val", v.ValueUInt.Value);
-                        v.ValueUInt = expression.Eval<uint>();
+                        v.ValueUInt = (uint)expression.Eval<long>();
 
                         if (v.ValueUInt.Value == uint.MaxValue)
                             v.ValueUInt = null;
