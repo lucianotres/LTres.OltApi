@@ -1,6 +1,11 @@
 # Introduction 
 LTres OLT API it's a monitoring tool to provide access of OLT informations over REST API.
 
+THIS PROJECT IT'S UNDER CONSTRUCTION! A lot of things are missing, and some of them are not working as expected.
+
+Source code can be found at https://github.com/lucianotres/LTres.OltApi  
+and at https://dev.azure.com/ltres/OLT%20API/ where you can find work items and tasks.
+
 # Getting Started
 All modules run at docker containers, so you just need a docker instance to build and run.
 

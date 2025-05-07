@@ -6,55 +6,47 @@ using Microsoft.Extensions.Hosting;
 using LTres.OltApi.Snmp;
 using LTres.OltApi.Core;
 using LTres.OltApi.Core.Tools;
+using LTres.OltApi.Common.Models;
 
-var implementationInt = 2;
-var usingMock = false;
-{
-    var implementationStr = Environment.GetEnvironmentVariable("LTRES_SNMP_IMPLEMENTATION");
+OltApiConfiguration configuration = new();
+configuration.FillFromEnvironmentVars();
 
-    if (!string.IsNullOrWhiteSpace(implementationStr) && int.TryParse(implementationStr, out int i) && i > 0 && i <=2)
-        implementationInt = i;
-
-    bool.TryParse(Environment.GetEnvironmentVariable("LTRES_MOCKING"), out usingMock);
-}
-
-Console.WriteLine($"Starting the worker i{implementationInt}..");
+Console.WriteLine($"Starting the worker i{configuration.implementationVersion}..");
 
 var builder = Host.CreateApplicationBuilder(args);
 
 builder.Services
+    .AddSingleton(configuration)
     .Configure<RabbitMQConfiguration>(o => o.FillFromEnvironmentVars());
 
 builder.Services.AddTransient<IWorkerAction, WorkAction>();
 
-if (usingMock)
+if (configuration.usingMock)
 {
     builder.Services
         .AddSingleton<MockSNMPItems>(new MockSNMPItems(Path.Combine(AppContext.BaseDirectory, "mock_items.csv")))
-        .AddTransient<IWorkerActionSnmpGet, MockSnmpGetAction>()
-        .AddTransient<IWorkerActionSnmpWalk, MockSnmpWalkAction>()
-        .AddTransient<IWorkerActionPing, MockPingAction>();
+        .AddTransient<MockSnmpGetAction>()
+        .AddTransient<MockSnmpWalkAction>()
+        .AddTransient<MockPingAction>();
 
     Console.WriteLine("Using Mock SNMP Items");
 }
+
+if (configuration.implementationVersion == 2)
+{
+    builder.Services
+        .AddTransient<IWorkerActionSnmpGet, WorkSnmpGetAction2>()
+        .AddTransient<IWorkerActionSnmpWalk, WorkSnmpWalkAction2>();
+}
 else
 {
-    if (implementationInt == 2)
-    {
-        builder.Services
-            .AddTransient<IWorkerActionSnmpGet, WorkSnmpGetAction2>()
-            .AddTransient<IWorkerActionSnmpWalk, WorkSnmpWalkAction2>();
-    }
-    else
-    {
-        builder.Services
-            .AddTransient<IWorkerActionSnmpGet, WorkSnmpGetAction>()
-            .AddTransient<IWorkerActionSnmpWalk, WorkSnmpWalkAction>();
-    }
-
     builder.Services
-        .AddTransient<IWorkerActionPing, WorkPingAction>();
+        .AddTransient<IWorkerActionSnmpGet, WorkSnmpGetAction>()
+        .AddTransient<IWorkerActionSnmpWalk, WorkSnmpWalkAction>();
 }
+
+builder.Services
+    .AddTransient<IWorkerActionPing, WorkPingAction>();
 
 builder.Services
     .AddTransient<IWorkProbeCalc, WorkProbeCalc2Values>()

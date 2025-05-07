@@ -17,16 +17,15 @@ public class MockSnmpWalkAction : IWorkerActionSnmpWalk
     {
         var finalResponse = initialResponse ?? new WorkProbeResponse() { Id = probeInfo.Id };
         finalResponse.Success = false;
+        finalResponse.Type = WorkProbeResponseType.Walk;
 
-        await Task.Delay(300);
+        await Task.Delay(100);
 
         if (probeInfo.ItemKey != null)
         {
-            await Task.Delay(300);
-
             var oidItems = _mockSNMPItems.StartWithOid(probeInfo.ItemKey);
 
-            if (oidItems != null)
+            if (oidItems != null && oidItems.Any())
             {
                 finalResponse.ValueUInt = (uint)oidItems.Count();
                 finalResponse.Values = oidItems.Select(s =>

@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using System.Net;
 using System.Net.Http.Headers;
 using LTres.OltApi.Common;
 using LTres.OltApi.Common.Models;
@@ -28,23 +29,37 @@ public class WorkAction : IWorkerAction
 
         try
         {
+            bool shouldUseMocking = probeInfo.Host.Address.Equals(IPAddress.None);
+            IWorkerAction worker;
+
+            //find the correct action to perform ------
+
             if (probeInfo.Action == "ping")
             {
-                var pingWorker = _serviceProvider.GetRequiredService<IWorkerActionPing>();
-                workProbeResponse = await pingWorker.Execute(probeInfo, cancellationToken, workProbeResponse);
+                if (shouldUseMocking)
+                    worker = _serviceProvider.GetRequiredService<MockPingAction>();
+                else
+                    worker = _serviceProvider.GetRequiredService<IWorkerActionPing>();
             }
             else if (probeInfo.Action == "snmpget")
             {
-                var snmpGetWorker = _serviceProvider.GetRequiredService<IWorkerActionSnmpGet>();
-                workProbeResponse = await snmpGetWorker.Execute(probeInfo, cancellationToken, workProbeResponse);
+                if (shouldUseMocking)
+                    worker = _serviceProvider.GetRequiredService<MockPingAction>();
+                else
+                    worker = _serviceProvider.GetRequiredService<IWorkerActionSnmpGet>();
             }
             else if (probeInfo.Action == "snmpwalk")
             {
-                var snmpWalkWorker = _serviceProvider.GetRequiredService<IWorkerActionSnmpWalk>();
-                workProbeResponse = await snmpWalkWorker.Execute(probeInfo, cancellationToken, workProbeResponse);
+                if (shouldUseMocking)
+                    worker = _serviceProvider.GetRequiredService<MockPingAction>();
+                else
+                    worker = _serviceProvider.GetRequiredService<IWorkerActionSnmpWalk>();
             }
             else
-                _log.LogWarning("Action not found to perform.");
+                throw new Exception("Action not found to perform.");
+
+            //execute the action ------
+            workProbeResponse = await worker.Execute(probeInfo, cancellationToken, workProbeResponse);
 
             if (probeInfo.Calc != null)
             {

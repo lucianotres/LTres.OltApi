@@ -6,10 +6,14 @@ public class MockSNMPItems
 {
     private Dictionary<string, MockSNMPItemsData> _items;
 
-    public MockSNMPItems(string srcSrvFile)
+    public MockSNMPItems(string? srcSrvFile)
     {
         _items = new Dictionary<string, MockSNMPItemsData>();
-        _ = ReadCSVFile(srcSrvFile);
+
+        if (srcSrvFile == null)
+            CreateFixedMockItems();
+        else
+            _ = ReadCSVFile(srcSrvFile);
     }
 
     public async Task ReadCSVFile(string srcSrvFile)
@@ -40,7 +44,6 @@ public class MockSNMPItems
             }
 
             data.Type = iType;
-            data.ValueCount = line.ColumnCount - 2;
 
             var Oid = line.Values[0];
             if (Oid.StartsWith('.'))
@@ -49,6 +52,55 @@ public class MockSNMPItems
             _items[Oid] = data;
         }
     }
+
+    private void CreateFixedMockItems()
+    {
+        _items.Clear();
+
+        _items.Add("1.3.6.1.4.1.3902.1012.3.28.1.1.2.268501248.1", new MockSNMPItemsData() { ValuesStr = ["ONU NUMBER 1"] });
+        _items.Add("1.3.6.1.4.1.3902.1012.3.28.1.1.2.268501248.2", new MockSNMPItemsData() { ValuesStr = ["ONU NUMBER 2"] });
+        _items.Add("1.3.6.1.4.1.3902.1012.3.28.1.1.2.268501248.3", new MockSNMPItemsData() { ValuesStr = ["ONU NUMBER 3"] });
+        _items.Add("1.3.6.1.4.1.3902.1012.3.28.1.1.2.268501248.4", new MockSNMPItemsData() { ValuesStr = ["ONU NUMBER 4"] });
+        _items.Add("1.3.6.1.4.1.3902.1012.3.28.1.1.2.268501248.5", new MockSNMPItemsData() { ValuesStr = ["ONU NUMBER 5"] });
+        _items.Add("1.3.6.1.4.1.3902.1012.3.28.1.1.2.268501248.6", new MockSNMPItemsData() { ValuesStr = ["ONU NUMBER 6"] });
+        _items.Add("1.3.6.1.4.1.3902.1012.3.28.1.1.2.268501248.7", new MockSNMPItemsData() { ValuesStr = ["ONU NUMBER 7"] });
+        _items.Add("1.3.6.1.4.1.3902.1012.3.28.1.1.2.268501248.8", new MockSNMPItemsData() { ValuesStr = ["ONU NUMBER 8"] });
+        _items.Add("1.3.6.1.4.1.3902.1012.3.28.1.1.2.268501248.9", new MockSNMPItemsData() { ValuesStr = ["ONU NUMBER 9"] });
+
+        _items.Add("1.3.6.1.4.1.3902.1012.3.28.1.1.5.268501248.1", new MockSNMPItemsData() { ValuesStr = ["49 54 42 53 5F 7B 3F CD"] });
+        _items.Add("1.3.6.1.4.1.3902.1012.3.28.1.1.5.268501248.2", new MockSNMPItemsData() { ValuesStr = ["49 54 42 53 5F 7B 43 CD"] });
+        _items.Add("1.3.6.1.4.1.3902.1012.3.28.1.1.5.268501248.3", new MockSNMPItemsData() { ValuesStr = ["49 54 42 53 5F 7B 5F CD"] });
+        _items.Add("1.3.6.1.4.1.3902.1012.3.28.1.1.5.268501248.4", new MockSNMPItemsData() { ValuesStr = ["49 54 42 53 5F 7B 1C CD"] });
+        _items.Add("1.3.6.1.4.1.3902.1012.3.28.1.1.5.268501248.5", new MockSNMPItemsData() { ValuesStr = ["49 54 42 53 5F 7B CC CD"] });
+        _items.Add("1.3.6.1.4.1.3902.1012.3.28.1.1.5.268501248.6", new MockSNMPItemsData() { ValuesStr = ["49 54 42 53 5F 7B AB CD"] });
+        _items.Add("1.3.6.1.4.1.3902.1012.3.28.1.1.5.268501248.7", new MockSNMPItemsData() { ValuesStr = ["49 54 42 53 5F 7B 18 CD"] });
+        _items.Add("1.3.6.1.4.1.3902.1012.3.28.1.1.5.268501248.8", new MockSNMPItemsData() { ValuesStr = ["49 54 42 53 5F 7B 1F CD"] });
+        _items.Add("1.3.6.1.4.1.3902.1012.3.28.1.1.5.268501248.9", new MockSNMPItemsData() { ValuesStr = ["49 54 42 53 5F 7B C1 CD"] });
+
+
+        _items.Add("1.3.6.1.4.1.3902.1012.3.28.2.1.4.268501248.1", new MockSNMPItemsData() { Type = 1, ValuesInt = [3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 4, 1] });
+        _items.Add("1.3.6.1.4.1.3902.1012.3.28.2.1.4.268501248.2", new MockSNMPItemsData() { Type = 1, ValuesInt = [3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 4, 1] });
+        _items.Add("1.3.6.1.4.1.3902.1012.3.28.2.1.4.268501248.3", new MockSNMPItemsData() { Type = 1, ValuesInt = [3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 4, 1] });
+        _items.Add("1.3.6.1.4.1.3902.1012.3.28.2.1.4.268501248.4", new MockSNMPItemsData() { Type = 1, ValuesInt = [3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 4, 1] });
+        _items.Add("1.3.6.1.4.1.3902.1012.3.28.2.1.4.268501248.5", new MockSNMPItemsData() { Type = 1, ValuesInt = [3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 4, 1] });
+        _items.Add("1.3.6.1.4.1.3902.1012.3.28.2.1.4.268501248.6", new MockSNMPItemsData() { Type = 1, ValuesInt = [3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 4, 1] });
+        _items.Add("1.3.6.1.4.1.3902.1012.3.28.2.1.4.268501248.7", new MockSNMPItemsData() { Type = 1, ValuesInt = [3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 4, 1] });
+        _items.Add("1.3.6.1.4.1.3902.1012.3.28.2.1.4.268501248.8", new MockSNMPItemsData() { Type = 1, ValuesInt = [3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 4, 1] });
+        _items.Add("1.3.6.1.4.1.3902.1012.3.28.2.1.4.268501248.9", new MockSNMPItemsData() { Type = 1, ValuesInt = [3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 4, 1] });
+
+        _items.Add("1.3.6.1.4.1.3902.1012.3.50.12.1.1.10.268501248.1.1", new MockSNMPItemsData() { Type = 1, ValuesInt = [3217, 2074, 2725, 2159, 2235, 2657] });
+        _items.Add("1.3.6.1.4.1.3902.1012.3.50.12.1.1.10.268501248.2.1", new MockSNMPItemsData() { Type = 1, ValuesInt = [3217, 2074, 2725, 2159, 2235, 2657] });
+        _items.Add("1.3.6.1.4.1.3902.1012.3.50.12.1.1.10.268501248.3.1", new MockSNMPItemsData() { Type = 1, ValuesInt = [3217, 2074, 2725, 2159, 2235, 2657] });
+        _items.Add("1.3.6.1.4.1.3902.1012.3.50.12.1.1.10.268501248.4.1", new MockSNMPItemsData() { Type = 1, ValuesInt = [3217, 2074, 2725, 2159, 2235, 2657] });
+        _items.Add("1.3.6.1.4.1.3902.1012.3.50.12.1.1.10.268501248.5.1", new MockSNMPItemsData() { Type = 1, ValuesInt = [3217, 2074, 2725, 2159, 2235, 2657] });
+        _items.Add("1.3.6.1.4.1.3902.1012.3.50.12.1.1.10.268501248.6.1", new MockSNMPItemsData() { Type = 1, ValuesInt = [3217, 2074, 2725, 2159, 2235, 2657] });
+        _items.Add("1.3.6.1.4.1.3902.1012.3.50.12.1.1.10.268501248.7.1", new MockSNMPItemsData() { Type = 1, ValuesInt = [3217, 2074, 2725, 2159, 2235, 2657] });
+        _items.Add("1.3.6.1.4.1.3902.1012.3.50.12.1.1.10.268501248.8.1", new MockSNMPItemsData() { Type = 1, ValuesInt = [3217, 2074, 2725, 2159, 2235, 2657] });
+        _items.Add("1.3.6.1.4.1.3902.1012.3.50.12.1.1.10.268501248.9.1", new MockSNMPItemsData() { Type = 1, ValuesInt = [3217, 2074, 2725, 2159, 2235, 2657] });
+
+        _items.Add("1.3.6.1.4.1.3902.1012.3.28.2.1.5.268501248.1", new MockSNMPItemsData() { Type = 2, ValuesUInt = [3, 4, 1] });
+    }
+
     public MockSNMPItemsData? this[string oid]
     {
         get
@@ -76,10 +128,22 @@ public class MockSNMPItems
 public class MockSNMPItemsData
 {
     public int Type { get; set; }
-    public int ValueCount { get; set; } = 1;
     public int[]? ValuesInt { get; set; }
     public uint[]? ValuesUInt { get; set; }
     public string[]? ValuesStr { get; set; }
+
+    public int ValueCount
+    {
+        get
+        {
+            if (Type == 1)
+                return ValuesInt?.Length ?? 1;
+            else if (Type == 2)
+                return ValuesUInt?.Length ?? 1;
+            else
+                return ValuesStr?.Length ?? 1;
+        }
+    }
 
     public int? GetRandomValueInt()
     {
