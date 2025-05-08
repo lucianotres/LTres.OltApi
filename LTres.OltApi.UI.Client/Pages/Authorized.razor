@@ -1,0 +1,10 @@
+﻿@page "/Authorized"
+@attribute [Authorize]
+
+<PageTitle>Authorized View</PageTitle>
+
+<h1>You are authorized!</h1>
+
+<AuthorizeView>
+    <p>@context.User.Identity?.Name</p>
+</AuthorizeView>

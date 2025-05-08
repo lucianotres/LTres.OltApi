@@ -2,7 +2,7 @@
 @using System.Globalization
 @inject IStringLocalizer<Home> localizer
 
-<PageTitle>Home</PageTitle>
+<PageTitle>@localizer["title"]</PageTitle>
 
 <h1>Hello, world!</h1>
 
@@ -11,10 +11,3 @@
 </div>
 
 Welcome to your new app.
-
-Cul: @CultureInfo.CurrentCulture
-
-UI: @CultureInfo.CurrentUICulture
-
-<br />
-@localizer["teste"]

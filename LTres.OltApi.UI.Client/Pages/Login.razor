@@ -1,0 +1,10 @@
+﻿@page "/Login"
+
+<PageTitle>Log in</PageTitle>
+
+<a href="api/Account/Login/Google?returnUrl=@Uri.EscapeDataString(ReturnUrl ?? "")">by Google</a>
+
+@code {
+    [SupplyParameterFromQuery]
+    public string? ReturnUrl { get; set; }
+}
