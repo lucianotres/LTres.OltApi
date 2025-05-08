@@ -83,4 +83,17 @@ public class HostAuthenticationStateProvider : AuthenticationStateProvider
 
         return new ClaimsPrincipal(identity);
     }
+
+    public async Task<IList<string>> GetSchemesList()
+    {
+        try
+        {
+            return await _client.GetFromJsonAsync<IList<string>>("api/Account/Schemes") ?? [];
+        }
+        catch (Exception exc)
+        {
+            _logger.LogWarning(exc, "Getting schemes list failed.");
+            return [];
+        }
+    }
 }

@@ -1,10 +1,29 @@
 ﻿@page "/Login"
+@using LTres.OltApi.UI.Client.Services
+@inject AuthenticationStateProvider authenticationStateProvider
 
 <PageTitle>Log in</PageTitle>
 
-<a href="api/Account/Login/Google?returnUrl=@Uri.EscapeDataString(ReturnUrl ?? "")">by Google</a>
+<div class="enter-with">
+    @foreach (var scheme in SchemesList)
+    {
+        var formatedName = char.ToUpper(scheme[0]) + scheme.Substring(1).ToLower();
+
+        <a href="api/Account/Login/@(scheme)?returnUrl=@Uri.EscapeDataString(ReturnUrl ?? "")" class="enter-with">
+            <img src="img/login-@(scheme).svg" alt="" title="" />
+            Enter with @formatedName
+        </a>
+    }
+</div>
 
 @code {
+    private IList<string> SchemesList = [];
+    
     [SupplyParameterFromQuery]
     public string? ReturnUrl { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        SchemesList = await ((HostAuthenticationStateProvider)authenticationStateProvider).GetSchemesList();
+    }
 }

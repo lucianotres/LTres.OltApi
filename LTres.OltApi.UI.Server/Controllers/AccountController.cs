@@ -11,6 +11,16 @@ namespace LTres.OltApi.UI.Server;
 [Route("api/[controller]")]
 public class AccountController : ControllerBase
 {
+    [HttpGet("Schemes")]
+    public async Task<IActionResult> GetSchemes([FromServices] IAuthenticationSchemeProvider schemeProvider)
+    {
+        var schemes = await schemeProvider.GetAllSchemesAsync();
+        return Ok(schemes
+            .Select(s => s.Name)
+            .Where(w => !w.Equals("cookies", StringComparison.InvariantCultureIgnoreCase))
+            .ToList());
+    }
+
     [HttpGet("Login/{scheme}")]
     public IActionResult Login(string scheme, string returnUrl)
     {
