@@ -2,8 +2,6 @@ name: Create and publish a Docker Image for WebAPI project
 
 on:
   push:
-    branches: 
-      - 'main'
     tags:
       - 'webapi-v*.*.*.*'
 
