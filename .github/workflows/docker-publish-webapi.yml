@@ -3,8 +3,10 @@ name: Create and publish a Docker Image for WebAPI project
 on:
   workflow_dispatch:
   push:
-    branches: [ "main" ]
-    tags: [ 'webapi', 'v*.*.*' ]
+    branches: 
+      - 'main'
+    tags:
+      - 'webapi-v*.*.*.*'
 
 env:
   REGISTRY: ghcr.io
@@ -27,8 +29,7 @@ jobs:
 
       # Set VERSION environment variable from tag (removing leading 'v')
       - name: Set VERSION env from tag
-        if: startsWith(github.ref, 'refs/tags/v')
-        run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_ENV
+        run: echo "VERSION=${GITHUB_REF#refs/tags/webapi-v}" >> $GITHUB_ENV
       
       # Login against a Docker registry 
       # https://github.com/docker/login-action
