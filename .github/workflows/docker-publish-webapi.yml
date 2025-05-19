@@ -25,11 +25,6 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # Set VERSION environment variable from tag (removing leading 'v')
-      - name: Set VERSION env from tag
-        if: startsWith(github.ref, 'refs/tags/v')
-        run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_ENV
-      
       # Login against a Docker registry 
       # https://github.com/docker/login-action
       - name: Log into registry ${{ env.REGISTRY }}
@@ -58,6 +53,8 @@ jobs:
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
+          build-args: |
+            VERSION=${{ startsWith(github.ref, 'refs/tags/v') && github.ref != 'refs/tags/v' && github.ref[11:] || '' }}
           #cache-from: type=gha
           #cache-to: type=gha,mode=max
 
