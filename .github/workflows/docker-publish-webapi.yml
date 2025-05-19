@@ -1,7 +1,6 @@
 name: Create and publish a Docker Image for WebAPI project
 
 on:
-  workflow_dispatch:
   push:
     branches: 
       - 'main'
@@ -12,6 +11,7 @@ env:
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}/webapi
   PROJECT_DF: ./LTres.OltApi.WebApi/Dockerfile
+  TAG_PREFIX: webapi-v
 
 jobs:
   build:
@@ -29,8 +29,18 @@ jobs:
 
       # Set VERSION environment variable from tag (removing leading 'v')
       - name: Set VERSION env from tag
-        run: echo "VERSION=${GITHUB_REF#refs/tags/webapi-v}" >> $GITHUB_ENV
+        if: startsWith(github.ref, format('refs/tags/{0}', env.TAG_PREFIX))
+        run: echo "VERSION=${GITHUB_REF#refs/tags/${TAG_PREFIX}}" >> $GITHUB_ENV
       
+      # Stop workflow if VERSION does not match version pattern
+      - name: Stop workflow if VERSION does not match version pattern
+        run: |
+          if [[ ! "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "VERSION is not a valid version string (x.x.x.x). Stopping workflow."
+            exit 1
+          fi
+        shell: bash
+
       # Login against a Docker registry 
       # https://github.com/docker/login-action
       - name: Log into registry ${{ env.REGISTRY }}
@@ -71,6 +81,8 @@ jobs:
       - name: Generate artifact attestation
         uses: actions/attest-build-provenance@v2
         with:
-          subject-name: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME}}
-          subject-digest: ${{ steps.push.outputs.digest }}
+          subject-name: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          subject-digest: ${{ steps.build-and-push.outputs.digest }}
           push-to-registry: true
+          file: ${{ env.PROJECT_DF }}
+
