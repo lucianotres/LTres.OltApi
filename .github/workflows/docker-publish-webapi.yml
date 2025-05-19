@@ -9,7 +9,7 @@ on:
 env:
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}/webapi
-  PROJECT_CONTEXT: LTres.OltApi.WebApi/.
+  PROJECT_DF: ./LTres.OltApi.WebApi/Dockerfile
 
 jobs:
   build:
@@ -48,7 +48,8 @@ jobs:
         id: build-and-push
         uses: docker/build-push-action@0565240e2d4ab88bba5387d719585280857ece09 # v5.0.0
         with:
-          context: ${{ env.PROJECT_CONTEXT }}
+          context: .
+          file: ${{ env.PROJECT_DF }}
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
