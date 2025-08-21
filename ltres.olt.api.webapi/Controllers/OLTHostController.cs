@@ -5,7 +5,7 @@ using LTres.Olt.Api.Common;
 namespace LTres.Olt.Api.WebApi.Controllers;
 
 [ApiController]
-[Route("api/[controller]")]
+[Route("[controller]")]
 public class OLTHostController : ControllerBase
 {
     private readonly IOLTHostService _service;

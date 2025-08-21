@@ -1,4 +1,3 @@
-using System.Data.Common;
 using LTres.Olt.Api.Common;
 using LTres.Olt.Api.Common.Models;
 using Microsoft.AspNetCore.Mvc;
@@ -6,7 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace LTres.Olt.Api.WebApi;
 
 [ApiController]
-[Route("api/[controller]")]
+[Route("[controller]")]
 public class OLTHostItemController : ControllerBase
 {
     private readonly IOLTHostItemService _service;

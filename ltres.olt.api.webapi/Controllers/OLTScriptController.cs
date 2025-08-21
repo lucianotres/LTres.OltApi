@@ -5,7 +5,7 @@ using LTres.Olt.Api.Common;
 namespace LTres.Olt.Api.WebApi.Controllers;
 
 [ApiController]
-[Route("api/[controller]")]
+[Route("[controller]")]
 public class OLTScriptController : ControllerBase
 {
     private readonly IOLTScriptService _service;

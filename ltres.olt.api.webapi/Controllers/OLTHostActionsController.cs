@@ -1,5 +1,4 @@
 using Microsoft.AspNetCore.Mvc;
-using LTres.Olt.Api.Common.Models;
 using LTres.Olt.Api.Common;
 using System.Text;
 using Microsoft.Extensions.Caching.Memory;
@@ -8,7 +7,7 @@ using LTres.Olt.Api.Core;
 namespace LTres.Olt.Api.WebApi.Controllers;
 
 [ApiController]
-[Route("api/[controller]")]
+[Route("[controller]")]
 public class OLTHostActionsController : ControllerBase
 {
     private readonly IOLTHostCLIActionsService _service;
@@ -65,7 +64,6 @@ public class OLTHostActionsController : ControllerBase
     {
         var guid = Guid.NewGuid();
 
-        //Guid.Parse("6a2c3da4-a027-4807-8639-318d9116dace"), Guid.Parse("a1ee6030-a5fd-41ee-8e8b-5e25ef9a15d9")
         var variablesFromQueryString = HttpContext.Request.Query.ToDictionary(k => k.Key, v => v.Value.ToString());
 
         await scriptService.StartScript(oltId, scriptId, variablesFromQueryString);

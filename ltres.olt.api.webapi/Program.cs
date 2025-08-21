@@ -7,7 +7,6 @@ using LTres.Olt.Api.Core;
 using LTres.Olt.Api.Core.Services;
 using LTres.Olt.Api.Core.Tools;
 using LTres.Olt.Api.Mongo;
-using LTres.Olt.Api.WebApi;
 using Microsoft.Extensions.Options;
 
 var builder = WebApplication.CreateBuilder(args);
