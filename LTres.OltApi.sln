@@ -3,25 +3,25 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LTres.OltApi.WebApi", "LTres.OltApi.WebApi\LTres.OltApi.WebApi.csproj", "{D86D3290-29D8-4A5A-B890-4912CF2BF2F5}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ltres.olt.api.webapi", "ltres.olt.api.webApi\ltres.olt.api.webapi.csproj", "{D86D3290-29D8-4A5A-B890-4912CF2BF2F5}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LTres.OltApi.Common", "LTres.OltApi.Common\LTres.OltApi.Common.csproj", "{1AFF77AF-5E80-4791-B88E-B82A1AE93FF3}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ltres.olt.api.common", "ltres.olt.api.common\ltres.olt.api.common.csproj", "{1AFF77AF-5E80-4791-B88E-B82A1AE93FF3}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LTres.OltApi.Core", "LTres.OltApi.Core\LTres.OltApi.Core.csproj", "{E521DD85-558E-4B19-85FE-A68255508440}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ltres.olt.api.core", "ltres.olt.api.core\ltres.olt.api.core.csproj", "{E521DD85-558E-4B19-85FE-A68255508440}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LTres.OltApi.Mongo", "LTres.OltApi.Mongo\LTres.OltApi.Mongo.csproj", "{66D94558-A823-4875-AC0E-ACE0E7B4EC90}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ltres.olt.api.mongo", "ltres.olt.api.mongo\ltres.olt.api.mongo.csproj", "{66D94558-A823-4875-AC0E-ACE0E7B4EC90}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LTres.OltApi.WorkerController", "LTres.OltApi.WorkerController\LTres.OltApi.WorkerController.csproj", "{21827E03-8DE6-4847-A6B6-FC95ED9FCF1D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ltres.olt.api.controller", "ltres.olt.api.controller\ltres.olt.api.controller.csproj", "{21827E03-8DE6-4847-A6B6-FC95ED9FCF1D}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LTres.OltApi.RabbitMQ", "LTres.OltApi.RabbitMQ\LTres.OltApi.RabbitMQ.csproj", "{B933889C-872B-42DF-9172-9EA094C718CD}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ltres.olt.api.rabbitmq", "ltres.olt.api.rabbitmq\ltres.olt.api.rabbitmq.csproj", "{B933889C-872B-42DF-9172-9EA094C718CD}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LTres.OltApi.Worker", "LTres.OltApi.Worker\LTres.OltApi.Worker.csproj", "{6719A97B-7508-4B6E-8108-D40A4FB0908D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ltres.olt.api.worker", "ltres.olt.api.worker\ltres.olt.api.worker.csproj", "{6719A97B-7508-4B6E-8108-D40A4FB0908D}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LTres.OltApi.Snmp", "LTres.OltApi.Snmp\LTres.OltApi.Snmp.csproj", "{29E197BB-ACAD-4D2B-BC9B-0A3FCD5A22AB}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ltres.olt.api.snmp", "ltres.olt.api.snmp\ltres.olt.api.snmp.csproj", "{29E197BB-ACAD-4D2B-BC9B-0A3FCD5A22AB}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LTres.OltApi.CLI", "LTres.OltApi.CLI\LTres.OltApi.CLI.csproj", "{6F2CD7AE-B549-4AF7-B6B0-4E57B56F29FA}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ltres.olt.api.cli", "ltres.olt.api.cli\ltres.olt.api.cli.csproj", "{6F2CD7AE-B549-4AF7-B6B0-4E57B56F29FA}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LTres.OltApi.Communication", "LTres.OltApi.Communication\LTres.OltApi.Communication.csproj", "{4A41B08D-E02F-416C-9BE8-55EA58916B8F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ltres.olt.api.communication", "ltres.olt.api.communication\ltres.olt.api.communication.csproj", "{4A41B08D-E02F-416C-9BE8-55EA58916B8F}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{9DAE494A-8A82-4D74-AD9B-809F5D2D4921}"
 	ProjectSection(SolutionItems) = preProject
@@ -29,17 +29,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		README.md = README.md
 	EndProjectSection
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{02EA681E-C7D8-13C7-8484-4AC65E1B71E8}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{02EA681E-C7D8-13C7-8484-4AC65E1B71E8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LTres.OltApi.Core.Tests", "Tests\LTres.OltApi.Core.Tests\LTres.OltApi.Core.Tests.csproj", "{76178D1C-692E-465B-B8FC-C2B5180ABC6C}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LTres.OltApi.UI.Client", "LTres.OltApi.UI.Client\LTres.OltApi.UI.Client.csproj", "{7218F956-3115-4BAA-A741-FE2A83DEF890}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "UI", "UI", "{5C51E672-973E-47AD-B348-05E9B6FD1A8E}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LTres.OltApi.UI.Server", "LTres.OltApi.UI.Server\LTres.OltApi.UI.Server.csproj", "{A2EAF9F1-36FB-4D64-ACF3-8B934A95E2FA}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LTres.OltApi.UI.Shared", "LTres.OltApi.UI.Shared\LTres.OltApi.UI.Shared.csproj", "{023C2138-0356-494C-8935-18EA50197290}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ltres.olt.api.core.tests", "tests\ltres.olt.api.core.tests\ltres.olt.api.core.tests.csproj", "{76178D1C-692E-465B-B8FC-C2B5180ABC6C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -91,27 +83,12 @@ Global
 		{76178D1C-692E-465B-B8FC-C2B5180ABC6C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{76178D1C-692E-465B-B8FC-C2B5180ABC6C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{76178D1C-692E-465B-B8FC-C2B5180ABC6C}.Release|Any CPU.Build.0 = Release|Any CPU
-		{7218F956-3115-4BAA-A741-FE2A83DEF890}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{7218F956-3115-4BAA-A741-FE2A83DEF890}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{7218F956-3115-4BAA-A741-FE2A83DEF890}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{7218F956-3115-4BAA-A741-FE2A83DEF890}.Release|Any CPU.Build.0 = Release|Any CPU
-		{A2EAF9F1-36FB-4D64-ACF3-8B934A95E2FA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{A2EAF9F1-36FB-4D64-ACF3-8B934A95E2FA}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{A2EAF9F1-36FB-4D64-ACF3-8B934A95E2FA}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{A2EAF9F1-36FB-4D64-ACF3-8B934A95E2FA}.Release|Any CPU.Build.0 = Release|Any CPU
-		{023C2138-0356-494C-8935-18EA50197290}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{023C2138-0356-494C-8935-18EA50197290}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{023C2138-0356-494C-8935-18EA50197290}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{023C2138-0356-494C-8935-18EA50197290}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{76178D1C-692E-465B-B8FC-C2B5180ABC6C} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
-		{7218F956-3115-4BAA-A741-FE2A83DEF890} = {5C51E672-973E-47AD-B348-05E9B6FD1A8E}
-		{A2EAF9F1-36FB-4D64-ACF3-8B934A95E2FA} = {5C51E672-973E-47AD-B348-05E9B6FD1A8E}
-		{023C2138-0356-494C-8935-18EA50197290} = {5C51E672-973E-47AD-B348-05E9B6FD1A8E}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {554E79BF-3181-47D5-9F62-C84B6C340EF1}

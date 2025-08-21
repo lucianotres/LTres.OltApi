@@ -1,0 +1,28 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <InvariantGlobalization>true</InvariantGlobalization>
+    <Version>0.0.1.10</Version>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="7.0.0" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.4.0" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <GenerateDocumentationFile>True</GenerateDocumentationFile>
+    <NoWarn>$(NoWarn);1591</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\ltres.olt.api.common\ltres.olt.api.common.csproj" />
+    <ProjectReference Include="..\ltres.olt.api.mongo\ltres.olt.api.mongo.csproj" />
+    <ProjectReference Include="..\ltres.olt.api.core\ltres.olt.api.core.csproj" />
+    <ProjectReference Include="..\ltres.olt.api.communication\ltres.olt.api.communication.csproj" />
+  </ItemGroup>
+
+</Project>
