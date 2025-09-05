@@ -72,7 +72,7 @@ public class TelnetZTEChannel : ICommunicationChannel
         return telnetLoggedIn;
     }
 
-    public async Task Disconnect() => await Task.Run(Dispose).ConfigureAwait(false);
+    public async Task Disconnect() => await Task.Run(Dispose);
 
     public void Dispose()
     {
@@ -96,14 +96,14 @@ public class TelnetZTEChannel : ICommunicationChannel
     public int ToReadAvailable { get => telnetClient == null ? 0 : telnetClient.Available; }
 
     public async Task<int> ReadBuffer(byte[] buffer, int offset, int count) =>
-        await ReadBuffer(buffer, offset, count, CancellationToken.None).ConfigureAwait(false);
+        await ReadBuffer(buffer, offset, count, CancellationToken.None);
 
     public async Task<int> ReadBuffer(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
     {
         if (telnetClient == null || telnetStream == null)
             throw new Exception("Not connected yet to read!");
 
-        return await telnetStream.ReadAsync(buffer, offset, count, cancellationToken).ConfigureAwait(false);
+        return await telnetStream.ReadAsync(buffer, offset, count, cancellationToken);
     }
 
     private async Task<IEnumerable<string>> ReadLinesTelnet(int seconds = 5,
@@ -190,7 +190,7 @@ public class TelnetZTEChannel : ICommunicationChannel
     }
 
     public async Task<IEnumerable<string>> ReadLinesFromChannel(Regex? regexDetectWaitLine = null, CancellationTokenSource? cancellationTokenSource = null) => 
-        await ReadLinesTelnet(5, true, regexDetectWaitLine, cancellationTokenSource).ConfigureAwait(false);
+        await ReadLinesTelnet(5, true, regexDetectWaitLine, cancellationTokenSource);
 
     public int LastReadBackspacesCount { get; set; }
 
@@ -203,10 +203,10 @@ public class TelnetZTEChannel : ICommunicationChannel
         if (telnetClient == null || telnetStream == null)
             throw new Exception("Not connected yet to write!");
 
-        await telnetStream.WriteAsync(buffer, 0, count ?? buffer.Length).ConfigureAwait(false);
+        await telnetStream.WriteAsync(buffer, 0, count ?? buffer.Length);
     }
 
-    public async Task WriteByte(byte b) => await WriteBuffer(new byte[] { b }).ConfigureAwait(false);
+    public async Task WriteByte(byte b) => await WriteBuffer(new byte[] { b });
 
     public async Task WriteCommand(string command, bool newLine = true, bool doLogging = true)
     {

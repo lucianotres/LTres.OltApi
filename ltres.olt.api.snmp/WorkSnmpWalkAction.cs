@@ -51,8 +51,7 @@ public class WorkSnmpWalkAction : IWorkerActionSnmpWalk
 
                     var response = await Task.Run(() =>
                         message.GetResponse(30000, probeInfo.Host),
-                        cancellationToken)
-                        .ConfigureAwait(false);
+                        cancellationToken);
                    
                     var pdu = response.Pdu();
                     errorFound = pdu.ErrorStatus.ToErrorCode() != 0;
@@ -85,8 +84,7 @@ public class WorkSnmpWalkAction : IWorkerActionSnmpWalk
 
                     var response = await Task.Run(() =>
                         message.GetResponse(5000, probeInfo.Host),
-                        cancellationToken)
-                        .ConfigureAwait(false);
+                        cancellationToken);
 
                     var pdu = response.Pdu();
                     errorFound = pdu.ErrorStatus.ToErrorCode() != 0;

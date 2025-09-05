@@ -26,7 +26,7 @@ public class WorkSnmpGetAction2 : IWorkerActionSnmpGet
             if (cancellationToken.IsCancellationRequested)
                 return finalResponse;
 
-            var response = await Task.Run(() => udpTarget.Request(pdu, snmpAgentParams)).ConfigureAwait(false);
+            var response = await Task.Run(() => udpTarget.Request(pdu, snmpAgentParams));
             var errorStatus = response.Pdu.ErrorStatus;
 
             if (cancellationToken.IsCancellationRequested)

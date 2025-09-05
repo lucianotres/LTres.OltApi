@@ -47,7 +47,7 @@ public class WorkSnmpWalkAction2 : IWorkerActionSnmpWalk
                 if (cancellationToken.IsCancellationRequested)
                     return finalResponse;
 
-                var response = await Task.Run(() => udpTarget.Request(pdu, snmpAgentParams)).ConfigureAwait(false);
+                var response = await Task.Run(() => udpTarget.Request(pdu, snmpAgentParams));
 
                 errorFound = response.Pdu.ErrorStatus != 0;
                 if (!errorFound)

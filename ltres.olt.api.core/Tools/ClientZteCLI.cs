@@ -51,7 +51,7 @@ public class ClientZteCLI : IDisposable
     private async Task<IEnumerable<string>?> ReadLinesFromChannelWithMore(bool trimEmptyLines = false)
     {
         var finalLines = new List<string>();
-        var readLines = await channel.ReadLinesFromChannel().ConfigureAwait(false);
+        var readLines = await channel.ReadLinesFromChannel();
         finalLines.AddRange(readLines);
 
         do
@@ -66,8 +66,8 @@ public class ClientZteCLI : IDisposable
 
             if (readLines.Any(j => j.Contains("--More--", StringComparison.Ordinal)))
             {
-                await channel.WriteByte(32).ConfigureAwait(false);
-                readLines = await channel.ReadLinesFromChannel().ConfigureAwait(false);
+                await channel.WriteByte(32);
+                readLines = await channel.ReadLinesFromChannel();
 
                 if (channel.LastReadBackspacesCount > 0)
                     channel.LastReadBackspacesCount -= finalLines.Last().Length;

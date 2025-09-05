@@ -53,9 +53,9 @@ public class WorkController : IHostedService
             counter.AddCount("to save queue", queueCount);
     }
 
-    public async Task StartAsync(CancellationToken cancellationToken) => await Task.Run(() => Start()).ConfigureAwait(false);
+    public async Task StartAsync(CancellationToken cancellationToken) => await Task.Run(() => Start());
 
-    public async Task StopAsync(CancellationToken cancellationToken) => await Task.Run(() => Stop()).ConfigureAwait(false);
+    public async Task StopAsync(CancellationToken cancellationToken) => await Task.Run(() => Stop());
 
     private void Start(bool autoRestart = true)
     {
@@ -97,7 +97,7 @@ public class WorkController : IHostedService
 
         while (_cancellationTokenSource != null && !_cancellationTokenSource.IsCancellationRequested)
         {
-            var workToBeDone = await _workListController.ToBeDone().ConfigureAwait(false);
+            var workToBeDone = await _workListController.ToBeDone();
             if (workToBeDone.Any())
             {
                 var quantity = workToBeDone.Count();
@@ -109,7 +109,7 @@ public class WorkController : IHostedService
             foreach (var work in workToBeDone)
                 _workExecutionDispatcher.Dispatch(work);
 
-            await Task.Delay(1000).ConfigureAwait(false);
+            await Task.Delay(1000);
 
             if (--toCleanUpCountdown <= 0)
             {
@@ -120,7 +120,7 @@ public class WorkController : IHostedService
                     lastCleanUpTask = Task.Run(async () =>
                     {
                         var removeTimer = Stopwatch.StartNew();
-                        var removedCount = await _workCleanUp.CleanUpExecute().ConfigureAwait(false);
+                        var removedCount = await _workCleanUp.CleanUpExecute();
                         removeTimer.Stop();
 
                         if (removedCount > 0)
@@ -155,7 +155,7 @@ public class WorkController : IHostedService
         _queueResponseSavingProccessorTask = Task.Run(async() =>
         {
             while (_queueResponses.TryDequeue(out var workProbeResponse))
-                await SaveProbeResponse(workProbeResponse).ConfigureAwait(false);
+                await SaveProbeResponse(workProbeResponse);
         });
     }
 
@@ -164,7 +164,7 @@ public class WorkController : IHostedService
         var workResponseTimer = Stopwatch.StartNew();
         try
         {
-            await _workResponseController.ResponseReceived(workProbeResponse).ConfigureAwait(false);
+            await _workResponseController.ResponseReceived(workProbeResponse);
             workResponseTimer.Stop();
 
             _log.LogDebug($"RESPONSE: {workProbeResponse}, saved in {workResponseTimer.Elapsed}");

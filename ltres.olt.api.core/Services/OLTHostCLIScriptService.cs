@@ -55,7 +55,7 @@ public class OLTHostCLIScriptService : IOLTHostCLIScriptService
         else
             scriptToRun = oltScript.Script;
 
-        _ = RunScript().ConfigureAwait(false);
+        _ = RunScript();
         return true;
     }
 

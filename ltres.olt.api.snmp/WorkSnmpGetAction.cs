@@ -25,8 +25,7 @@ public class WorkSnmpGetAction : IWorkerActionSnmpGet
 
             var replyMessage = await Task.Run(() =>
                 requestMessage.GetResponse(probeInfo.GetTimeout.GetValueOrDefault(5000), probeInfo.Host),
-                cancellationToken)
-                .ConfigureAwait(false);
+                cancellationToken);
 
             var pdu = replyMessage.Pdu();
             var errorStatus = pdu.ErrorStatus.ToErrorCode();

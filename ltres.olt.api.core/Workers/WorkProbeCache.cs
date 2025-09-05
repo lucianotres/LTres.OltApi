@@ -34,7 +34,7 @@ public class WorkProbeCache : IWorkProbeCache
                 _cacheLst.Add((idWork, requestedIn));
                 return true;
             }
-        }).ConfigureAwait(false);
+        });
     }
 
     private void RemoveOld()
@@ -49,6 +49,6 @@ public class WorkProbeCache : IWorkProbeCache
         {
             lock (_cacheLock)
                 return _cacheLst.RemoveAll(f => f.id == idWork) > 0;
-        }).ConfigureAwait(false);
+        });
     }
 }
