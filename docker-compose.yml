@@ -16,10 +16,11 @@ services:
   
   rabbit:
     container_name: rabbit
-    image: rabbitmq:3
-    restart: always
+    image: rabbitmq:3-management
+    restart: unless-stopped
     ports:
       - 5672:5672
+      - 15672:15672
     healthcheck:
       test: rabbitmq-diagnostics -q ping
       interval: 30s
@@ -31,9 +32,10 @@ services:
     depends_on:
       mongodb:
         condition: service_healthy
+    restart: unless-stopped
     build: 
       context: .
-      dockerfile: ./LTres.OltApi.WebApi/Dockerfile
+      dockerfile: ./ltres.olt.api.webapi/Dockerfile
       args:
         - VERSION=0.0.1.10
     ports:
@@ -47,7 +49,7 @@ services:
         condition: service_healthy
     build: 
       context: .
-      dockerfile: ./LTres.OltApi.WorkerController/Dockerfile
+      dockerfile: ./ltres.olt.api.controller/Dockerfile
       args:
         - VERSION=0.0.0.10
 
@@ -57,14 +59,14 @@ services:
   #     - rabbit
   #   build: 
   #     context: .
-  #     dockerfile: ./LTres.OltApi.WorkerController/Dockerfile
+  #     dockerfile: ./ltres.olt.api.controller/Dockerfile
 
   worker1:
     depends_on:
       - rabbit
     build: 
       context: .
-      dockerfile: ./LTres.OltApi.Worker/Dockerfile
+      dockerfile: ./ltres.olt.api.worker/Dockerfile
       args:
         - VERSION=0.0.1.10
     environment:
@@ -75,21 +77,21 @@ services:
   #     - rabbit
   #   build: 
   #     context: .
-  #     dockerfile: ./LTres.OltApi.Worker/Dockerfile
+  #     dockerfile: ./ltres.olt.api.worker/Dockerfile
 
   # worker3:
   #   depends_on:
   #     - rabbit
   #   build: 
   #     context: .
-  #     dockerfile: ./LTres.OltApi.Worker/Dockerfile
+  #     dockerfile: ./ltres.olt.api.worker/Dockerfile
 
   # worker4:
   #   depends_on:
   #     - rabbit
   #   build: 
   #     context: .
-  #     dockerfile: ./LTres.OltApi.Worker/Dockerfile
+  #     dockerfile: ./ltres.olt.api.worker/Dockerfile
 
 volumes:
   ltres_oltapi_data:
