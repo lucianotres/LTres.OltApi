@@ -3,25 +3,25 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ltres.olt.api.webapi", "ltres.olt.api.webApi\ltres.olt.api.webapi.csproj", "{D86D3290-29D8-4A5A-B890-4912CF2BF2F5}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LTres.Olt.Api.WebApi", "LTres.Olt.Api.WebApi\LTres.Olt.Api.WebApi.csproj", "{D86D3290-29D8-4A5A-B890-4912CF2BF2F5}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ltres.olt.api.common", "ltres.olt.api.common\ltres.olt.api.common.csproj", "{1AFF77AF-5E80-4791-B88E-B82A1AE93FF3}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LTres.Olt.Api.Common", "LTres.Olt.Api.Common\LTres.Olt.Api.Common.csproj", "{1AFF77AF-5E80-4791-B88E-B82A1AE93FF3}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ltres.olt.api.core", "ltres.olt.api.core\ltres.olt.api.core.csproj", "{E521DD85-558E-4B19-85FE-A68255508440}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LTres.Olt.Api.Core", "LTres.Olt.Api.Core\LTres.Olt.Api.Core.csproj", "{E521DD85-558E-4B19-85FE-A68255508440}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ltres.olt.api.mongo", "ltres.olt.api.mongo\ltres.olt.api.mongo.csproj", "{66D94558-A823-4875-AC0E-ACE0E7B4EC90}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LTres.Olt.Api.Mongo", "LTres.Olt.Api.Mongo\LTres.Olt.Api.Mongo.csproj", "{66D94558-A823-4875-AC0E-ACE0E7B4EC90}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ltres.olt.api.controller", "ltres.olt.api.controller\ltres.olt.api.controller.csproj", "{21827E03-8DE6-4847-A6B6-FC95ED9FCF1D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LTres.Olt.Api.Controller", "LTres.Olt.Api.Controller\LTres.Olt.Api.Controller.csproj", "{21827E03-8DE6-4847-A6B6-FC95ED9FCF1D}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ltres.olt.api.rabbitmq", "ltres.olt.api.rabbitmq\ltres.olt.api.rabbitmq.csproj", "{B933889C-872B-42DF-9172-9EA094C718CD}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LTres.Olt.Api.RabbitMQ", "LTres.Olt.Api.RabbitMQ\LTres.Olt.Api.RabbitMQ.csproj", "{B933889C-872B-42DF-9172-9EA094C718CD}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ltres.olt.api.worker", "ltres.olt.api.worker\ltres.olt.api.worker.csproj", "{6719A97B-7508-4B6E-8108-D40A4FB0908D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LTres.Olt.Api.Worker", "LTres.Olt.Api.Worker\LTres.Olt.Api.Worker.csproj", "{6719A97B-7508-4B6E-8108-D40A4FB0908D}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ltres.olt.api.snmp", "ltres.olt.api.snmp\ltres.olt.api.snmp.csproj", "{29E197BB-ACAD-4D2B-BC9B-0A3FCD5A22AB}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LTres.Olt.Api.Snmp", "LTres.Olt.Api.Snmp\LTres.Olt.Api.Snmp.csproj", "{29E197BB-ACAD-4D2B-BC9B-0A3FCD5A22AB}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ltres.olt.api.cli", "ltres.olt.api.cli\ltres.olt.api.cli.csproj", "{6F2CD7AE-B549-4AF7-B6B0-4E57B56F29FA}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LTres.Olt.Api.Cli", "LTres.Olt.Api.Cli\LTres.Olt.Api.Cli.csproj", "{6F2CD7AE-B549-4AF7-B6B0-4E57B56F29FA}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ltres.olt.api.communication", "ltres.olt.api.communication\ltres.olt.api.communication.csproj", "{4A41B08D-E02F-416C-9BE8-55EA58916B8F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LTres.Olt.Api.Communication", "LTres.Olt.Api.Communication\LTres.Olt.Api.Communication.csproj", "{4A41B08D-E02F-416C-9BE8-55EA58916B8F}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{9DAE494A-8A82-4D74-AD9B-809F5D2D4921}"
 	ProjectSection(SolutionItems) = preProject
@@ -29,9 +29,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		README.md = README.md
 	EndProjectSection
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{02EA681E-C7D8-13C7-8484-4AC65E1B71E8}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{02EA681E-C7D8-13C7-8484-4AC65E1B71E8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ltres.olt.api.core.tests", "tests\ltres.olt.api.core.tests\ltres.olt.api.core.tests.csproj", "{76178D1C-692E-465B-B8FC-C2B5180ABC6C}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LTres.Olt.Api.Core.Tests", "Tests\LTres.Olt.Api.Core.Tests\LTres.Olt.Api.Core.Tests.csproj", "{76178D1C-692E-465B-B8FC-C2B5180ABC6C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
