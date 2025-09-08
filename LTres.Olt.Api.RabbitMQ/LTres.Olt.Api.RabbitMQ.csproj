@@ -13,7 +13,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\ltres.olt.api.common\ltres.olt.api.common.csproj" />
+    <ProjectReference Include="..\LTres.Olt.Api.Common\LTres.Olt.Api.Common.csproj" />
   </ItemGroup>
 
 </Project>

@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <ItemGroup>
-    <ProjectReference Include="..\ltres.olt.api.common\ltres.olt.api.common.csproj" />
+    <ProjectReference Include="..\LTres.Olt.Api.Common\LTres.Olt.Api.Common.csproj" />
   </ItemGroup>
 
   <ItemGroup>

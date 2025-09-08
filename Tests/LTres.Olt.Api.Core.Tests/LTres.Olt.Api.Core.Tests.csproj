@@ -17,8 +17,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\ltres.olt.api.common\ltres.olt.api.common.csproj" />
-    <ProjectReference Include="..\..\ltres.olt.api.core\ltres.olt.api.core.csproj" />
+    <ProjectReference Include="..\..\LTres.Olt.Api.Common\LTres.Olt.Api.Common.csproj" />
+    <ProjectReference Include="..\..\LTres.Olt.Api.Core\LTres.Olt.Api.Core.csproj" />
   </ItemGroup>
 
   <ItemGroup>

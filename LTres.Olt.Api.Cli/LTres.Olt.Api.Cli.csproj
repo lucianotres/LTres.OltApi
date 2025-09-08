@@ -1,9 +1,9 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <ItemGroup>
-    <ProjectReference Include="..\ltres.olt.api.core\ltres.olt.api.core.csproj" />
-    <ProjectReference Include="..\ltres.olt.api.snmp\ltres.olt.api.snmp.csproj" />
-    <ProjectReference Include="..\ltres.olt.api.communication\ltres.olt.api.communication.csproj" />
+    <ProjectReference Include="..\LTres.Olt.Api.Core\LTres.Olt.Api.Core.csproj" />
+    <ProjectReference Include="..\LTres.Olt.Api.Snmp\LTres.Olt.Api.Snmp.csproj" />
+    <ProjectReference Include="..\LTres.Olt.Api.Communication\LTres.Olt.Api.Communication.csproj" />
   </ItemGroup>
 
   <PropertyGroup>

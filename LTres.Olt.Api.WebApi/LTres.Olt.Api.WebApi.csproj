@@ -19,10 +19,10 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\ltres.olt.api.common\ltres.olt.api.common.csproj" />
-    <ProjectReference Include="..\ltres.olt.api.mongo\ltres.olt.api.mongo.csproj" />
-    <ProjectReference Include="..\ltres.olt.api.core\ltres.olt.api.core.csproj" />
-    <ProjectReference Include="..\ltres.olt.api.communication\ltres.olt.api.communication.csproj" />
+    <ProjectReference Include="..\LTres.Olt.Api.Common\LTres.Olt.Api.Common.csproj" />
+    <ProjectReference Include="..\LTres.Olt.Api.Mongo\LTres.Olt.Api.Mongo.csproj" />
+    <ProjectReference Include="..\LTres.Olt.Api.Core\LTres.Olt.Api.Core.csproj" />
+    <ProjectReference Include="..\LTres.Olt.Api.Communication\LTres.Olt.Api.Communication.csproj" />
   </ItemGroup>
 
 </Project>

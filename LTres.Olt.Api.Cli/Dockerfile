@@ -4,9 +4,9 @@ ARG VERSION
 WORKDIR /App
 COPY . .
 
-RUN dotnet restore ltres.olt.api.cli
+RUN dotnet restore LTres.Olt.Api.cli
 
-RUN dotnet publish -c Release -p Version=$VERSION -o out ltres.olt.api.cli
+RUN dotnet publish -c Release -p Version=$VERSION -o out LTres.Olt.Api.cli
 
 #-------------- runtime
 
@@ -14,4 +14,4 @@ FROM mcr.microsoft.com/dotnet/aspnet:8.0
 WORKDIR /App
 COPY --from=build-env /App/out .
 
-ENTRYPOINT ["dotnet", "ltres.olt.api.cli.dll"]
+ENTRYPOINT ["dotnet", "LTres.Olt.Api.cli.dll"]

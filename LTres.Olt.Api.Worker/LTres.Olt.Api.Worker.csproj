@@ -9,10 +9,10 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\ltres.olt.api.common\ltres.olt.api.common.csproj" />
-    <ProjectReference Include="..\ltres.olt.api.rabbitmq\ltres.olt.api.rabbitmq.csproj" />
-    <ProjectReference Include="..\ltres.olt.api.core\ltres.olt.api.core.csproj" />
-    <ProjectReference Include="..\ltres.olt.api.snmp\ltres.olt.api.snmp.csproj" />
+    <ProjectReference Include="..\LTres.Olt.Api.Common\LTres.Olt.Api.Common.csproj" />
+    <ProjectReference Include="..\LTres.Olt.Api.RabbitMQ\LTres.Olt.Api.RabbitMQ.csproj" />
+    <ProjectReference Include="..\LTres.Olt.Api.Core\LTres.Olt.Api.Core.csproj" />
+    <ProjectReference Include="..\LTres.Olt.Api.Snmp\LTres.Olt.Api.Snmp.csproj" />
   </ItemGroup>
   
   <ItemGroup>

@@ -35,7 +35,7 @@ services:
     restart: unless-stopped
     build: 
       context: .
-      dockerfile: ./ltres.olt.api.webapi/Dockerfile
+      dockerfile: ./LTres.Olt.Api.webapi/Dockerfile
       args:
         - VERSION=0.0.1.10
     ports:
@@ -49,7 +49,7 @@ services:
         condition: service_healthy
     build: 
       context: .
-      dockerfile: ./ltres.olt.api.controller/Dockerfile
+      dockerfile: ./LTres.Olt.Api.controller/Dockerfile
       args:
         - VERSION=0.0.0.10
 
@@ -59,14 +59,14 @@ services:
   #     - rabbit
   #   build: 
   #     context: .
-  #     dockerfile: ./ltres.olt.api.controller/Dockerfile
+  #     dockerfile: ./LTres.Olt.Api.controller/Dockerfile
 
   worker1:
     depends_on:
       - rabbit
     build: 
       context: .
-      dockerfile: ./ltres.olt.api.worker/Dockerfile
+      dockerfile: ./LTres.Olt.Api.worker/Dockerfile
       args:
         - VERSION=0.0.1.10
     environment:
@@ -77,21 +77,21 @@ services:
   #     - rabbit
   #   build: 
   #     context: .
-  #     dockerfile: ./ltres.olt.api.worker/Dockerfile
+  #     dockerfile: ./LTres.Olt.Api.worker/Dockerfile
 
   # worker3:
   #   depends_on:
   #     - rabbit
   #   build: 
   #     context: .
-  #     dockerfile: ./ltres.olt.api.worker/Dockerfile
+  #     dockerfile: ./LTres.Olt.Api.worker/Dockerfile
 
   # worker4:
   #   depends_on:
   #     - rabbit
   #   build: 
   #     context: .
-  #     dockerfile: ./ltres.olt.api.worker/Dockerfile
+  #     dockerfile: ./LTres.Olt.Api.worker/Dockerfile
 
 volumes:
   ltres_oltapi_data:
