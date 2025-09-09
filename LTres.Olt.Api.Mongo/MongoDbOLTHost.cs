@@ -1,31 +1,13 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using LTres.Olt.Api.Common.DbServices;
 using LTres.Olt.Api.Common.Models;
-using Microsoft.Extensions.Options;
-using MongoDB.Bson;
 using MongoDB.Driver;
-using MongoDB.Driver.Core.Events;
 
 namespace LTres.Olt.Api.Mongo;
 
-public class MongoDbOLTHost : IDbOLTHost, IDbOLTScript
+public class MongoDbOLTHost(IMongoDatabase database) : IDbOLTHost, IDbOLTScript
 {
-    public MongoDbOLTHost(IOptions<MongoConfig> options)
-    {
-        var config = options.Value;
-        var client = new MongoClient(config.ConnectionString);
-        var database = client.GetDatabase(config.DatabaseName);
-
-        OLT_Hosts = database.GetCollection<OLT_Host>("olt_hosts");
-        OLT_Scripts = database.GetCollection<OLT_Script>("olt_scripts");
-    }
-
-    private IMongoCollection<OLT_Host> OLT_Hosts;
-
-    private IMongoCollection<OLT_Script> OLT_Scripts;
+    private readonly IMongoCollection<OLT_Host> OLT_Hosts = database.GetCollection<OLT_Host>("olt_hosts");
+    private readonly IMongoCollection<OLT_Script> OLT_Scripts = database.GetCollection<OLT_Script>("olt_scripts");
 
     public async Task<Guid> AddOLTHost(OLT_Host olt)
     {
