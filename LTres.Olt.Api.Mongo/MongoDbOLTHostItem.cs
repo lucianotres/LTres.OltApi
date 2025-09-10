@@ -1,8 +1,6 @@
-using System.Data.Common;
 using LTres.Olt.Api.Common;
 using LTres.Olt.Api.Common.Models;
 using Microsoft.Extensions.Options;
-using MongoDB.Bson;
 using MongoDB.Driver;
 
 namespace LTres.Olt.Api.Mongo;
@@ -12,12 +10,8 @@ public class MongoDbOLTHostItem : IDbOLTHostItem
     private readonly IMongoCollection<OLT_Host_Item> OLT_Host_Items;
     private readonly IMongoCollection<OLT_Host> OLT_Hosts;
 
-    public MongoDbOLTHostItem(IOptions<MongoConfig> options)
+    public MongoDbOLTHostItem(IMongoDatabase database)
     {
-        var config = options.Value;
-        var client = new MongoClient(config.ConnectionString);
-        var database = client.GetDatabase(config.DatabaseName);
-
         OLT_Host_Items = database.GetCollection<OLT_Host_Item>("olt_host_items");
         OLT_Hosts = database.GetCollection<OLT_Host>("olt_hosts");
     }
