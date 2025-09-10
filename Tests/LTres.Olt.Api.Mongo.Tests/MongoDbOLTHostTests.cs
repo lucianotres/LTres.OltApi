@@ -19,9 +19,29 @@ public class MongoDbOLTHostTests
     private readonly List<OLT_Host> fakeOltHostsList = [
         new OLT_Host()
         {
-            Id = Guid.Empty,
-            Name = "Test",
-            Host = "1.1.1.1:131"
+            Id = Guid.NewGuid(),
+            Name = "Test 1",
+            Host = "1.1.1.1:131",
+            Active = true
+        },
+        new OLT_Host()
+        {
+            Id = Guid.NewGuid(),
+            Name = "Test 2",
+            Host = "1.1.1.2:131"
+        },
+        new OLT_Host()
+        {
+            Id = Guid.NewGuid(),
+            Name = "Test 3",
+            Host = "1.1.2.1:131"
+        },
+        new OLT_Host()
+        {
+            Id = Guid.NewGuid(),
+            Name = "Test 4",
+            Host = "1.1.2.2:131",
+            tags = ["tag1", "tag2"]
         }
     ];
 
@@ -82,4 +102,17 @@ public class MongoDbOLTHostTests
         Assert.Equal(1, result);
         mockCollectionOltHosts.Verify(m => m.ReplaceOneAsync(It.IsAny<FilterDefinition<OLT_Host>>(), newHost, null as ReplaceOptions, default), Times.Once);
     }
+
+    [Fact]
+    public async Task ListOLTHosts_ShouldReturnAFullList()
+    {
+        var dbContext = new MongoDbOLTHost(mockDatabase.Object);
+
+        var result = await dbContext.ListOLTHosts();
+
+        mockCollectionOltHosts.Verify(x => x.FindAsync(It.IsAny<FilterDefinition<OLT_Host>>(), It.IsAny<FindOptions<OLT_Host, OLT_Host>>(), It.IsAny<CancellationToken>()), Times.Once);
+        Assert.Equal(4, result.Count());
+        Assert.Equal(fakeOltHostsList, result);
+    }
+    
 }
