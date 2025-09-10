@@ -1,5 +1,6 @@
 ﻿using System.Net;
 using LTres.Olt.Api.Common.Models;
+using LTres.Olt.Api.Mongo.Tests.Utils;
 using MongoDB.Driver;
 using Moq;
 
@@ -25,26 +26,9 @@ public class MongoDbWorkProbeInfoTests
 
     public MongoDbWorkProbeInfoTests()
     {
-        mockCursorToProbe.Setup(x => x.Current).Returns(fakeToProbeList);
-        mockCursorToProbe
-            .SetupSequence(x => x.MoveNext(It.IsAny<CancellationToken>()))
-            .Returns(true)
-            .Returns(false);
-        mockCursorToProbe
-            .SetupSequence(x => x.MoveNextAsync(It.IsAny<CancellationToken>()))
-            .Returns(Task.FromResult(true))
-            .Returns(Task.FromResult(false));
-
-        mockCollectionToProbe
-            .Setup(x => x.FindAsync(
-                It.IsAny<FilterDefinition<WorkProbeInfo>>(),
-                It.IsAny<FindOptions<WorkProbeInfo, WorkProbeInfo>>(),
-                It.IsAny<CancellationToken>()))
-            .ReturnsAsync(mockCursorToProbe.Object);
-
-        mockDatabase
-            .Setup(m => m.GetCollection<WorkProbeInfo>("to_probe", null))
-            .Returns(mockCollectionToProbe.Object);
+        mockCursorToProbe.SetupIAsyncCursor(fakeToProbeList);
+        mockCollectionToProbe.SetupCollection(mockCursorToProbe);
+        mockDatabase.SetupDatabase("to_probe", mockCollectionToProbe);
     }
 
     [Fact]
