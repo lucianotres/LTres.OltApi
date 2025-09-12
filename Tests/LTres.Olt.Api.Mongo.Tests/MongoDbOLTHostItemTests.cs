@@ -11,7 +11,10 @@ public class MongoDbOLTHostItemTests
     private readonly Mock<IMongoDatabase> mockDatabase = new();
     private readonly Mock<IMongoCollection<OLT_Host_Item>> mockCollectionHostItem = new();
     private readonly Mock<IAsyncCursor<OLT_Host_Item>> mockCursorHostItem = new();
-
+    private readonly Mock<IMongoCollection<OLT_Host>> mockCollectionOltHosts = new();
+    private readonly Mock<IAsyncCursor<OLT_Host>> mockCursorOltHosts = new();
+    private readonly Mock<IAsyncCursor<OLT_Host_OnuRef>> mockCursorOltHostOnuRef = new();
+    
     private readonly List<OLT_Host_Item> fakeHostItemList = [
         new OLT_Host_Item()
         {
@@ -20,11 +23,21 @@ public class MongoDbOLTHostItemTests
         }
     ];
 
+    private readonly List<OLT_Host> fakeOltHostsList = [];
+
     public MongoDbOLTHostItemTests()
     {
         mockCursorHostItem.SetupIAsyncCursor(fakeHostItemList);
         mockCollectionHostItem.SetupCollection(mockCursorHostItem);
         mockDatabase.SetupDatabase("olt_host_items", mockCollectionHostItem);
+
+        mockCursorOltHosts.SetupIAsyncCursor(fakeOltHostsList);
+        mockCollectionOltHosts.SetupCollection(mockCursorOltHosts);
+        mockCursorOltHostOnuRef.SetupIAsyncCursor([]);
+        mockCollectionOltHosts
+            .Setup(c => c.FindAsync(It.IsAny<FilterDefinition<OLT_Host>>(), It.IsAny<FindOptions<OLT_Host, OLT_Host_OnuRef?>>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(mockCursorOltHostOnuRef.Object);
+        mockDatabase.SetupDatabase("olt_hosts", mockCollectionOltHosts);
     }
 
     [Fact]
@@ -78,5 +91,35 @@ public class MongoDbOLTHostItemTests
         mockCollectionHostItem.Verify(x => x.FindAsync(It.IsAny<FilterDefinition<OLT_Host_Item>>(), It.IsAny<FindOptions<OLT_Host_Item, OLT_Host_Item>>(), It.IsAny<CancellationToken>()), Times.Once);
         Assert.Single(result);
         Assert.Equal(fakeHostItemList, result);
+    }
+
+    [Fact]
+    public async Task GetOLTOnuRef_ShouldReturnOnuReferencesByOltIdAsync()
+    {
+        var oltId = Guid.NewGuid();
+        var onuRefs = new OLT_Host_OnuRef()
+        {
+            Name = Guid.NewGuid(),
+            Desc = Guid.NewGuid()
+        };
+        var fakeOltHostsList = new List<OLT_Host>([
+            new()
+            {
+                Id = oltId,
+                Name = "OLT Test",
+                OnuRef = onuRefs
+            }
+        ]);
+        
+        mockCursorOltHosts.SetupIAsyncCursor(fakeOltHostsList);
+        mockCursorOltHostOnuRef.SetupIAsyncCursor([onuRefs]);
+
+        var dbContext = new MongoDbOLTHostItem(mockDatabase.Object);
+
+        //execute
+        var result = await dbContext.GetOLTOnuRef(oltId);
+
+        Assert.NotNull(result);
+        Assert.Equal(onuRefs, result);
     }
 }

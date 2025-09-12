@@ -1,20 +1,13 @@
 using LTres.Olt.Api.Common;
 using LTres.Olt.Api.Common.Models;
-using Microsoft.Extensions.Options;
 using MongoDB.Driver;
 
 namespace LTres.Olt.Api.Mongo;
 
-public class MongoDbOLTHostItem : IDbOLTHostItem
+public class MongoDbOLTHostItem(IMongoDatabase database) : IDbOLTHostItem
 {
-    private readonly IMongoCollection<OLT_Host_Item> OLT_Host_Items;
-    private readonly IMongoCollection<OLT_Host> OLT_Hosts;
-
-    public MongoDbOLTHostItem(IMongoDatabase database)
-    {
-        OLT_Host_Items = database.GetCollection<OLT_Host_Item>("olt_host_items");
-        OLT_Hosts = database.GetCollection<OLT_Host>("olt_hosts");
-    }
+    private readonly IMongoCollection<OLT_Host_Item> OLT_Host_Items = database.GetCollection<OLT_Host_Item>("olt_host_items");
+    private readonly IMongoCollection<OLT_Host> OLT_Hosts = database.GetCollection<OLT_Host>("olt_hosts");
 
     public async Task<Guid> AddOLTHostItem(OLT_Host_Item item)
     {
