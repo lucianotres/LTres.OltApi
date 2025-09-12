@@ -1,24 +1,14 @@
 using LTres.Olt.Api.Common.DbServices;
 using LTres.Olt.Api.Common.Models;
-using Microsoft.Extensions.Options;
 using MongoDB.Driver;
 
 namespace LTres.Olt.Api.Mongo;
 
-public class MongoDbWorkProbeResponse : IDbWorkProbeResponse
+public class MongoDbWorkProbeResponse(IMongoDatabase database) : IDbWorkProbeResponse
 {
-    private IMongoCollection<OLT_Host_Item> OLT_Host_Items;
-    private IMongoCollection<OLT_Host_Item_History> OLT_Host_Items_History;
+    private readonly IMongoCollection<OLT_Host_Item> OLT_Host_Items = database.GetCollection<OLT_Host_Item>("olt_host_items");
+    private readonly IMongoCollection<OLT_Host_Item_History> OLT_Host_Items_History = database.GetCollection<OLT_Host_Item_History>("olt_host_items_history");
 
-    public MongoDbWorkProbeResponse(IOptions<MongoConfig> options)
-    {
-        var config = options.Value;
-        var client = new MongoClient(config.ConnectionString);
-        var database = client.GetDatabase(config.DatabaseName);
-
-        OLT_Host_Items = database.GetCollection<OLT_Host_Item>("olt_host_items");
-        OLT_Host_Items_History = database.GetCollection<OLT_Host_Item_History>("olt_host_items_history");
-    }
 
     public async Task SaveWorkProbeResponse(WorkProbeResponse workProbeResponse)
     {

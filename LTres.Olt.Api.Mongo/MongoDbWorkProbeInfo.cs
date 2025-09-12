@@ -1,7 +1,5 @@
 using LTres.Olt.Api.Common.DbServices;
 using LTres.Olt.Api.Common.Models;
-using Microsoft.Extensions.Options;
-using MongoDB.Bson;
 using MongoDB.Driver;
 
 namespace LTres.Olt.Api.Mongo;
