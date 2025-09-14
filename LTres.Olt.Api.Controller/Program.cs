@@ -4,7 +4,6 @@ using LTres.Olt.Api.RabbitMQ;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Options;
 using LTres.Olt.Api.Mongo;
 using LTres.Olt.Api.Common.DbServices;
 using LTres.Olt.Api.Core;
@@ -18,6 +17,7 @@ builder.Services
     .Configure<RabbitMQConfiguration>(o => o.FillFromEnvironmentVars());
 
 builder.Services
+    .AddMongoConfigToDatabase()
     .AddTransient<IDbWorkProbeInfo, MongoDbWorkProbeInfo>()
     .AddTransient<IDbWorkProbeResponse, MongoDbWorkProbeResponse>()
     .AddTransient<IDbWorkCleanUp, MongoDbWorkCleanUp>()
@@ -34,7 +34,7 @@ var app = builder.Build();
 
 //do migrations for database
 MongoModelsConfiguration.RegisterClassMap();
-await MongoDbOltApiMigrations.Do(app.Services.GetRequiredService<IOptions<MongoConfig>>().Value);
+await MongoDbOltApiMigrations.Do(app.Services);
 
 await app.StartAsync();
 Console.WriteLine("Started");

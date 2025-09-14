@@ -18,6 +18,7 @@ MongoModelsConfiguration.RegisterClassMap();
 
 //database handlers
 builder.Services
+    .AddMongoConfigToDatabase()
     .AddScoped<IDbOLTHost, MongoDbOLTHost>()
     .AddScoped<IDbOLTScript, MongoDbOLTHost>()
     .AddScoped<IDbOLTHostItem, MongoDbOLTHostItem>();

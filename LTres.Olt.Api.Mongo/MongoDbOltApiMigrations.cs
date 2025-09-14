@@ -1,28 +1,17 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net;
-using System.Reflection.Metadata;
-using System.Threading.Tasks;
-using Amazon.Runtime.SharedInterfaces;
-using LTres.Olt.Api.Common.DbServices;
 using LTres.Olt.Api.Common.Models;
-using Microsoft.Extensions.Options;
+using Microsoft.Extensions.DependencyInjection;
 using MongoDB.Bson;
 using MongoDB.Driver;
-using MongoDB.Driver.Core.Events;
-using MongoDB.Driver.Linq;
+
 
 namespace LTres.Olt.Api.Mongo;
 
 public static class MongoDbOltApiMigrations
 {
 
-    public static async Task Do(MongoConfig config)
+    public static async Task Do(IServiceProvider serviceProvider)
     {
-        var client = new MongoClient(config.ConnectionString);
-        var database = client.GetDatabase(config.DatabaseName);
-
+        var database = serviceProvider.GetRequiredService<IMongoDatabase>();
         await CheckOrCreateCollections(database);
         await CheckOrCreateIndexes(database);
         await CheckOrCreateView(database);
