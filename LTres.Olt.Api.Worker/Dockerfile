@@ -14,6 +14,8 @@ RUN dotnet restore LTres.Olt.Api.RabbitMQ
 RUN dotnet restore LTres.Olt.Api.Snmp
 RUN dotnet restore LTres.Olt.Api.Worker
 
+RUN dotnet publish -c Release -p Version=$VERSION -o out LTres.Olt.Api.Snmp
+RUN dotnet publish -c Release -p Version=$VERSION -o out LTres.Olt.Api.RabbitMQ
 RUN dotnet publish -c Release -p Version=$VERSION -o out LTres.Olt.Api.Worker
 
 #-------------- runtime

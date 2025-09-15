@@ -14,6 +14,8 @@ RUN dotnet restore LTres.Olt.Api.Mongo
 RUN dotnet restore LTres.Olt.Api.RabbitMQ
 RUN dotnet restore LTres.Olt.Api.Controller
 
+RUN dotnet publish -c Release -p Version=$VERSION -o out LTres.Olt.Api.Mongo
+RUN dotnet publish -c Release -p Version=$VERSION -o out LTres.Olt.Api.RabbitMQ
 RUN dotnet publish -c Release -p Version=$VERSION -o out LTres.Olt.Api.Controller
 
 #-------------- runtime

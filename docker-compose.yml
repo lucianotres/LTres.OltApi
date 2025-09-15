@@ -41,7 +41,7 @@ services:
     ports:
       - 5000:5000
   
-  workercontroller1:
+  controller1:
     depends_on:
       mongodb:
         condition: service_healthy
@@ -53,13 +53,7 @@ services:
       args:
         - VERSION=0.0.0.10
 
-  # workercontroller2:
-  #   depends_on:
-  #     - mongodb
-  #     - rabbit
-  #   build: 
-  #     context: .
-  #     dockerfile: ./LTres.Olt.Api.controller/Dockerfile
+  # controller2: ...
 
   worker1:
     depends_on:
@@ -72,26 +66,7 @@ services:
     environment:
       - LTRES_MOCKING=true
   
-  # worker2:
-  #   depends_on:
-  #     - rabbit
-  #   build: 
-  #     context: .
-  #     dockerfile: ./LTres.Olt.Api.worker/Dockerfile
-
-  # worker3:
-  #   depends_on:
-  #     - rabbit
-  #   build: 
-  #     context: .
-  #     dockerfile: ./LTres.Olt.Api.worker/Dockerfile
-
-  # worker4:
-  #   depends_on:
-  #     - rabbit
-  #   build: 
-  #     context: .
-  #     dockerfile: ./LTres.Olt.Api.worker/Dockerfile
+  # worker2: ...
 
 volumes:
   ltres_oltapi_data:

@@ -13,6 +13,7 @@ RUN dotnet restore LTres.Olt.Api.Core
 RUN dotnet restore LTres.Olt.Api.Mongo
 RUN dotnet restore LTres.Olt.Api.WebApi
 
+RUN dotnet publish -c Release -p Version=$VERSION -o out LTres.Olt.Api.Mongo
 RUN dotnet publish -c Release -p Version=$VERSION -o out LTres.Olt.Api.WebApi
 
 #-------------- runtime
