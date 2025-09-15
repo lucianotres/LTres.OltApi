@@ -36,7 +36,7 @@ public class PluginManager(PluginManagerConfig config) : ILTresOltApiPlugin
                     plugin.Configure(services, configuration);
                     _pluginsList.Add(plugin);
 
-                    Console.WriteLine($"Plugin {plugin.Name} activated!");
+                    Console.WriteLine($"Plugin {plugin.Name}, v.{assembly.GetName().Version} activated!");
                 }
             }
             else
