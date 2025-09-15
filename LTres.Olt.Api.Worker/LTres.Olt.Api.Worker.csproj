@@ -6,13 +6,13 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
 	  <Version>0.0.1.10</Version>
+    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
   </PropertyGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\LTres.Olt.Api.Common\LTres.Olt.Api.Common.csproj" />
     <ProjectReference Include="..\LTres.Olt.Api.RabbitMQ\LTres.Olt.Api.RabbitMQ.csproj" />
     <ProjectReference Include="..\LTres.Olt.Api.Core\LTres.Olt.Api.Core.csproj" />
-    <ProjectReference Include="..\LTres.Olt.Api.Snmp\LTres.Olt.Api.Snmp.csproj" />
   </ItemGroup>
   
   <ItemGroup>
@@ -29,5 +29,13 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
+
+  <!-- Target to copy plugin files for local development -->
+  <Target Name="CopySnmpPluginOutput" AfterTargets="Build" Condition="'$(Configuration)' == 'Debug'">
+    <ItemGroup>
+      <_PluginFilesToCopy Include="..\LTres.Olt.Api.Snmp\bin\$(Configuration)\$(TargetFramework)\**\*.*" />
+    </ItemGroup>
+    <Copy SourceFiles="@(_PluginFilesToCopy)" DestinationFiles="@(_PluginFilesToCopy->'$(OutputPath)%(RecursiveDir)%(Filename)%(Extension)')" Condition="!Exists('$(OutputPath)%(RecursiveDir)%(Filename)%(Extension)')" />
+  </Target>
 
 </Project>

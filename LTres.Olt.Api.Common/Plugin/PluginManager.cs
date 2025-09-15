@@ -1,4 +1,5 @@
 using System.Reflection;
+using LTres.Olt.Api.Common.Models;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -91,6 +92,8 @@ public static class PluginManagerConfigExtensions
 {
     public static IServiceCollection AddPluginManager(this IServiceCollection services, IConfiguration configuration)
     {
+        OltApiConfiguration.Instance.FillFromEnvironmentVars();
+
         var pluginManagerConfig = new PluginManagerConfig();
         configuration.Bind("Plugins", pluginManagerConfig);
 

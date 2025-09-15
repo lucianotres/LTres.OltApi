@@ -8,6 +8,8 @@ namespace LTres.Olt.Api.Common.Models;
 
 public class OltApiConfiguration
 {
+    public static OltApiConfiguration Instance { get; private set; } = new();
+
     public int implementationVersion { get; set; } = 2;
 
     public bool usingMock { get; set; } = false;

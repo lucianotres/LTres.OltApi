@@ -3,52 +3,33 @@ using LTres.Olt.Api.Core.Workers;
 using LTres.Olt.Api.RabbitMQ;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using LTres.Olt.Api.Snmp;
 using LTres.Olt.Api.Core;
-using LTres.Olt.Api.Core.Tools;
+using LTres.Olt.Api.Common.Plugin;
 using LTres.Olt.Api.Common.Models;
+using LTres.Olt.Api.Core.Tools;
 
-OltApiConfiguration configuration = new();
-configuration.FillFromEnvironmentVars();
-
-Console.WriteLine($"Starting the worker i{configuration.implementationVersion}..");
+Console.WriteLine($"Starting the worker..");
 
 var builder = Host.CreateApplicationBuilder(args);
 
 builder.Services
-    .AddSingleton(configuration)
-    .Configure<RabbitMQConfiguration>(o => o.FillFromEnvironmentVars());
+    .AddPluginManager(builder.Configuration);
 
-builder.Services.AddTransient<IWorkerAction, WorkAction>();
-
-if (configuration.usingMock)
+if (OltApiConfiguration.Instance.usingMock)
 {
     builder.Services
-        .AddSingleton<MockSNMPItems>(new MockSNMPItems(Path.Combine(AppContext.BaseDirectory, "mock_items.csv")))
-        .AddTransient<MockSnmpGetAction>()
-        .AddTransient<MockSnmpWalkAction>()
-        .AddTransient<MockPingAction>();
+        .AddSingleton(new MockSNMPItems(Path.Combine(AppContext.BaseDirectory, "mock_items.csv")))
+        .AddTransient<IWorkerActionSnmpGet, MockSnmpGetAction>()
+        .AddTransient<IWorkerActionSnmpWalk, MockSnmpWalkAction>()
+        .AddTransient<IWorkerActionPing, MockPingAction>();
 
     Console.WriteLine("Using Mock SNMP Items");
 }
-
-if (configuration.implementationVersion == 2)
-{
-    builder.Services
-        .AddTransient<IWorkerActionSnmpGet, WorkSnmpGetAction2>()
-        .AddTransient<IWorkerActionSnmpWalk, WorkSnmpWalkAction2>();
-}
 else
-{
-    builder.Services
-        .AddTransient<IWorkerActionSnmpGet, WorkSnmpGetAction>()
-        .AddTransient<IWorkerActionSnmpWalk, WorkSnmpWalkAction>();
-}
+    builder.Services.AddTransient<IWorkerActionPing, WorkPingAction>();
 
 builder.Services
-    .AddTransient<IWorkerActionPing, WorkPingAction>();
-
-builder.Services
+    .AddTransient<IWorkerAction, WorkAction>()
     .AddTransient<IWorkProbeCalc, WorkProbeCalc2Values>()
     .AddSingleton<ILogCounter, LogCounter>()
     .AddHostedService<LogCounterPrinter>()
@@ -56,8 +37,12 @@ builder.Services
 
 var app = builder.Build();
 
+await app.Services.PluginManagerBeforeStart();
 await app.StartAsync();
-Console.WriteLine("Started successfully");
+await app.Services.PluginManagerAfterStart();
+Console.WriteLine("Started");
 
+await app.Services.PluginManagerBeforeStop();
 await app.WaitForShutdownAsync();
+await app.Services.PluginManagerAfterStop();
 Console.WriteLine("Stopped");
