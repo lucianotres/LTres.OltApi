@@ -1,6 +1,7 @@
 using System.Collections.Concurrent;
 using System.Diagnostics;
 using LTres.Olt.Api.Common;
+using LTres.Olt.Api.Common.DbServices;
 using LTres.Olt.Api.Common.Models;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;

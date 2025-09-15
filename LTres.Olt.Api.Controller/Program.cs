@@ -3,24 +3,18 @@ using LTres.Olt.Api.Core.Workers;
 using LTres.Olt.Api.RabbitMQ;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Configuration;
-using LTres.Olt.Api.Mongo;
-using LTres.Olt.Api.Common.DbServices;
 using LTres.Olt.Api.Core;
+using LTres.Olt.Api.Common.Plugin;
 
 Console.WriteLine("Starting the worker controller..");
 
 var builder = Host.CreateApplicationBuilder(args);
 
 builder.Services
-    .Configure<MongoConfig>(o => builder.Configuration.Bind("MongoConfig", o))
+    .AddPluginManager(builder.Configuration)
     .Configure<RabbitMQConfiguration>(o => o.FillFromEnvironmentVars());
 
 builder.Services
-    .AddMongoConfigToDatabase()
-    .AddTransient<IDbWorkProbeInfo, MongoDbWorkProbeInfo>()
-    .AddTransient<IDbWorkProbeResponse, MongoDbWorkProbeResponse>()
-    .AddTransient<IDbWorkCleanUp, MongoDbWorkCleanUp>()
     .AddTransient<IWorkListController, WorkListManager>()
     .AddTransient<IWorkResponseController, WorkDoneManager>()
     .AddTransient<IWorkerDispatcher, RabbitMQWorkExecutionDispatcher>()
@@ -32,12 +26,12 @@ builder.Services
 
 var app = builder.Build();
 
-//do migrations for database
-MongoModelsConfiguration.RegisterClassMap();
-await MongoDbOltApiMigrations.Do(app.Services);
-
+await app.Services.PluginManagerBeforeStart();
 await app.StartAsync();
+await app.Services.PluginManagerAfterStart();
 Console.WriteLine("Started");
 
+await app.Services.PluginManagerBeforeStop();
 await app.WaitForShutdownAsync();
+await app.Services.PluginManagerAfterStop();
 Console.WriteLine("Stopped");

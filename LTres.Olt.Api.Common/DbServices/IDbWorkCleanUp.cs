@@ -1,4 +1,4 @@
-namespace LTres.Olt.Api.Common;
+namespace LTres.Olt.Api.Common.DbServices;
 
 public interface IDbWorkCleanUp
 {

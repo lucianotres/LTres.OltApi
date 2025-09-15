@@ -14,27 +14,32 @@ public class PluginManager(PluginManagerConfig config) : ILTresOltApiPlugin
 
     public void Configure(IServiceCollection services, IConfiguration configuration)
     {
+        AppDomain.CurrentDomain.AssemblyResolve += ResolvePluginAssemblies;
+
         var appPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)!;
 
         foreach (var active in _config.Active)
         {
             var pathPlugin = Path.Combine(appPath, active);
+
             if (File.Exists(pathPlugin))
             {
-                var assembly = Assembly.LoadFile(pathPlugin);
+                var assembly = Assembly.LoadFrom(pathPlugin);
 
                 var pluginType = assembly
                     .GetExportedTypes()
-                    .FirstOrDefault(w => w.IsClass && w.GetInterfaces().Any(t => t == typeof(ILTresOltApiPlugin)));
+                    .FirstOrDefault(t => t.IsClass && !t.IsAbstract && typeof(ILTresOltApiPlugin).IsAssignableFrom(t));
 
-                if (pluginType != null)
+                if (pluginType != null && Activator.CreateInstance(pluginType) is ILTresOltApiPlugin plugin)
                 {
-                    var configureMethod = pluginType.GetMethod("Configure", BindingFlags.Public | BindingFlags.Static);
-                    configureMethod?.Invoke(null, [services, configuration]);
+                    plugin.Configure(services, configuration);
+                    _pluginsList.Add(plugin);
 
-                    _pluginsList.Add((ILTresOltApiPlugin)Activator.CreateInstance(pluginType)!);
+                    Console.WriteLine($"Plugin {plugin.Name} activated!");
                 }
             }
+            else
+                Console.WriteLine($"Plugin {active} not found!");
         }
     }
 
@@ -62,6 +67,24 @@ public class PluginManager(PluginManagerConfig config) : ILTresOltApiPlugin
             await plugin.BeforeStop(services);
     }
 
+    /// <summary>
+    /// Handles the AssemblyResolve event to load plugin dependencies from the application's base directory.
+    /// </summary>
+    private Assembly? ResolvePluginAssemblies(object? sender, ResolveEventArgs args)
+    {
+        var assemblyName = new AssemblyName(args.Name).Name;
+        if (string.IsNullOrEmpty(assemblyName))
+            return null;
+
+        var appPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)!;
+        var assemblyPath = Path.Combine(appPath, $"{assemblyName}.dll");        
+
+        if (File.Exists(assemblyPath))
+            return Assembly.LoadFrom(assemblyPath);
+
+        return null;
+    }
+
 }
 
 public static class PluginManagerConfigExtensions
@@ -74,7 +97,7 @@ public static class PluginManagerConfigExtensions
         var pluginManager = new PluginManager(pluginManagerConfig);
         pluginManager.Configure(services, configuration);
 
-        services.AddSingleton(pluginManagerConfig);
+        services.AddSingleton(pluginManager);
         return services;
     }
 

@@ -12,7 +12,6 @@
     <ProjectReference Include="..\LTres.Olt.Api.Common\LTres.Olt.Api.Common.csproj" />
     <ProjectReference Include="..\LTres.Olt.Api.Core\LTres.Olt.Api.Core.csproj" />
     <ProjectReference Include="..\LTres.Olt.Api.RabbitMQ\LTres.Olt.Api.RabbitMQ.csproj" />
-    <ProjectReference Include="..\LTres.Olt.Api.Mongo\LTres.Olt.Api.Mongo.csproj" />
   </ItemGroup>
   
   <ItemGroup>
@@ -27,4 +26,13 @@
     <None Update="appsettings.json" CopyToOutputDirectory="PreserveNewest" />
     <None Update="appsettings.Development.json" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
+
+  <!-- Target to copy plugin files for local development -->
+  <Target Name="CopyPluginOutput" AfterTargets="Build" Condition="'$(Configuration)' == 'Debug'">
+    <ItemGroup>
+      <_PluginFilesToCopy Include="..\LTres.Olt.Api.Mongo\bin\$(Configuration)\$(TargetFramework)\**\*.*" />
+    </ItemGroup>
+    <Copy SourceFiles="@(_PluginFilesToCopy)" DestinationFiles="@(_PluginFilesToCopy->'$(OutputPath)%(RecursiveDir)%(Filename)%(Extension)')" Condition="!Exists('$(OutputPath)%(RecursiveDir)%(Filename)%(Extension)')" />
+  </Target>
+
 </Project>
