@@ -1,6 +1,5 @@
 using LTres.Olt.Api.Common;
 using LTres.Olt.Api.Core.Workers;
-using LTres.Olt.Api.RabbitMQ;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using LTres.Olt.Api.Core;
@@ -11,14 +10,11 @@ Console.WriteLine("Starting the worker controller..");
 var builder = Host.CreateApplicationBuilder(args);
 
 builder.Services
-    .AddPluginManager(builder.Configuration)
-    .Configure<RabbitMQConfiguration>(o => o.FillFromEnvironmentVars());
+    .AddPluginManager(builder.Configuration);
 
 builder.Services
     .AddTransient<IWorkListController, WorkListManager>()
     .AddTransient<IWorkResponseController, WorkDoneManager>()
-    .AddTransient<IWorkerDispatcher, RabbitMQWorkExecutionDispatcher>()
-    .AddTransient<IWorkerResponseReceiver, RabbitMQWorkResponseReceiver>()
     .AddSingleton<ILogCounter, LogCounter>()
     .AddSingleton<IWorkProbeCache, WorkProbeCache>()
     .AddHostedService<LogCounterPrinter>()

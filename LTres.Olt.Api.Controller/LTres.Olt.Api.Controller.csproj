@@ -28,9 +28,15 @@
   </ItemGroup>
 
   <!-- Target to copy plugin files for local development -->
-  <Target Name="CopyPluginOutput" AfterTargets="Build" Condition="'$(Configuration)' == 'Debug'">
+  <Target Name="CopyMongoPluginOutput" AfterTargets="Build" Condition="'$(Configuration)' == 'Debug'">
     <ItemGroup>
       <_PluginFilesToCopy Include="..\LTres.Olt.Api.Mongo\bin\$(Configuration)\$(TargetFramework)\**\*.*" />
+    </ItemGroup>
+    <Copy SourceFiles="@(_PluginFilesToCopy)" DestinationFiles="@(_PluginFilesToCopy->'$(OutputPath)%(RecursiveDir)%(Filename)%(Extension)')" Condition="!Exists('$(OutputPath)%(RecursiveDir)%(Filename)%(Extension)')" />
+  </Target>
+  <Target Name="CopyRabbitMQPluginOutput" AfterTargets="Build" Condition="'$(Configuration)' == 'Debug'">
+    <ItemGroup>
+      <_PluginFilesToCopy Include="..\LTres.Olt.Api.RabbitMQ\bin\$(Configuration)\$(TargetFramework)\**\*.*" />
     </ItemGroup>
     <Copy SourceFiles="@(_PluginFilesToCopy)" DestinationFiles="@(_PluginFilesToCopy->'$(OutputPath)%(RecursiveDir)%(Filename)%(Extension)')" Condition="!Exists('$(OutputPath)%(RecursiveDir)%(Filename)%(Extension)')" />
   </Target>
