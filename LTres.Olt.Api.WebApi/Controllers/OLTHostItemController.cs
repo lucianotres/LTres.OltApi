@@ -72,6 +72,7 @@ public class OLTHostItemController : ControllerBase
     /// </summary>
     /// <param name="id">Guid ID of the OLT Host</param>
     /// <param name="key">Key to find OLT Host Items</param>
+    /// <param name="activeOnly"></param>
     /// <param name="limit">Limit result range</param>
     /// <param name="skip">Amount to skip before mount the result</param>
     [HttpGet("ByKey/{id}")]

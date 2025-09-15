@@ -24,7 +24,10 @@ public class MongoDbPluginDefinition : ILTresOltApiPlugin
     public void Configure(IServiceCollection services, IConfiguration configuration) => services
         .Configure<MongoConfig>(o => configuration.Bind("MongoConfig", o))
         .AddMongoConfigToDatabase()
-        .AddTransient<IDbWorkProbeInfo, MongoDbWorkProbeInfo>()
-        .AddTransient<IDbWorkProbeResponse, MongoDbWorkProbeResponse>()
-        .AddTransient<IDbWorkCleanUp, MongoDbWorkCleanUp>();
+        .AddScoped<IDbWorkProbeInfo, MongoDbWorkProbeInfo>()
+        .AddScoped<IDbWorkProbeResponse, MongoDbWorkProbeResponse>()
+        .AddScoped<IDbWorkCleanUp, MongoDbWorkCleanUp>()
+        .AddScoped<IDbOLTHost, MongoDbOLTHost>()
+        .AddScoped<IDbOLTScript, MongoDbOLTHost>()
+        .AddScoped<IDbOLTHostItem, MongoDbOLTHostItem>();
 }

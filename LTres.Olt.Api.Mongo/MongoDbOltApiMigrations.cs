@@ -11,7 +11,8 @@ public static class MongoDbOltApiMigrations
 
     public static async Task Do(IServiceProvider serviceProvider)
     {
-        var database = serviceProvider.GetRequiredService<IMongoDatabase>();
+        using var scope = serviceProvider.CreateScope();
+        var database = scope.ServiceProvider.GetRequiredService<IMongoDatabase>();
         await CheckOrCreateCollections(database);
         await CheckOrCreateIndexes(database);
         await CheckOrCreateView(database);

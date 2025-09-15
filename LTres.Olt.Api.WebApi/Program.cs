@@ -1,27 +1,16 @@
 using System.Reflection;
 using System.Text.Json.Serialization;
 using LTres.Olt.Api.Common;
-using LTres.Olt.Api.Common.DbServices;
+using LTres.Olt.Api.Common.Plugin;
 using LTres.Olt.Api.Communication;
 using LTres.Olt.Api.Core;
 using LTres.Olt.Api.Core.Services;
 using LTres.Olt.Api.Core.Tools;
-using LTres.Olt.Api.Mongo;
-using Microsoft.Extensions.Options;
 
 var builder = WebApplication.CreateBuilder(args);
 
-//configure connection settings for database
-builder.Services.Configure<MongoConfig>(o => builder.Configuration.Bind("MongoConfig", o));
-
-MongoModelsConfiguration.RegisterClassMap();
-
-//database handlers
 builder.Services
-    .AddMongoConfigToDatabase()
-    .AddScoped<IDbOLTHost, MongoDbOLTHost>()
-    .AddScoped<IDbOLTScript, MongoDbOLTHost>()
-    .AddScoped<IDbOLTHostItem, MongoDbOLTHostItem>();
+    .AddPluginManager(builder.Configuration);
 
 //service handlers
 builder.Services
@@ -61,8 +50,7 @@ builder.Services.AddSwaggerGen(options =>
 
 var app = builder.Build();
 
-//do BD migrations before start
-await MongoDbOltApiMigrations.Do(app.Services.GetRequiredService<IOptions<MongoConfig>>().Value);
+await app.Services.PluginManagerBeforeStart();
 
 // Configure the HTTP request pipeline.
 //if (app.Environment.IsDevelopment())
@@ -79,4 +67,11 @@ app.UseAuthorization();
 
 app.MapControllers();
 
-app.Run();
+await app.StartAsync();
+await app.Services.PluginManagerAfterStart();
+Console.WriteLine("Started");
+
+await app.Services.PluginManagerBeforeStop();
+await app.WaitForShutdownAsync();
+await app.Services.PluginManagerAfterStop();
+Console.WriteLine("Stopped");

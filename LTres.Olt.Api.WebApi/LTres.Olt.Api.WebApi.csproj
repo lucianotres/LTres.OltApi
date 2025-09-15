@@ -6,6 +6,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <InvariantGlobalization>true</InvariantGlobalization>
     <Version>0.0.1.10</Version>
+    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
   </PropertyGroup>
 
   <ItemGroup>
@@ -20,9 +21,16 @@
 
   <ItemGroup>
     <ProjectReference Include="..\LTres.Olt.Api.Common\LTres.Olt.Api.Common.csproj" />
-    <ProjectReference Include="..\LTres.Olt.Api.Mongo\LTres.Olt.Api.Mongo.csproj" />
     <ProjectReference Include="..\LTres.Olt.Api.Core\LTres.Olt.Api.Core.csproj" />
     <ProjectReference Include="..\LTres.Olt.Api.Communication\LTres.Olt.Api.Communication.csproj" />
   </ItemGroup>
+
+  <!-- Target to copy plugin files for local development -->
+  <Target Name="CopyMongoPluginOutput" AfterTargets="Build" Condition="'$(Configuration)' == 'Debug'">
+    <ItemGroup>
+      <_PluginFilesToCopy Include="..\LTres.Olt.Api.Mongo\bin\$(Configuration)\$(TargetFramework)\**\*.*" />
+    </ItemGroup>
+    <Copy SourceFiles="@(_PluginFilesToCopy)" DestinationFiles="@(_PluginFilesToCopy->'$(OutputPath)%(RecursiveDir)%(Filename)%(Extension)')" Condition="!Exists('$(OutputPath)%(RecursiveDir)%(Filename)%(Extension)')" />
+  </Target>
 
 </Project>

@@ -1,6 +1,6 @@
 using LTres.Olt.Api.Common.Models;
 
-namespace LTres.Olt.Api.Common;
+namespace LTres.Olt.Api.Common.DbServices;
 
 public interface IDbOLTHostItem 
 {

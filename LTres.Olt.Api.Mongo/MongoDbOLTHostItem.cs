@@ -1,4 +1,4 @@
-using LTres.Olt.Api.Common;
+using LTres.Olt.Api.Common.DbServices;
 using LTres.Olt.Api.Common.Models;
 using MongoDB.Driver;
 
