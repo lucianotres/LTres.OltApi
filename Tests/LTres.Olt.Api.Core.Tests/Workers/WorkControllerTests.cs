@@ -78,4 +78,24 @@ public class WorkControllerTests
         mockWorkExecutionDispatcher.Verify(d => d.Dispatch(It.IsAny<WorkProbeInfo>()), Times.Exactly(2));
         Assert.Equal(2, workDispatched.Count);
     }
+
+    [Fact]
+    public async Task Start_ShouldExecuteCleanupPeriodically()
+    {
+        mockWorkCleanUp
+            .Setup(s => s.CleanUpExecute())
+            .Callback(async () => await workController.StopAsync(default));
+
+        var stopWatch = Stopwatch.StartNew();
+        var maxExecutionTime = TimeSpan.FromSeconds(10);
+        workController.CleanUpInterval = 1;
+
+        await workController.StartAsync(default);
+        while (workController.IsRunning && stopWatch.Elapsed < maxExecutionTime)
+            await Task.Delay(10);
+
+        stopWatch.Stop();
+
+        mockWorkCleanUp.Verify(s => s.CleanUpExecute(), Times.Once());
+    }
 }

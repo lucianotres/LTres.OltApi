@@ -10,8 +10,6 @@ namespace LTres.Olt.Api.Core.Workers;
 
 public class WorkController : IHostedService
 {
-    private const int cleanUpInterval = 60;
-
     private readonly ILogger _log;
     private readonly ILogCounter _logCounter;
     private readonly IWorkListController _workListController;
@@ -46,6 +44,26 @@ public class WorkController : IHostedService
 
         _workResponseReceiver.OnResponseReceived += DoOnResponseReceived;
     }
+
+    /// <summary>
+    /// Time in seconds to perform a lookup and dispatch work to be done
+    /// </summary>
+    public ushort DispatchInterval
+    {
+        get => _dispatchInterval;
+        set => _dispatchInterval = value == 0 ? throw new ArgumentOutOfRangeException(nameof(DispatchInterval)) : value;
+    }
+    private ushort _dispatchInterval = 1;
+
+    /// <summary>
+    /// Time in seconds to perform a cleanup
+    /// </summary>
+    public ushort CleanUpInterval
+    {
+        get => _cleanUpInterval;
+        set => _cleanUpInterval = value == 0 ? throw new ArgumentOutOfRangeException(nameof(CleanUpInterval)) : value;
+    }
+    private ushort _cleanUpInterval = 60;
 
     private void HookOnPrintResetAction(ILogCounter counter)
     {
@@ -98,14 +116,14 @@ public class WorkController : IHostedService
 
     private async Task ExecuteLoop()
     {
-        var toDispatchWorkCountdown = 0;
-        var toCleanUpCountdown = cleanUpInterval * 100;
+        int toDispatchWorkCountdown = 0;
+        int toCleanUpCountdown = _cleanUpInterval * 100;
 
         while (_cancellationTokenSource != null && !_cancellationTokenSource.IsCancellationRequested)
         {
             if (--toDispatchWorkCountdown <= 0)
             {
-                toCleanUpCountdown = 100;
+                toDispatchWorkCountdown = _dispatchInterval * 100;
                 await VerifyAndDispatchWorkToBeDone();
             }
 
@@ -113,7 +131,7 @@ public class WorkController : IHostedService
 
             if (--toCleanUpCountdown <= 0)
             {
-                toCleanUpCountdown = cleanUpInterval;
+                toCleanUpCountdown = _cleanUpInterval * 100;
                 QueueAsyncCleanUp();
             }
         }
