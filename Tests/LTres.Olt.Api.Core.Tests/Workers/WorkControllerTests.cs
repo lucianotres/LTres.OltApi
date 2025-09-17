@@ -98,4 +98,22 @@ public class WorkControllerTests
 
         mockWorkCleanUp.Verify(s => s.CleanUpExecute(), Times.Once());
     }
+
+    [Fact]
+    public async Task OnResponseReceived_ShouldSaveResponse()
+    {
+        var workProbeResponse = new WorkProbeResponse() { Id = Guid.NewGuid() };
+        WorkProbeResponse? workProbeResponseToSave = null;
+        mockWorkResponseController
+            .Setup(w => w.ResponseReceived(It.IsAny<WorkProbeResponse>()))
+            .Callback<WorkProbeResponse>(a => workProbeResponseToSave = a);
+
+        mockWorkerResponseReceiver.Raise(r => r.OnResponseReceived += null, new WorkerResponseReceivedEventArgs { ProbeResponse = workProbeResponse });
+        await Task.Delay(10);
+
+        mockWorkResponseController.Verify(
+            c => c.ResponseReceived(It.Is<WorkProbeResponse>(r => r.Id == workProbeResponse.Id)), Times.Once());
+        Assert.NotNull(workProbeResponseToSave);
+        Assert.Equal(workProbeResponseToSave, workProbeResponse);
+    }
 }
