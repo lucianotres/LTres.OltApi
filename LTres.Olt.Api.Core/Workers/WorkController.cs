@@ -23,7 +23,7 @@ public class WorkController : IHostedService
     private Task? _loopTask = Task.CompletedTask;
     private Task lastCleanUpTask = Task.CompletedTask;
     private readonly ConcurrentQueue<WorkProbeResponse> _queueResponses;
-    private Task? _queueResponseSavingProccessorTask;
+    private Task? _lastResponseSavingProcessTask;
 
     public WorkController(ILogger<WorkController> logger,
         ILogCounter logCounter,
@@ -54,106 +54,125 @@ public class WorkController : IHostedService
             counter.AddCount("to save queue", queueCount);
     }
 
-    public async Task StartAsync(CancellationToken cancellationToken) => await Task.Run(() => Start());
+    public Task StartAsync(CancellationToken cancellationToken) => Start(cancellationToken);
 
-    public async Task StopAsync(CancellationToken cancellationToken) => await Task.Run(() => Stop());
-
-    private void Start(bool autoRestart = true)
+    public Task StopAsync(CancellationToken cancellationToken) => Stop();
+    
+    private async Task Start(CancellationToken cancellationToken = default, bool autoRestart = true)
     {
         _log.LogDebug("Starting work controller..");
-        if (autoRestart && _cancellationTokenSource != null && !_cancellationTokenSource.IsCancellationRequested)
-            Stop();
+        if (_cancellationTokenSource != null && !_cancellationTokenSource.IsCancellationRequested)
+            await Stop();
+
+        if (cancellationToken.IsCancellationRequested)
+            return;
 
         _cancellationTokenSource = new CancellationTokenSource();
         _loopTask = Task.Run(ExecuteLoop, _cancellationTokenSource.Token);
-        _loopTask.ContinueWith(k =>
+        _ = _loopTask.ContinueWith(task =>
         {
-            if (k.IsFaulted && (k.Exception != null))
-                throw k.Exception;
-
-            Stop();
-        });
+            if (task.IsFaulted && task.Exception != null)
+                _log.LogError(task.Exception, "Work controller failed on execute loop.");
+        }, TaskContinuationOptions.OnlyOnFaulted);
 
         _log.LogDebug("Work controller started.");
     }
 
-    private void Stop()
+    private Task Stop()
     {
-        if (_cancellationTokenSource == null)
-            return;
+        if (_cancellationTokenSource == null || _cancellationTokenSource.IsCancellationRequested)
+            return Task.CompletedTask;
 
         _log.LogDebug("Stopping work controller..");
 
-        _cancellationTokenSource.Cancel();
-        if (_loopTask != null)
-            _loopTask.Wait();
+        try
+        {
+            _cancellationTokenSource.Cancel();
+        }
+        catch { }
 
-        _cancellationTokenSource = null;
-        _log.LogDebug("Work controller stopped.");
+        return _loopTask ?? Task.CompletedTask;
     }
+
+    public bool IsRunning { get => _loopTask != null && !_loopTask.IsCompleted; }
 
     private async Task ExecuteLoop()
     {
-        var toCleanUpCountdown = cleanUpInterval;
+        var toDispatchWorkCountdown = 0;
+        var toCleanUpCountdown = cleanUpInterval * 100;
 
         while (_cancellationTokenSource != null && !_cancellationTokenSource.IsCancellationRequested)
         {
-            var workToBeDone = await _workListController.ToBeDone();
-            if (workToBeDone.Any())
+            if (--toDispatchWorkCountdown <= 0)
             {
-                var quantity = workToBeDone.Count();
-
-                _log.LogDebug($"Working to be done: {quantity}");
-                _logCounter.AddCount("work sent", quantity);
+                toCleanUpCountdown = 100;
+                await VerifyAndDispatchWorkToBeDone();
             }
 
-            foreach (var work in workToBeDone)
-                _workExecutionDispatcher.Dispatch(work);
-
-            await Task.Delay(1000);
+            await Task.Delay(10);
 
             if (--toCleanUpCountdown <= 0)
             {
                 toCleanUpCountdown = cleanUpInterval;
-
-                if (lastCleanUpTask.IsCompleted || lastCleanUpTask.IsCanceled)
-                {
-                    lastCleanUpTask = Task.Run(async () =>
-                    {
-                        var removeTimer = Stopwatch.StartNew();
-                        var removedCount = await _workCleanUp.CleanUpExecute();
-                        removeTimer.Stop();
-
-                        if (removedCount > 0)
-                        {
-                            _log.LogDebug($"Removed {removedCount} history items");
-                            _logCounter.AddCount("CleanUp Rem", removedCount > int.MaxValue ? int.MaxValue : (int)removedCount, removeTimer.Elapsed);
-                        }
-                    });
-                }
+                QueueAsyncCleanUp();
             }
         }
+
+        _log.LogDebug("Work controller stopped.");
+    }
+
+    private async Task VerifyAndDispatchWorkToBeDone()
+    {
+        var workToBeDone = await _workListController.ToBeDone();
+        if (!workToBeDone.Any())
+            return;
+        
+        var quantity = workToBeDone.Count();
+        _log.LogDebug($"Working to be done: {quantity}");
+        _logCounter.AddCount("work sent", quantity);
+
+        foreach (var work in workToBeDone)
+            _workExecutionDispatcher.Dispatch(work);
+    }
+
+    private void QueueAsyncCleanUp()
+    {
+        if (!lastCleanUpTask.IsCompleted && !lastCleanUpTask.IsCanceled)
+            return;
+            
+        lastCleanUpTask = Task.Run(async () =>
+        {
+            var removeTimer = Stopwatch.StartNew();
+            var removedCount = await _workCleanUp.CleanUpExecute();
+            removeTimer.Stop();
+
+            if (removedCount > 0)
+            {
+                _log.LogDebug($"Removed {removedCount} history items");
+                _logCounter.AddCount("CleanUp Rem", removedCount > int.MaxValue ? int.MaxValue : (int)removedCount, removeTimer.Elapsed);
+            }
+        });
     }
 
     private void DoOnResponseReceived(object? sender, WorkerResponseReceivedEventArgs e)
     {
         var probeResponse = e.ProbeResponse;
-
         if (probeResponse == null)
-            _log.LogWarning("Empty response received");
-        else 
         {
-            _queueResponses.Enqueue(probeResponse);
-            StartQueueResponseSavingProccessor();
+            _log.LogWarning("Empty response received");
+            return;
         }
+        
+        _queueResponses.Enqueue(probeResponse);
+        QueueAsyncResponseSavingProcess();
     }
 
-    private void StartQueueResponseSavingProccessor()
+    private void QueueAsyncResponseSavingProcess()
     {
-        if (_queueResponseSavingProccessorTask != null && !_queueResponseSavingProccessorTask.IsCompleted)
+        if (_lastResponseSavingProcessTask != null && !_lastResponseSavingProcessTask.IsCompleted) 
             return;
 
-        _queueResponseSavingProccessorTask = Task.Run(async() =>
+        _lastResponseSavingProcessTask = Task.Run(async() =>
         {
             while (_queueResponses.TryDequeue(out var workProbeResponse))
                 await SaveProbeResponse(workProbeResponse);
