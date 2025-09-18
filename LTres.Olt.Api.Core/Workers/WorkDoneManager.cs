@@ -4,16 +4,10 @@ using LTres.Olt.Api.Common.Models;
 
 namespace LTres.Olt.Api.Core.Workers;
 
-public class WorkDoneManager : IWorkResponseController
+public class WorkDoneManager(IWorkProbeCache workProbeCache, IDbWorkProbeResponse dbWorkProbeResponse) : IWorkResponseController
 {
-    private readonly IWorkProbeCache _workProbeCache;
-    private readonly IDbWorkProbeResponse _dbWorkProbeResponse;
-
-    public WorkDoneManager(IWorkProbeCache workProbeCache, IDbWorkProbeResponse dbWorkProbeResponse)
-    {
-        _workProbeCache = workProbeCache;
-        _dbWorkProbeResponse = dbWorkProbeResponse;
-    }
+    private readonly IWorkProbeCache _workProbeCache = workProbeCache;
+    private readonly IDbWorkProbeResponse _dbWorkProbeResponse = dbWorkProbeResponse;
 
     public async Task ResponseReceived(WorkProbeResponse workProbeResponse)
     {
