@@ -8,6 +8,10 @@ using Microsoft.Extensions.Logging;
 
 namespace LTres.Olt.Api.Core.Workers;
 
+/// <summary>
+/// A collection of expected actions to be performed by a controller to manage work to be done, receive feedback, and clean up.
+/// In other words, an implementation of a controller app.
+/// </summary>
 public class WorkController : IHostedService
 {
     private readonly ILogger _log;
@@ -75,7 +79,7 @@ public class WorkController : IHostedService
     public Task StartAsync(CancellationToken cancellationToken) => Start(cancellationToken);
 
     public Task StopAsync(CancellationToken cancellationToken) => Stop();
-    
+
     private async Task Start(CancellationToken cancellationToken = default, bool autoRestart = true)
     {
         _log.LogDebug("Starting work controller..");
@@ -144,7 +148,7 @@ public class WorkController : IHostedService
         var workToBeDone = await _workListController.ToBeDone();
         if (!workToBeDone.Any())
             return;
-        
+
         var quantity = workToBeDone.Count();
         _log.LogDebug($"Working to be done: {quantity}");
         _logCounter.AddCount("work sent", quantity);
@@ -157,7 +161,7 @@ public class WorkController : IHostedService
     {
         if (!lastCleanUpTask.IsCompleted && !lastCleanUpTask.IsCanceled)
             return;
-            
+
         lastCleanUpTask = Task.Run(async () =>
         {
             var removeTimer = Stopwatch.StartNew();
@@ -180,17 +184,17 @@ public class WorkController : IHostedService
             _log.LogWarning("Empty response received");
             return;
         }
-        
+
         _queueResponses.Enqueue(probeResponse);
         QueueAsyncResponseSavingProcess();
     }
 
     private void QueueAsyncResponseSavingProcess()
     {
-        if (_lastResponseSavingProcessTask != null && !_lastResponseSavingProcessTask.IsCompleted) 
+        if (_lastResponseSavingProcessTask != null && !_lastResponseSavingProcessTask.IsCompleted)
             return;
 
-        _lastResponseSavingProcessTask = Task.Run(async() =>
+        _lastResponseSavingProcessTask = Task.Run(async () =>
         {
             while (_queueResponses.TryDequeue(out var workProbeResponse))
                 await SaveProbeResponse(workProbeResponse);
