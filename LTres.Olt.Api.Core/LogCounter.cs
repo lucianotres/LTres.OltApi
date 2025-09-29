@@ -33,6 +33,8 @@ public class LogCounter : ILogCounter
             Error: error));
     }
 
+    internal IEnumerable<LogCounterData> GetLogCounters() => logBag.ToList();
+
     public void RegisterHookOnPrintResetAction<T>(Action<ILogCounter> hookAction) where T : class
     {
         var type = typeof(T);
@@ -84,4 +86,4 @@ public class LogCounter : ILogCounter
 
 }
 
-record LogCounterData(Guid Id, string Category, bool? Success, int Quantity, TimeSpan TimeDone, Exception? Error);
+internal record LogCounterData(Guid Id, string Category, bool? Success, int Quantity, TimeSpan TimeDone, Exception? Error);

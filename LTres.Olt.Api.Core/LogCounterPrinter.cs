@@ -8,6 +8,7 @@ public class LogCounterPrinter(ILogCounter counter) : IHostedService
     private readonly ILogCounter logCounter = counter;
     private CancellationTokenSource? cancellationTokenRunnerPeriodic;
     private const int periodicPrintOutSeconds = 60;
+    private const int firstPrintOutSeconds = 0;
 
     public Task StartAsync(CancellationToken cancellationToken)
     {
@@ -23,9 +24,9 @@ public class LogCounterPrinter(ILogCounter counter) : IHostedService
         return Task.CompletedTask;
     }
 
-    private Task RunPeriodicNotification(CancellationToken cancellationToken) => Task.Run(async () =>
+    internal Task RunPeriodicNotification(CancellationToken cancellationToken) => Task.Run(async () =>
         {
-            int countdownToPrintOut = 15;
+            int countdownToPrintOut = firstPrintOutSeconds;
             while (!cancellationToken.IsCancellationRequested)
             {
                 if (countdownToPrintOut <= 0)
