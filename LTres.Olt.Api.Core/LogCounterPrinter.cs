@@ -1,25 +1,13 @@
-using System.Collections.Concurrent;
-using System.Text;
 using LTres.Olt.Api.Common;
-using LTres.Olt.Api.Common.Models;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
-using Microsoft.VisualBasic;
 
 namespace LTres.Olt.Api.Core;
 
-public class LogCounterPrinter : IHostedService
+public class LogCounterPrinter(ILogCounter counter) : IHostedService
 {
-    private readonly ILogger log;
-    private readonly ILogCounter logCounter;
+    private readonly ILogCounter logCounter = counter;
     private CancellationTokenSource? cancellationTokenRunnerPeriodic;
     private const int periodicPrintOutSeconds = 60;
-
-    public LogCounterPrinter(ILogger<LogCounterPrinter> logger, ILogCounter counter)
-    {
-        log = logger;
-        logCounter = counter;
-    }
 
     public Task StartAsync(CancellationToken cancellationToken)
     {
@@ -31,9 +19,7 @@ public class LogCounterPrinter : IHostedService
 
     public Task StopAsync(CancellationToken cancellationToken)
     {
-        if (cancellationTokenRunnerPeriodic != null)
-            cancellationTokenRunnerPeriodic.Cancel();
-
+        cancellationTokenRunnerPeriodic?.Cancel();
         return Task.CompletedTask;
     }
 
@@ -46,9 +32,9 @@ public class LogCounterPrinter : IHostedService
                 {
                     countdownToPrintOut = periodicPrintOutSeconds;
                     var strToPrintOut = logCounter.PrintOutAndReset();
-                    
+
                     if (strToPrintOut != null)
-                        log.LogInformation(strToPrintOut);
+                        Console.WriteLine(strToPrintOut);
                 }
                 else
                     countdownToPrintOut--;

@@ -1,6 +1,6 @@
 {
   "profiles": {
-    "LTres.OltApi.Worker": {
+    "LTres.Olt.Api.Worker": {
       "commandName": "Project",
       "environmentVariables": {
         "LTRES_MOCKING": "true"

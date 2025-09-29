@@ -10,13 +10,13 @@ Console.WriteLine("Starting the worker controller..");
 var builder = Host.CreateApplicationBuilder(args);
 
 builder.Services
+    .AddSingleton<ILogCounter, LogCounter>()
+    .AddSingleton<IWorkProbeCache, WorkProbeCache>()
     .AddPluginManager(builder.Configuration);
 
 builder.Services
     .AddTransient<IWorkListController, WorkListManager>()
     .AddTransient<IWorkResponseController, WorkDoneManager>()
-    .AddSingleton<ILogCounter, LogCounter>()
-    .AddSingleton<IWorkProbeCache, WorkProbeCache>()
     .AddHostedService<LogCounterPrinter>()
     .AddHostedService<WorkController>();
 

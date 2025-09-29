@@ -1,24 +1,14 @@
 using System.Collections.Concurrent;
 using System.Text;
 using LTres.Olt.Api.Common;
-using LTres.Olt.Api.Common.Models;
-using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
-using Microsoft.VisualBasic;
 
 namespace LTres.Olt.Api.Core;
 
 public class LogCounter : ILogCounter
 {
-    private readonly ConcurrentBag<LogCounterData> logBag;
-    private readonly Dictionary<Type, Action<ILogCounter>> hooksPrintResetAction;
+    private readonly ConcurrentBag<LogCounterData> logBag = [];
+    private readonly Dictionary<Type, Action<ILogCounter>> hooksPrintResetAction = [];
     private DateTime startedLoggingAt = DateTime.MinValue;
-
-    public LogCounter()
-    {
-        logBag = new ConcurrentBag<LogCounterData>();
-        hooksPrintResetAction = new Dictionary<Type, Action<ILogCounter>>();
-    }
 
     public void AddSuccess(Guid id, string category, TimeSpan? timeDone = null) =>
         InternalAdd(id, category, true, timeDone.GetValueOrDefault(TimeSpan.Zero), 1);
@@ -29,7 +19,7 @@ public class LogCounter : ILogCounter
     public void AddCount(string category, int quantity, TimeSpan? timeDone = null) =>
         InternalAdd(Guid.NewGuid(), category, null, timeDone.GetValueOrDefault(TimeSpan.Zero), quantity);
 
-    private void InternalAdd(Guid id, string category, bool? sucess, TimeSpan timeDone, int quantity, Exception? error = null)
+    private void InternalAdd(Guid id, string category, bool? success, TimeSpan timeDone, int quantity, Exception? error = null)
     {
         if (logBag.IsEmpty)
             startedLoggingAt = DateTime.Now;
@@ -37,7 +27,7 @@ public class LogCounter : ILogCounter
         logBag.Add(new LogCounterData(
             Id: id,
             Category: category,
-            Success: sucess,
+            Success: success,
             Quantity: quantity,
             TimeDone: timeDone,
             Error: error));
@@ -87,11 +77,9 @@ public class LogCounter : ILogCounter
 
         if (output.Length == 0)
             return null;
-        else
-        {
-            output.Insert(0, $"{"",15} {"total",-8} {"success",-8} {"fail",-8} {"per sec",-8} {"exec (s)",-8}\r\n");
-            return output.ToString();
-        }
+        
+        output.Insert(0, $"{"",15} {"total",-8} {"success",-8} {"fail",-8} {"per sec",-8} {"exec (s)",-8}\r\n");
+        return output.ToString();
     }
 
 }

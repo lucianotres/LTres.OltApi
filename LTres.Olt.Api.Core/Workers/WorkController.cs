@@ -146,12 +146,12 @@ public class WorkController : IHostedService
     private async Task VerifyAndDispatchWorkToBeDone()
     {
         var workToBeDone = await _workListController.ToBeDone();
-        if (!workToBeDone.Any())
-            return;
-
         var quantity = workToBeDone.Count();
         _log.LogDebug($"Working to be done: {quantity}");
         _logCounter.AddCount("work sent", quantity);
+
+        if (!workToBeDone.Any())
+            return;
 
         foreach (var work in workToBeDone)
             _workExecutionDispatcher.Dispatch(work);
