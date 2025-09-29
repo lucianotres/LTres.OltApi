@@ -1,22 +1,28 @@
+using LTres.Olt.Api.Common;
 using LTres.Olt.Api.Core.Workers;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Xunit;
+using Moq;
 
 namespace LTres.Olt.Api.Core.Tests.Workers;
 
 public class WorkProbeCacheTests
 {
+    private readonly Mock<ILogCounter> mockLogCounter = new();
+    private readonly WorkProbeCache workProbeCache;
 
+    public WorkProbeCacheTests()
+    {
+        workProbeCache = new WorkProbeCache(mockLogCounter.Object);
+    }
+
+    [Fact]
+    public void ShouldBeCreatable()
+    {
+        Assert.NotNull(workProbeCache);
+    }
     
     [Fact]
     public async Task TryToPutIntoCache_ShouldAddItemToCacheAndReturnsTrue_WhenGuidNotExists()
     {
-        var logCounter = new MockLogCounter();
-        var workProbeCache = new WorkProbeCache(logCounter);
         var idWork = Guid.NewGuid();
         var requestedIn = DateTime.Now;
         
@@ -28,8 +34,6 @@ public class WorkProbeCacheTests
     [Fact]
     public async Task TryToPutIntoCache_ShouldAddItemToCacheAndValidateAsThreadSafe()
     {
-        var logCounter = new MockLogCounter();
-        var workProbeCache = new WorkProbeCache(logCounter);
         var idWork = Guid.NewGuid();
         var requestedIn = DateTime.Now;
         bool result1 = false;
@@ -46,8 +50,6 @@ public class WorkProbeCacheTests
     [Fact]
     public async Task TryToPutIntoCache_ShouldNotAddItemToCacheAndReturnsFalse_WhenGuidAlreadyExists()
     {
-        var logCounter = new MockLogCounter();
-        var workProbeCache = new WorkProbeCache(logCounter);
         var idWork = Guid.NewGuid();
         var requestedIn = DateTime.Now;
         
@@ -60,8 +62,6 @@ public class WorkProbeCacheTests
     [Fact]
     public async Task TryToPutIntoCache_ShouldRemoveOldItemsFromCache()
     {
-        var logCounter = new MockLogCounter();
-        var workProbeCache = new WorkProbeCache(logCounter);
         var idWork1 = Guid.NewGuid();
         var idWork2 = Guid.NewGuid();
         var requestedIn1 = DateTime.Now.Subtract(TimeSpan.FromMinutes(4));
@@ -78,8 +78,6 @@ public class WorkProbeCacheTests
     [Fact]
     public async Task TryToRemoveFromCache_ShouldRemoveItemFromCacheAndReturnsTrue_WhenGuidExists()
     {
-        var logCounter = new MockLogCounter();
-        var workProbeCache = new WorkProbeCache(logCounter);
         var idWork = Guid.NewGuid();
         var requestedIn = DateTime.Now;
         
@@ -92,8 +90,6 @@ public class WorkProbeCacheTests
     [Fact]
     public async Task TryToRemoveFromCache_ShouldNotRemoveItemFromCacheAndReturnsFalse_WhenGuidDoesNotExist()
     {
-        var logCounter = new MockLogCounter();
-        var workProbeCache = new WorkProbeCache(logCounter);
         var idWork = Guid.NewGuid();
 
         var result = await workProbeCache.TryToRemoveFromCache(idWork);

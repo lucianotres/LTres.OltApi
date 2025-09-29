@@ -4,16 +4,13 @@ using LTres.Olt.Api.Common.Models;
 
 namespace LTres.Olt.Api.Core.Workers;
 
-public class WorkDoneManager : IWorkResponseController
+/// <summary>
+/// Deal with response received when work is done.
+/// </summary>
+public class WorkDoneManager(IWorkProbeCache workProbeCache, IDbWorkProbeResponse dbWorkProbeResponse) : IWorkResponseController
 {
-    private readonly IWorkProbeCache _workProbeCache;
-    private readonly IDbWorkProbeResponse _dbWorkProbeResponse;
-
-    public WorkDoneManager(IWorkProbeCache workProbeCache, IDbWorkProbeResponse dbWorkProbeResponse)
-    {
-        _workProbeCache = workProbeCache;
-        _dbWorkProbeResponse = dbWorkProbeResponse;
-    }
+    private readonly IWorkProbeCache _workProbeCache = workProbeCache;
+    private readonly IDbWorkProbeResponse _dbWorkProbeResponse = dbWorkProbeResponse;
 
     public async Task ResponseReceived(WorkProbeResponse workProbeResponse)
     {
@@ -24,7 +21,7 @@ public class WorkDoneManager : IWorkResponseController
         if (workProbeResponse.Success && workProbeResponse.Type == WorkProbeResponseType.Walk)
         {
             var templates = await _dbWorkProbeResponse.GetItemTemplates(workProbeResponse.Id);
-            
+
             if (templates.Any())
                 foreach (var template in templates)
                     await _dbWorkProbeResponse.CreateItemsFromTemplate(template, workProbeResponse);

@@ -1,6 +1,5 @@
 using System.Diagnostics;
 using System.Net;
-using System.Net.Http.Headers;
 using LTres.Olt.Api.Common;
 using LTres.Olt.Api.Common.Models;
 using Microsoft.Extensions.DependencyInjection;
@@ -8,18 +7,14 @@ using Microsoft.Extensions.Logging;
 
 namespace LTres.Olt.Api.Core.Workers;
 
-public class WorkAction : IWorkerAction
+/// <summary>
+/// Process the requisition of work to probe data and activate the adequate action.
+/// </summary>
+public class WorkAction(ILogger<WorkAction> logger, IServiceProvider serviceProvider, ILogCounter counter) : IWorkerAction
 {
-    private readonly ILogger _log;
-    private readonly IServiceProvider _serviceProvider;
-    private readonly ILogCounter _logCounter;
-
-    public WorkAction(ILogger<WorkAction> logger, IServiceProvider serviceProvider, ILogCounter counter)
-    {
-        _log = logger;
-        _serviceProvider = serviceProvider;
-        _logCounter = counter;
-    }
+    private readonly ILogger _log = logger;
+    private readonly IServiceProvider _serviceProvider = serviceProvider;
+    private readonly ILogCounter _logCounter = counter;
 
     public async Task<WorkProbeResponse> Execute(WorkProbeInfo probeInfo, CancellationToken cancellationToken, WorkProbeResponse? initialResponse = null)
     {
@@ -30,42 +25,14 @@ public class WorkAction : IWorkerAction
         try
         {
             bool shouldUseMocking = probeInfo.Host.Address.Equals(IPAddress.None);
-            IWorkerAction worker;
+            IWorkerAction worker = (shouldUseMocking ?
+                CreateMockWorkerByAction(probeInfo.Action) :
+                CreateWorkerByAction(probeInfo.Action))
+                ?? throw new Exception("Action not found to perform!");
 
-            //find the correct action to perform ------
-
-            if (probeInfo.Action == "ping")
-            {
-                if (shouldUseMocking)
-                    worker = _serviceProvider.GetRequiredService<MockPingAction>();
-                else
-                    worker = _serviceProvider.GetRequiredService<IWorkerActionPing>();
-            }
-            else if (probeInfo.Action == "snmpget")
-            {
-                if (shouldUseMocking)
-                    worker = _serviceProvider.GetRequiredService<MockPingAction>();
-                else
-                    worker = _serviceProvider.GetRequiredService<IWorkerActionSnmpGet>();
-            }
-            else if (probeInfo.Action == "snmpwalk")
-            {
-                if (shouldUseMocking)
-                    worker = _serviceProvider.GetRequiredService<MockPingAction>();
-                else
-                    worker = _serviceProvider.GetRequiredService<IWorkerActionSnmpWalk>();
-            }
-            else
-                throw new Exception("Action not found to perform.");
-
-            //execute the action ------
             workProbeResponse = await worker.Execute(probeInfo, cancellationToken, workProbeResponse);
 
-            if (probeInfo.Calc != null)
-            {
-                var calc = _serviceProvider.GetRequiredService<IWorkProbeCalc>();
-                await calc.UpdateProbedValuesWithCalculated(probeInfo, workProbeResponse);
-            }
+            await DoCalcIfNeeded(probeInfo, workProbeResponse);
 
             timer.Stop();
             _logCounter.AddSuccess(probeInfo.Id, probeInfo.Action, timer.Elapsed);
@@ -86,4 +53,30 @@ public class WorkAction : IWorkerAction
         _log.LogDebug($"Work {probeInfo.Id} done in {timer.Elapsed}");
         return workProbeResponse;
     }
+
+    private IWorkerAction? CreateWorkerByAction(string actionName) => actionName switch
+    {
+        "ping" => _serviceProvider.GetRequiredService<IWorkerActionPing>(),
+        "snmpget" => _serviceProvider.GetRequiredService<IWorkerActionSnmpGet>(),
+        "snmpwalk" => _serviceProvider.GetRequiredService<IWorkerActionSnmpWalk>(),
+        _ => null
+    };
+
+    private IWorkerAction? CreateMockWorkerByAction(string actionName) => actionName switch
+    {
+        "ping" => _serviceProvider.GetRequiredService<MockPingAction>(),
+        "snmpget" => _serviceProvider.GetRequiredService<MockSnmpGetAction>(),
+        "snmpwalk" => _serviceProvider.GetRequiredService<MockSnmpWalkAction>(),
+        _ => null
+    };
+
+    private async Task DoCalcIfNeeded(WorkProbeInfo workProbeInfo, WorkProbeResponse workProbeResponse)
+    {
+        if (workProbeInfo.Calc == null)
+            return;
+
+        var calc = _serviceProvider.GetRequiredService<IWorkProbeCalc>();
+        await calc.UpdateProbedValuesWithCalculated(workProbeInfo, workProbeResponse);
+    }
+
 }

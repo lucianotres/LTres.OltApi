@@ -7,12 +7,18 @@ namespace LTres.Olt.Api.Core.Tests.Workers;
 
 public class MockSnmpWalkActionTests
 {
+    private readonly MockSnmpWalkAction mockSnmpWalkAction = new(new(null));
+
     [Fact]
     public async Task Execute_ShouldReturnANotNullResponse()
     {
         var id = Guid.NewGuid();
-        var mockSnmpWalkAction = new MockSnmpWalkAction(new MockSNMPItems(null));
-        var probeInfo = new WorkProbeInfo { Id = id, Host = new (IPAddress.Loopback, 0), ItemKey = "123.456" };
+        var probeInfo = new WorkProbeInfo
+        {
+            Id = id,
+            Host = new(IPAddress.Loopback, 0),
+            ItemKey = "123.456"
+        };
         var cancellationToken = CancellationToken.None;
         
         var response = await mockSnmpWalkAction.Execute(probeInfo, cancellationToken);
@@ -26,8 +32,12 @@ public class MockSnmpWalkActionTests
     public async Task Execute_ShouldReturnAWalkTypeResponse()
     {
         var id = Guid.NewGuid();
-        var mockSnmpWalkAction = new MockSnmpWalkAction(new MockSNMPItems(null));
-        var probeInfo = new WorkProbeInfo { Id = id, Host = new(IPAddress.Loopback, 0), ItemKey = "123.456" };
+        var probeInfo = new WorkProbeInfo
+        {
+            Id = id,
+            Host = new(IPAddress.Loopback, 0),
+            ItemKey = "123.456"
+        };
         var cancellationToken = CancellationToken.None;
 
         var response = await mockSnmpWalkAction.Execute(probeInfo, cancellationToken);
@@ -41,8 +51,12 @@ public class MockSnmpWalkActionTests
     public async Task Execute_ShouldReturnFailedResponse_WhenOidNotExists()
     {
         var id = Guid.NewGuid();
-        var mockSnmpWalkAction = new MockSnmpWalkAction(new MockSNMPItems(null));
-        var probeInfo = new WorkProbeInfo { Id = id, Host = new(IPAddress.Loopback, 0), ItemKey = "123.456" };
+        var probeInfo = new WorkProbeInfo
+        {
+            Id = id,
+            Host = new(IPAddress.Loopback, 0),
+            ItemKey = "123.456"
+        };
         var cancellationToken = CancellationToken.None;
 
         var response = await mockSnmpWalkAction.Execute(probeInfo, cancellationToken);
@@ -57,8 +71,12 @@ public class MockSnmpWalkActionTests
     public async Task Execute_ShouldReturnSuccessfulResponse_WhenOidExists()
     {
         var id = Guid.NewGuid();
-        var mockSnmpWalkAction = new MockSnmpWalkAction(new MockSNMPItems(null));
-        var probeInfo = new WorkProbeInfo { Id = id, Host = new(IPAddress.Loopback, 0), ItemKey = "1.3.6.1.4.1.3902.1012.3.28.1.1.2" };
+        var probeInfo = new WorkProbeInfo
+        {
+            Id = id,
+            Host = new(IPAddress.Loopback, 0),
+            ItemKey = "1.3.6.1.4.1.3902.1012.3.28.1.1.2"
+        };
         var cancellationToken = CancellationToken.None;
 
         var response = await mockSnmpWalkAction.Execute(probeInfo, cancellationToken);
@@ -76,7 +94,12 @@ public class MockSnmpWalkActionTests
     {
         var id = Guid.NewGuid();
         var mockSnmpWalkAction = new MockSnmpWalkAction(new MockSNMPItems(null));
-        var probeInfo = new WorkProbeInfo { Id = id, Host = new(IPAddress.Loopback, 0), ItemKey = "1.3.6.1.4.1.3902.1012.3.28.1.1.2" };
+        var probeInfo = new WorkProbeInfo
+        {
+            Id = id,
+            Host = new(IPAddress.Loopback, 0),
+            ItemKey = "1.3.6.1.4.1.3902.1012.3.28.1.1.2"
+        };
         var cancellationToken = CancellationToken.None;
 
         var response = await mockSnmpWalkAction.Execute(probeInfo, cancellationToken);

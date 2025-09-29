@@ -13,25 +13,24 @@ Console.WriteLine($"Starting the worker..");
 var builder = Host.CreateApplicationBuilder(args);
 
 builder.Services
+    .AddSingleton<ILogCounter, LogCounter>()
     .AddPluginManager(builder.Configuration);
 
 if (OltApiConfiguration.Instance.usingMock)
 {
     builder.Services
         .AddSingleton(new MockSNMPItems(Path.Combine(AppContext.BaseDirectory, "mock_items.csv")))
-        .AddTransient<IWorkerActionSnmpGet, MockSnmpGetAction>()
-        .AddTransient<IWorkerActionSnmpWalk, MockSnmpWalkAction>()
-        .AddTransient<IWorkerActionPing, MockPingAction>();
+        .AddTransient<MockSnmpGetAction>()
+        .AddTransient<MockSnmpWalkAction>()
+        .AddTransient<MockPingAction>();
 
     Console.WriteLine("Using Mock SNMP Items");
 }
-else
-    builder.Services.AddTransient<IWorkerActionPing, WorkPingAction>();
 
 builder.Services
+    .AddTransient<IWorkerActionPing, WorkPingAction>()
     .AddTransient<IWorkerAction, WorkAction>()
-    .AddTransient<IWorkProbeCalc, WorkProbeCalc2Values>()
-    .AddSingleton<ILogCounter, LogCounter>()
+    .AddTransient<IWorkProbeCalc, WorkProbeCalc2Values>()   
     .AddHostedService<LogCounterPrinter>()
     .AddHostedService<RabbitMQWorkExecution>();
 

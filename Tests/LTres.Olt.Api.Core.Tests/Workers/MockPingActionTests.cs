@@ -1,9 +1,6 @@
 using LTres.Olt.Api.Common.Models;
 using LTres.Olt.Api.Core.Workers;
 using System.Net;
-using System.Threading;
-using System.Threading.Tasks;
-using Xunit;
 
 namespace LTres.Olt.Api.Core.Tests.Workers;
 

@@ -1,12 +1,11 @@
-using System.Collections.Concurrent;
 using LTres.Olt.Api.Common;
 
 namespace LTres.Olt.Api.Core.Workers;
 
 public class WorkProbeCache : IWorkProbeCache
 {
-    private List<(Guid id, DateTime requestedIn)> _cacheLst = new List<(Guid id, DateTime requestedIn)>();
-    private object _cacheLock = new object();
+    private List<(Guid id, DateTime requestedIn)> _cacheLst = [];
+    private object _cacheLock = new();
 
     public WorkProbeCache(ILogCounter logCounter)
     {
